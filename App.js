@@ -1,5 +1,6 @@
-import { createAppContainer } from "react-navigation";
-import { createStackNavigator } from "react-navigation-stack";
+import * as React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 
 import HomeScreen from "./src/screens/HomeScreen";
 import ComponentsScreen from "./src/screens/ComponentsScreen";
@@ -9,22 +10,32 @@ import CounterScreen from "./src/screens/CounterScreen";
 import ColorScreen from "./src/screens/ColorScreen";
 import SquareScreen from "./src/screens/SquareScreen";
 
-const navigator = createStackNavigator(
-  {
-    Home: HomeScreen,
-    Components: ComponentsScreen,
-    List: ListScreen,
-    Image: ImageScreen,
-    Counter: CounterScreen,
-    Color: ColorScreen,
-    Square: SquareScreen,
-  },
-  {
-    initialRouteName: "Home",
-    defaultNavigationOptions: {
-      title: "App",
-    },
-  }
-);
+const Stack = createStackNavigator();
 
-export default createAppContainer(navigator);
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName="Home"
+        screenOptions={{ headerTitle: "App" }}
+      >
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Components" component={ComponentsScreen} />
+        <Stack.Screen name="List" component={ListScreen} />
+        <Stack.Screen name="Image" component={ImageScreen} />
+        <Stack.Screen name="Counter" component={CounterScreen} />
+        <Stack.Screen name="Color" component={ColorScreen} />
+        <Stack.Screen name="Square" component={SquareScreen} />
+      </Stack.Navigator>
+      <Tab.Navigator>
+        <Tab.Screen name="Home" component={HomeScreen} />
+        <Tab.Screen name="Components" component={ComponentsScreen} />
+        <Tab.Screen name="List" component={ListScreen} />
+        <Tab.Screen name="Image" component={ImageScreen} />
+        <Tab.Screen name="Counter" component={CounterScreen} />
+        <Tab.Screen name="Color" component={ColorScreen} />
+        <Tab.Screen name="Square" component={SquareScreen} />
+      </Tab.Navigator>
+    </NavigationContainer>
+  );
+}

@@ -1,37 +1,30 @@
-import React, { useState } from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { StatusBar } from "expo-status-bar";
+import { createAppContainer } from "react-navigation";
+import { createStackNavigator } from "react-navigation-stack";
 
-import HomeScreen from "./components/screens/HomeScreen";
-import DetailsScreen from "./components/screens/DetailsScreen";
+import HomeScreen from "./src/screens/HomeScreen";
+import ComponentsScreen from "./src/screens/ComponentsScreen";
+import ListScreen from "./src/screens/ListScreen";
+import ImageScreen from "./src/screens/ImageScreen";
+import CounterScreen from "./src/screens/CounterScreen";
+import ColorScreen from "./src/screens/ColorScreen";
+import SquareScreen from "./src/screens/SquareScreen";
 
-const Stack = createNativeStackNavigator();
+const navigator = createStackNavigator(
+  {
+    Home: HomeScreen,
+    Components: ComponentsScreen,
+    List: ListScreen,
+    Image: ImageScreen,
+    Counter: CounterScreen,
+    Color: ColorScreen,
+    Square: SquareScreen,
+  },
+  {
+    initialRouteName: "Home",
+    defaultNavigationOptions: {
+      title: "App",
+    },
+  }
+);
 
-export default function App() {
-  const [activeRoute, setActiveRoute] = useState("Home");
-
-  return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="Home"
-          screenOptions={{ headerShown: false }}
-        >
-          <Stack.Screen name="Home">
-            {(props) => (
-              <HomeScreen {...props} setActiveRoute={setActiveRoute} />
-            )}
-          </Stack.Screen>
-          <Stack.Screen name="Details">
-            {(props) => (
-              <DetailsScreen {...props} setActiveRoute={setActiveRoute} />
-            )}
-          </Stack.Screen>
-        </Stack.Navigator>
-        <StatusBar style="auto" />
-      </NavigationContainer>
-    </SafeAreaProvider>
-  );
-}
+export default createAppContainer(navigator);

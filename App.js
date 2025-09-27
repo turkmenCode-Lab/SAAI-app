@@ -13,12 +13,12 @@ import SquareScreen from "./src/screens/SquareScreen";
 
 const Tab = createBottomTabNavigator();
 
-const Stack = createStackNavigator();
+// const Stack = createStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator
+      {/* <Stack.Navigator
         initialRouteName="Home"
         screenOptions={{ headerTitle: "App" }}
       >
@@ -29,7 +29,7 @@ export default function App() {
         <Stack.Screen name="Counter" component={CounterScreen} />
         <Stack.Screen name="Color" component={ColorScreen} />
         <Stack.Screen name="Square" component={SquareScreen} />
-      </Stack.Navigator>
+      </Stack.Navigator> */}
       <Tab.Navigator>
         <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="Components" component={ComponentsScreen} />

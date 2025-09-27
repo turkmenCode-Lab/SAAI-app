@@ -10,9 +10,9 @@ const SquareScreen = () => {
       case "red":
         return { ...state, red: state.red + action.amount };
       case "green":
-        return { ...state, red: state.green + action.amount };
+        return { ...state, green: state.green + action.amount };
       case "green":
-        return { ...state, red: state.green + action.amount };
+        return { ...state, blue: state.green + action.amount };
       default:
         return state;
     }

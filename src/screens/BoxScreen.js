@@ -21,19 +21,16 @@ const styles = StyleSheet.create({
     fontSize: 22,
     borderWidth: 3,
     borderColor: "red",
-    flex: 1,
   },
   textTwoStyle: {
     fontSize: 22,
     borderWidth: 3,
     borderColor: "red",
-    flex: 1,
   },
   textThreeStyle: {
     fontSize: 22,
     borderWidth: 3,
     borderColor: "red",
-    flex: 1,
   },
 });
 

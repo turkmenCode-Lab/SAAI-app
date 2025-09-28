@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
     borderColor: "black",
   },
   textStyle: {
-    borderWidth: 1,
+    borderWidth: 10,
     borderColor: "red",
     margin: 20,
   },

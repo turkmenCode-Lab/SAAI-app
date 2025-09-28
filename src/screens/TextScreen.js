@@ -22,7 +22,7 @@ const TextScreen = () => {
         autoCorrect={false}
         onChangeText={(value) => setPassword(value)}
       />
-      {password.length <= 5 ? <Text>That was true {password}</Text> : null}
+      {password.length === 5 ? <Text>That was true {password}</Text> : null}
     </View>
   );
 };

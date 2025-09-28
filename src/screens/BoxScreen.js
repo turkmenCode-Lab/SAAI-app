@@ -15,15 +15,17 @@ const styles = StyleSheet.create({
   parentStyle: {
     borderWidth: 3,
     borderColor: "black",
-    height: 200,
+    height: 100,
     flexDirection: "row",
     justifyContent: "space-between",
+    boxSizing: "border-box",
   },
   viewOneStyle: { width: 50, height: 50, backgroundColor: "red" },
   viewTwoStyle: {
     width: 50,
     height: 50,
     backgroundColor: "green",
+    alignSelf: "flex-end",
   },
   viewThreeStyle: { width: 50, height: 50, backgroundColor: "blue" },
 });

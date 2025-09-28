@@ -17,8 +17,11 @@ const styles = StyleSheet.create({
     borderColor: "black",
     flexDirection: "row",
     height: 200,
+    alignItems: "center",
+    justifyContent: "space-evenly",
   },
   textStyle: {
+    fontSize: 22,
     borderWidth: 3,
     borderColor: "red",
   },

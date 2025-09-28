@@ -7,7 +7,7 @@ const TextScreen = () => {
 
   return (
     <View>
-      <Text>Enter your name:</Text>
+      <Text>Enter Name:</Text>
       <TextInput
         style={styles.input}
         autoCapitalize="none"
@@ -15,14 +15,14 @@ const TextScreen = () => {
         onChangeText={(value) => setName(value)}
       />
       <Text>My name's {name}</Text>
-      <Text>Enter password:</Text>
+      <Text>Enter Password:</Text>
       <TextInput
         style={styles.input}
         autoCapitalize="none"
         autoCorrect={false}
         onChangeText={(value) => setPassword(value)}
       />
-      <Text>Your password must be longer than 5</Text>
+      <Text>Password must be longer than 5</Text>
       {password.length > 5 ? <Text>That was true</Text> : null}
     </View>
   );

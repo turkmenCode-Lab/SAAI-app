@@ -20,17 +20,25 @@ const Prompt = ({ onSubmit, input, setInput }) => {
 };
 
 const styles = StyleSheet.create({
-    container: {},
+    container: {
+        flex: 1,
+        marginRight: 10,
+    },
     input: {
-        marginHorizontal: 15,
+        flex: 1,
         color: AppTheme.colors.text,
-        borderRadius: 22.5,
-        padding: 12,
-        marginBottom: 15,
+        borderRadius: 27.5,
+        paddingVertical: 12,
+        paddingHorizontal: 15,
         fontSize: 16,
         borderColor: AppTheme.colors.primary,
         borderWidth: 2,
         backgroundColor: "#1a1a1a",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
     },
 });
 

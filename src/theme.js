@@ -5,7 +5,7 @@ export const AppTheme = {
     colors: {
         ...DefaultTheme.colors,
         background: '#000',
-        text: '#ffffff',
+        text: '#fff',
         primary: '#A1A1AA',
     },
 };

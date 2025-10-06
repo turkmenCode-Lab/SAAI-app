@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
         borderRadius: 27.5,
         paddingVertical: 12,
         paddingHorizontal: 15,
-        fontSize: 16,
+        fontSize: 18,
         borderColor: AppTheme.colors.primary,
         borderWidth: 2,
         backgroundColor: "#1a1a1a",

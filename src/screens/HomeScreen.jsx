@@ -27,7 +27,7 @@ const HomeScreen = ({ navigation }) => {
                         style={styles.submit}
                         onPress={() => handleSubmit(input)}
                     >
-                        <Feather name="arrow-up" size={24} color="black" />
+                        <Feather name="arrow-up" size={30} color="black" />
                     </TouchableOpacity>
                 </View>
             </KeyboardAvoidingView>

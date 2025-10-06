@@ -4,8 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const HomeScreen = ({ navigation }) => {
   return (
-      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text>🚀 Safe Screen View is working!</Text>
+      <SafeAreaView style={{ flex: 1 }}>
+
       </SafeAreaView>
   );
 };

@@ -2,10 +2,12 @@ import React from "react";
 import { Text, StyleSheet, View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Prompt from "../components/Prompt";
+import Header from "../components/Header";
 
 const HomeScreen = ({ navigation }) => {
   return (
       <SafeAreaView style={{ flex: 1 }}>
+            <Header />
             <Prompt/>
       </SafeAreaView>
   );

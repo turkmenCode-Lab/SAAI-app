@@ -4,8 +4,8 @@ export const AppTheme = {
     ...DefaultTheme,
     colors: {
         ...DefaultTheme.colors,
-        background: '#1E1E2E',
+        background: '#000',
         text: '#ffffff',
-        primary: '#FF6B00',
+        primary: '#A1A1AA',
     },
 };

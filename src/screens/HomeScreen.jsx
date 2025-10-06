@@ -25,7 +25,7 @@ const HomeScreen = ({ navigation }) => {
                     style={styles.submit}
                     onPress={() => handleSubmit(input)}
                 >
-                    <Feather name="arrow-up" size={24} color={AppTheme.colors.text} />
+                    <Feather name="arrow-up" size={24} color="black" />
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -38,12 +38,15 @@ const styles = StyleSheet.create({
         backgroundColor: AppTheme.colors.background,
     },
     content: {
-        flex: 1,
+        position: 'fixed',
+        display: 'flex',
         padding: 15,
-        justifyContent: "space-between",
+        bottom: 0,
+        alignItems: "center",
+        justifyContent: "center",
     },
     submit: {
-        backgroundColor: AppTheme.colors.primary,
+        backgroundColor: AppTheme.colors.text,
         borderRadius: 22.5,
         padding: 12,
         alignItems: "center",

@@ -8,7 +8,7 @@ const Prompt = () => {
                 autoCorrect={false}
                 style={styles.input}
                 placeholder="Ask anything you want..."
-                placeholderTextColor="grey"
+                placeholderTextColor="white"
                 autoCapitalize="none"
             />
         </View>

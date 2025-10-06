@@ -5,7 +5,7 @@ import App from './App';
 
 function Root() {
     return (
-        <SafeAreaProvider>
+        <SafeAreaProvider style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <App />
         </SafeAreaProvider>
     );

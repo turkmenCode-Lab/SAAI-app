@@ -21,14 +21,13 @@ const styles = StyleSheet.create({
     },
     input: {
         marginHorizontal: 15,
-        backgroundColor: '#222',
         color: '#fff',
         borderRadius: 22.5,
         padding: 12,
         marginBottom: 15,
         fontSize: 16,
-        borderColor: '#FF6B00',
-        borderWidth: 1,
+        borderColor: '#c5c5c5',
+        borderWidth: 2,
     },
 })
 

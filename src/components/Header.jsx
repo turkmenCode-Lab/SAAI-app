@@ -9,9 +9,9 @@ const Header = () => {
         <View style={styles.header}>
             <FontAwesome6 name="book-open" size={24} color={AppTheme.colors.text} />
             <Text>Asisstant</Text>
-            <TouchableOpacity>
-                <MaterialCommunityIcons name="star-four-points-outline" size={24} color="black" />
-                <Text>Get Pro</Text>
+            <TouchableOpacity style={styles.getPro}>
+                <MaterialCommunityIcons name="star-four-points-outline" size={24} color="white" />
+                <Text style={{ color: AppTheme.colors.vitally, fontSize: 14, fontWeight: 800}}>Get Pro</Text>
             </TouchableOpacity>
         </View>
     );
@@ -24,6 +24,18 @@ const styles = StyleSheet.create({
         padding: 15,
         alignItems: "center",
     },
+    getPro: {
+        display: "flex",
+        flexDirection: "row",
+        gap: 3,
+        backgroundColor: AppTheme.colors.secondary,
+        borderRadius: 22.5,
+        paddingVertical: 7.5,
+        paddingHorizontal: 12.5,
+        alignItems: 'center',
+        justifyContent: 'center',
+
+    }
 });
 
 export default Header;

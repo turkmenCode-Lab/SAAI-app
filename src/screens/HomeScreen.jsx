@@ -27,7 +27,7 @@ const HomeScreen = ({ navigation }) => {
                         style={styles.submit}
                         onPress={() => handleSubmit(input)}
                     >
-                        <Feather name="arrow-up" size={30} color="black" />
+                        <Feather name="arrow-up" size={28} color="black" />
                     </TouchableOpacity>
                 </View>
             </KeyboardAvoidingView>
@@ -56,8 +56,8 @@ const styles = StyleSheet.create({
         padding: 12,
         alignItems: 'center',
         justifyContent: 'center',
-        width: 60,
-        height: 60,
+        width: 52,
+        height: 52,
     },
 });
 

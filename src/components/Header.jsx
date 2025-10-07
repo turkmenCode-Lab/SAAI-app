@@ -7,13 +7,11 @@ import { AppTheme } from "../theme";
 const Header = () => {
     return (
         <View style={styles.header}>
-            {/* Left Icon */}
-            <FontAwesome6 name="book-open" size={28} color={AppTheme.colors.text} />
+            <View style={styles.leftSection}>
+                <FontAwesome6 name="book-open" size={28} color={AppTheme.colors.text} />
+                <Text style={styles.heading}>Asisstant</Text>
+            </View>
 
-            {/* Title */}
-            <Text style={styles.heading}>Assistant</Text>
-
-            {/* Get Pro Button */}
             <TouchableOpacity style={styles.getPro}>
                 <MaterialCommunityIcons
                     name="star-four-points-outline"
@@ -28,20 +26,24 @@ const Header = () => {
 
 const styles = StyleSheet.create({
     header: {
+        marginHorizontal: 5,
         paddingVertical: 12,
         paddingHorizontal: 16,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        borderBottomWidth: 1,
-        borderBottomColor: AppTheme.colors.primary,
         backgroundColor: AppTheme.colors.background,
     },
+    leftSection: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
     heading: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: "600",
         color: AppTheme.colors.text,
         letterSpacing: 0.5,
+        marginLeft: 8
     },
     getPro: {
         flexDirection: "row",
@@ -58,6 +60,5 @@ const styles = StyleSheet.create({
         marginLeft: 6,
     },
 });
-
 
 export default Header;

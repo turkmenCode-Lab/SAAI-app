@@ -9,7 +9,7 @@ const Prompt = ({ onSubmit, input, setInput }) => {
                 autoCorrect={false}
                 style={styles.input}
                 placeholder="Ask anything you want..."
-                placeholderTextColor={AppTheme.colors.primary}
+                placeholderTextColor={AppTheme.colors.text}
                 autoCapitalize="none"
                 value={input}
                 onChangeText={setInput}
@@ -30,10 +30,10 @@ const styles = StyleSheet.create({
         borderRadius: 27.5,
         paddingVertical: 12,
         paddingHorizontal: 15,
-        fontSize: 18,
-        borderColor: AppTheme.colors.primary,
+        fontSize: 16,
+        borderColor: AppTheme.colors.text,
         borderWidth: 2,
-        backgroundColor: "#1a1a1a",
+        backgroundColor: AppTheme.colors.primary,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,

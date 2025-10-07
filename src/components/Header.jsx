@@ -7,11 +7,20 @@ import { AppTheme } from "../theme";
 const Header = () => {
     return (
         <View style={styles.header}>
-            <FontAwesome6 name="book-open" size={24} color={AppTheme.colors.text} />
-            <Text>Asisstant</Text>
+            {/* Left Icon */}
+            <FontAwesome6 name="book-open" size={28} color={AppTheme.colors.text} />
+
+            {/* Title */}
+            <Text style={styles.heading}>Assistant</Text>
+
+            {/* Get Pro Button */}
             <TouchableOpacity style={styles.getPro}>
-                <MaterialCommunityIcons name="star-four-points-outline" size={24} color="white" />
-                <Text style={{ color: AppTheme.colors.vitally, fontSize: 14, fontWeight: 800}}>Get Pro</Text>
+                <MaterialCommunityIcons
+                    name="star-four-points-outline"
+                    size={20}
+                    color={AppTheme.colors.vitally}
+                />
+                <Text style={styles.getProText}>Get Pro</Text>
             </TouchableOpacity>
         </View>
     );
@@ -19,23 +28,36 @@ const Header = () => {
 
 const styles = StyleSheet.create({
     header: {
-        borderBottomWidth: 2,
-        borderBottomColor: AppTheme.colors.primary,
-        padding: 15,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        flexDirection: "row",
         alignItems: "center",
+        justifyContent: "space-between",
+        borderBottomWidth: 1,
+        borderBottomColor: AppTheme.colors.primary,
+        backgroundColor: AppTheme.colors.background,
+    },
+    heading: {
+        fontSize: 20,
+        fontWeight: "600",
+        color: AppTheme.colors.text,
+        letterSpacing: 0.5,
     },
     getPro: {
-        display: "flex",
         flexDirection: "row",
-        gap: 3,
+        alignItems: "center",
         backgroundColor: AppTheme.colors.secondary,
-        borderRadius: 22.5,
-        paddingVertical: 7.5,
-        paddingHorizontal: 12.5,
-        alignItems: 'center',
-        justifyContent: 'center',
-
-    }
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 20,
+    },
+    getProText: {
+        color: AppTheme.colors.vitally,
+        fontWeight: "600",
+        fontSize: 14,
+        marginLeft: 6,
+    },
 });
+
 
 export default Header;

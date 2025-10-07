@@ -7,7 +7,7 @@ export const AppTheme = {
         background: '#000',
         text: '#fff',
         primary: '#A1A1AA',
-        secondary: '#a957c4',
-        vitally: '#eec5ff',
+        secondary: 'rgba(169,87,196,0.5)',
+        vitally: '#e9cdff',
     },
 };

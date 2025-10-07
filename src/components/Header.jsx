@@ -34,7 +34,7 @@ const Header = () => {
                 <Text style={styles.heading}>Asisstant</Text>
             </View>
 
-            <View style={styles.leftSection}>
+            <View style={styles.rightSection}>
                 <TouchableOpacity activeOpacity={0.7} style={styles.getPro}>
                     <MaterialCommunityIcons
                         name="star-four-points-outline"
@@ -43,7 +43,9 @@ const Header = () => {
                     />
                 <Text style={styles.getProText}>Get Pro</Text>
                 </TouchableOpacity>
-                <MaterialCommunityIcons name="dots-vertical" size={24} color={AppTheme.colors.text} />
+                <TouchableOpacity activeOpacity={0.7}>
+                    <MaterialCommunityIcons name="dots-vertical" style={{marginRight: -15,}} size={28} color={AppTheme.colors.text} />
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -51,7 +53,7 @@ const Header = () => {
 
 const styles = StyleSheet.create({
     header: {
-        marginHorizontal: 20,
+        marginHorizontal: 15,
         paddingVertical: 10,
         flexDirection: "row",
         alignItems: "center",
@@ -59,6 +61,11 @@ const styles = StyleSheet.create({
         backgroundColor: AppTheme.colors.background,
     },
     leftSection: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 5,
+    },
+    rightSection: {
         flexDirection: "row",
         alignItems: "center",
         gap: 5,

@@ -20,15 +20,13 @@ const HomeScreen = ({ navigation }) => {
 
         setIsSubmitting(true);
         try {
-            // Simulate an async operation (e.g., API call)
             console.log("Submitted:", text);
-            // Replace with actual async logic, e.g., await apiCall(text);
-            setInput(""); // Clear input only on success
+            setInput("");
         } catch (error) {
             Alert.alert("Error", "Submission failed. Please try again.");
             console.error("Submission error:", error);
         } finally {
-            setIsSubmitting(false); // Reset submitting state
+            setIsSubmitting(false);
         }
     };
 
@@ -59,9 +57,9 @@ const HomeScreen = ({ navigation }) => {
                         accessibilityRole="button"
                     >
                         {isSubmitting ? (
-                            <Feather name="arrow-up" size={28} color="black" />
-                        ) : (
                             <FontAwesome6 name="stop" size={28} color="black" />
+                        ) : (
+                            <Feather name="arrow-up" size={28} color="black" />
                         )}
                     </TouchableOpacity>
                 </View>

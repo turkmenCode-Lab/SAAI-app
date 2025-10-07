@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Text, StyleSheet, View, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from "react-native";
+import { Text, StyleSheet, View, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import PropTypes from "prop-types";
+import { Toast } from "toastify-react-native";
 import Prompt from "../components/Prompt";
 import Header from "../components/Header";
 import { AppTheme } from "../theme";
@@ -14,27 +15,117 @@ const HomeScreen = ({ navigation }) => {
 
     const handleSubmit = async (text) => {
         if (!text.trim()) {
-            Alert.alert("Error", "Please enter some text before submitting.");
+            Toast.error("Please enter some text before submitting.", {
+                duration: 3000,
+                position: "bottom",
+                style: {
+                    backgroundColor: AppTheme.colors.background,
+                    borderRadius: 16,
+                    padding: 12,
+                    marginHorizontal: 16,
+                    borderWidth: 1,
+                    borderColor: AppTheme.colors.vitally,
+                    shadowColor: AppTheme.colors.text,
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 8,
+                    elevation: 3,
+                },
+                textStyle: {
+                    color: AppTheme.colors.text,
+                    fontWeight: "500",
+                    fontSize: 14,
+                    textAlign: "center",
+                },
+            });
             return;
         }
 
         setIsSubmitting(true);
         try {
-            // Simulate an async operation (e.g., API call)
             console.log("Submitted:", text);
-            // Replace with actual async logic, e.g., await apiCall(text);
-            setInput(""); // Clear input only on success
+            setInput("");
+
+            Toast.success("Submission successful! 🎉", {
+                duration: 2000,
+                position: "bottom",
+                style: {
+                    backgroundColor: AppTheme.colors.background,
+                    borderRadius: 16,
+                    padding: 12,
+                    marginHorizontal: 16,
+                    borderWidth: 1,
+                    borderColor: AppTheme.colors.principally,
+                    shadowColor: AppTheme.colors.text,
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 8,
+                    elevation: 3,
+                },
+                textStyle: {
+                    color: AppTheme.colors.text,
+                    fontWeight: "500",
+                    fontSize: 14,
+                    textAlign: "center",
+                },
+            });
+
         } catch (error) {
-            Alert.alert("Error", "Submission failed. Please try again.");
+            Toast.error("Submission failed. Please try again.", {
+                duration: 3000,
+                position: "bottom",
+                style: {
+                    backgroundColor: AppTheme.colors.background,
+                    borderRadius: 16,
+                    padding: 12,
+                    marginHorizontal: 16,
+                    borderWidth: 1,
+                    borderColor: AppTheme.colors.vitally,
+                    shadowColor: AppTheme.colors.text,
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 8,
+                    elevation: 3,
+                },
+                textStyle: {
+                    color: AppTheme.colors.text,
+                    fontWeight: "500",
+                    fontSize: 14,
+                    textAlign: "center",
+                },
+            });
             console.error("Submission error:", error);
         } finally {
-            setIsSubmitting(false); // Reset submitting state
+            setIsSubmitting(false);
         }
     };
 
     const handleCancel = () => {
         setIsSubmitting(false);
         console.log("Submission cancelled");
+        Toast.info("Submission cancelled.", {
+            duration: 2000,
+            position: "bottom",
+            style: {
+                backgroundColor: AppTheme.colors.background,
+                borderRadius: 16,
+                padding: 12,
+                marginHorizontal: 16,
+                borderWidth: 1,
+                borderColor: AppTheme.colors.secondary,
+                shadowColor: AppTheme.colors.text,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                elevation: 3,
+            },
+            textStyle: {
+                color: AppTheme.colors.text,
+                fontWeight: "500",
+                fontSize: 14,
+                textAlign: "center",
+            },
+        });
     };
 
     return (
@@ -59,7 +150,7 @@ const HomeScreen = ({ navigation }) => {
                         accessibilityRole="button"
                     >
                         {isSubmitting ? (
-                            <FontAwesome6 name="stop" size={28} color="black" />
+                            <FontAwesome6 name="stop" size={24} color="black" />
                         ) : (
                             <Feather name="arrow-up" size={28} color="black" />
                         )}
@@ -106,7 +197,6 @@ const styles = StyleSheet.create({
     },
     main: {
         width: "100%",
-        minHeight: "60%",
         alignItems: "center",
         justifyContent: "center",
     },

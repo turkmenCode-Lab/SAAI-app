@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet } from "react-native"; // Removed unused Text import
+import { View, StyleSheet } from "react-native";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { AppTheme } from "../theme";
 
@@ -15,8 +15,8 @@ const styles = StyleSheet.create({
     header: {
         borderBottomWidth: 2,
         borderBottomColor: AppTheme.colors.primary,
-        padding: 15, // Added padding for better spacing
-        alignItems: "center", // Center the icon
+        padding: 15,
+        alignItems: "center",
     },
 });
 

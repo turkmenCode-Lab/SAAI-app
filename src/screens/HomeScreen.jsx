@@ -35,12 +35,10 @@ const HomeScreen = ({ navigation }) => {
     return currentChat ? currentChat.messages : [];
   }, [chats, currentChatId]);
 
-  // Create first chat
   useEffect(() => {
     if (chats.length === 0) createNewChat();
   }, []);
 
-  // Scroll to bottom when messages update
   useEffect(() => {
     const timer = setTimeout(() => {
       scrollRef.current?.scrollToEnd({ animated: true });
@@ -63,7 +61,7 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const toggleNav = () => {
-    if (!rotation || !slideValue) return; // ✅ avoid undefined refs
+    if (!rotation || !slideValue) return;
 
     const newOpen = !isNavOpen;
     const rotTo = newOpen ? 1 : 0;
@@ -115,7 +113,6 @@ const HomeScreen = ({ navigation }) => {
       )
     );
 
-    // Update title if new chat
     setChats((prev) =>
       prev.map((c) =>
         c.id === currentChatId && c.title === "New Chat"
@@ -198,7 +195,6 @@ const HomeScreen = ({ navigation }) => {
         isOpen={isNavOpen}
       />
 
-      {/* Keyboard avoiding container */}
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}

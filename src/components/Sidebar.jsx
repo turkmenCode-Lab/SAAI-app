@@ -19,10 +19,13 @@ const Sidebar = ({
   onClose,
   slideValue,
   isOpen,
+  onSubmit,
+  searchQ,
+  setSearchQ,
 }) => {
   const { colors } = useTheme();
 
-  const renderChatItem = ({ item, onSubmit, searchQ, setSearchQ }) => (
+  const renderChatItem = ({ item }) => (
     <TouchableOpacity
       style={styles.chatItem}
       onPress={() => onLoadChat(item.id)}
@@ -57,12 +60,20 @@ const Sidebar = ({
         ]}
       >
         <TextInput
-          placeholder="Let's search your chat history"
+          style={[
+            styles.input,
+            {
+              color: colors.text,
+              borderColor: colors.text,
+            },
+          ]}
+          autoCorrect={false}
+          placeholder="Let's search your chat history!?"
           placeholderTextColor={colors.text}
           autoCapitalize="none"
           value={searchQ}
           onChangeText={setSearchQ}
-          onSubmitEditing={() => onSubmit(input)}
+          onSubmitEditing={() => onSubmit(searchQ)}
           multiline
         />
       </View>

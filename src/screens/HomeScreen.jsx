@@ -20,6 +20,7 @@ import Sidebar from "../components/Sidebar";
 
 const HomeScreen = ({ navigation }) => {
   const [input, setInput] = useState("");
+  const [searchQ, setSearchQ] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [chats, setChats] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
@@ -87,6 +88,10 @@ const HomeScreen = ({ navigation }) => {
     inputRange: [0, 1],
     outputRange: ["0deg", "90deg"],
   });
+
+  const handleSearchQ = async (query) => {
+    console.log(query);
+  };
 
   const handleSubmit = async (text) => {
     if (!text.trim()) {
@@ -203,6 +208,9 @@ const HomeScreen = ({ navigation }) => {
         onClose={toggleNav}
         slideValue={slideValue}
         isOpen={isNavOpen}
+        searchQ={searchQ}
+        setSearchQ={setSearchQ}
+        onSubmit={handleSearchQ}
       />
 
       <KeyboardAvoidingView

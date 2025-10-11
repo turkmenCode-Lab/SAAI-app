@@ -1,4 +1,10 @@
-import React, { useState, useRef, useMemo, useEffect } from "react";
+import React, {
+  useState,
+  useRef,
+  useMemo,
+  useEffect,
+  useCallback,
+} from "react";
 import {
   Text,
   StyleSheet,
@@ -40,7 +46,11 @@ const HomeScreen = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    scrollRef.current?.scrollToEnd({ animated: false });
+    // Delay for keyboard sync
+    const timer = setTimeout(() => {
+      scrollRef.current?.scrollToEnd({ animated: false });
+    }, 100);
+    return () => clearTimeout(timer);
   }, [messages]);
 
   const createNewChat = () => {
@@ -146,7 +156,9 @@ const HomeScreen = ({ navigation }) => {
     setIsLoading(false);
   };
 
-  const renderMessage = ({ item }) => (
+  const renderMessage = (
+    item // Simplified—no need for {item} destructuring since not FlatList
+  ) => (
     <View
       key={item.id}
       style={[
@@ -167,6 +179,7 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView
+      edges={["left", "right", "top"]} // Avoid bottom interference
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <Header
@@ -195,31 +208,34 @@ const HomeScreen = ({ navigation }) => {
       />
       <KeyboardAwareScrollView
         style={styles.chatContainer}
-        contentContainerStyle={styles.chatContent}
+        contentContainerStyle={styles.chatContent} // Now with justifyContent: 'flex-end'
         ref={scrollRef}
         keyboardShouldPersistTaps="handled"
         enableOnAndroid={true}
-        extraScrollHeight={Platform.OS === "ios" ? 20 : 100} // Extra space for Android
+        extraScrollHeight={Platform.OS === "ios" ? 20 : 80} // Tuned for input buffer
         enableAutomaticScroll={true}
+        viewIsInsideTabBar={false}
+        resetScrollToCoords={false}
+        showsVerticalScrollIndicator={true}
       >
-        <View style={styles.messagesContainer}>
-          {messages.length === 0 ? (
-            <Text
-              style={[styles.greeting, { color: colors.text }]}
-              accessibilityLabel="Greeting message"
-            >
-              How can I help you today?
-            </Text>
-          ) : (
-            messages.map(renderMessage)
-          )}
-        </View>
+        {/* Messages directly here—no extra wrapper */}
+        {messages.length === 0 ? (
+          <Text
+            style={[styles.greeting, { color: colors.text }]}
+            accessibilityLabel="Greeting message"
+          >
+            How can I help you today?
+          </Text>
+        ) : (
+          messages.map(renderMessage)
+        )}
+        {/* Input sticks at bottom via justifyContent */}
         <View style={styles.inputContainer}>
           <View style={styles.content}>
             <Prompt onSubmit={handleSubmit} input={input} setInput={setInput} />
             <TouchableOpacity
               activeOpacity={0.7}
-              style={[styles.submit, { backgroundColor: colors.primary }]} // Swap if 'primary' isn't in theme
+              style={[styles.submit, { backgroundColor: colors.primary }]} // Or colors.card if primary isn't set
               onPress={() => handleSubmit(input)}
               accessibilityLabel={isLoading ? "Sending" : "Submit input"}
               accessibilityRole="button"
@@ -242,14 +258,15 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   chatContainer: { flex: 1 },
   chatContent: {
-    flexGrow: 1, // Ensures content stretches to fill
+    flexGrow: 1,
+    justifyContent: "flex-end", // Pins input at bottom, messages above
     paddingVertical: 20,
     paddingHorizontal: 15,
   },
-  messagesContainer: { flexGrow: 1 }, // Messages take available space
   inputContainer: {
     paddingVertical: 10,
     paddingHorizontal: 15,
+    marginBottom: 10, // Extra bottom buffer
   },
   content: {
     flexDirection: "row",

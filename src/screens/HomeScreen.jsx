@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
   },
   sidebar: {
     position: "absolute",
-    top: 0,
+    top: 25,
     left: 0,
     bottom: 0,
     width: 300,

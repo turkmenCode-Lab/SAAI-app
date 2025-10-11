@@ -92,7 +92,6 @@ const styles = StyleSheet.create({
     width: 300,
     padding: 15,
     zIndex: 10,
-    backgroundColor: colors.background,
   },
   sidebarHeader: {
     flexDirection: "row",

@@ -8,7 +8,7 @@ import {
   Animated,
   TextInput,
 } from "react-native";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useTheme } from "@react-navigation/native";
 
 const Sidebar = ({
@@ -17,7 +17,7 @@ const Sidebar = ({
   onLoadChat,
   onNewChat,
   onClose,
-  slideValue,
+  slideTranslate,
   isOpen,
   onSubmit,
   searchQ,
@@ -48,7 +48,7 @@ const Sidebar = ({
       style={[
         styles.sidebar,
         {
-          transform: [{ translateX: slideValue }],
+          transform: [{ translateX: slideTranslate }],
           backgroundColor: colors.background,
         },
       ]}
@@ -76,6 +76,9 @@ const Sidebar = ({
           onSubmitEditing={() => onSubmit(searchQ)}
           multiline
         />
+        <TouchableOpacity onPress={onClose}>
+          <MaterialCommunityIcons name="backburger" size={24} color="black" />
+        </TouchableOpacity>
       </View>
       <TouchableOpacity
         style={[styles.newChatBtn, { backgroundColor: colors.text + "0A" }]}
@@ -101,7 +104,7 @@ const styles = StyleSheet.create({
     top: 25,
     left: 0,
     bottom: 0,
-    width: 300,
+    width: "100%",
     padding: 15,
     zIndex: 1000,
   },

@@ -29,7 +29,7 @@ const HomeScreen = ({ navigation }) => {
   const bubble = colors.text;
   const scrollRef = useRef(null);
   const rotation = useRef(new Animated.Value(0)).current;
-  const slideValue = useRef(new Animated.Value(-300)).current;
+  const slideValue = useRef(new Animated.Value(0)).current;
 
   const messages = useMemo(() => {
     const currentChat = chats.find((chat) => chat.id === currentChatId);
@@ -47,6 +47,11 @@ const HomeScreen = ({ navigation }) => {
     return () => clearTimeout(timer);
   }, [messages]);
 
+  const slideTranslate = slideValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["-100%", "0%"],
+  });
+
   const createNewChat = () => {
     const newId = Date.now();
     setChats((prev) => [
@@ -62,25 +67,12 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const toggleNav = () => {
-    if (!rotation || !slideValue) return;
-
     const newOpen = !isNavOpen;
-    const rotTo = newOpen ? 1 : 0;
-    const slideTo = newOpen ? 0 : -300;
-
-    Animated.parallel([
-      Animated.timing(rotation, {
-        toValue: rotTo,
-        duration: 125,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideValue, {
-        toValue: slideTo,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
+    Animated.timing(slideValue, {
+      toValue: newOpen ? 1 : 0,
+      duration: 250,
+      useNativeDriver: true,
+    }).start();
     setIsNavOpen(newOpen);
   };
 
@@ -206,7 +198,7 @@ const HomeScreen = ({ navigation }) => {
           toggleNav();
         }}
         onClose={toggleNav}
-        slideValue={slideValue}
+        slideValue={slideTranslate}
         isOpen={isNavOpen}
         searchQ={searchQ}
         setSearchQ={setSearchQ}

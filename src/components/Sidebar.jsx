@@ -61,7 +61,7 @@ const Sidebar = ({
       >
         <TextInput
           style={[
-            styles.input,
+            styles.searchInput,
             {
               color: colors.text,
               borderColor: colors.text,
@@ -143,6 +143,12 @@ const styles = StyleSheet.create({
   chatSubtitle: {
     fontSize: 14,
     opacity: 0.7,
+  },
+  searchInput: {
+    flex: 1,
+    borderRadius: 27.5,
+    padding: 10,
+    borderWidth: 1,
   },
 });
 

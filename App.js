@@ -2,13 +2,14 @@ import * as React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "./src/screens/HomeScreen";
-
 import ToastManager from "toastify-react-native";
-import { AppTheme } from "./src/theme";
+import { useAppTheme } from "./src/theme";
 
 const Stack = createStackNavigator();
 
 export default function App() {
+  const AppTheme = useAppTheme();
+
   return (
     <NavigationContainer theme={AppTheme}>
       <Stack.Navigator

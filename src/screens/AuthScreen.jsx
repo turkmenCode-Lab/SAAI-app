@@ -13,14 +13,18 @@ const AuthScreen = () => {
     >
       <Text>Auth Screen</Text>
       <TypingErase
-        texts={["Hello.", "I'm Merdan.", "I build apps."]}
-        typingSpeed={60}
+        texts={[
+          "Start developing with AI",
+          "Hi I'm here, how can I help?",
+          "I build apps.",
+        ]}
+        typingSpeed={45}
         erasingSpeed={30}
         pauseBeforeErase={1000}
         pauseBeforeType={400}
         loop={true}
-        textStyle={{ fontSize: 20, color: "#111" }}
-        cursorStyle={{ color: "#ff2d55" }}
+        textStyle={{ fontSize: 38, color: colors.vitally, fontWeight: "700" }}
+        cursorStyle={{ color: colors.text, fontSize: 44, fontWeight: "700" }}
       />
     </SafeAreaView>
   );

@@ -66,7 +66,7 @@ const HomeScreen = ({ navigation }) => {
           <Prompt onSubmit={handleSubmit} input={input} setInput={setInput} />
           <TouchableOpacity
             activeOpacity={0.7}
-            style={[styles.submit, { backgroundColor: colors.text }]}
+            style={[styles.submit, { backgroundColor: colors.mostly }]}
             onPress={() =>
               isSubmitting ? handleCancel() : handleSubmit(input)
             }
@@ -93,9 +93,13 @@ HomeScreen.propTypes = {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  keyboardAvoiding: { flex: 1, justifyContent: "flex-end" },
+  keyboardAvoiding: {
+    flex: 1,
+    justifyContent: "flex-end",
+    paddingVertical: 10,
+  },
   content: {
-    padding: 15,
+    paddingHorizontal: 15,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

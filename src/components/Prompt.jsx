@@ -29,7 +29,10 @@ const Prompt = ({ onSubmit, input, setInput }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, marginRight: 10 },
+  container: {
+    flex: 1,
+    marginRight: 10,
+  },
   input: {
     flex: 1,
     borderRadius: 27.5,

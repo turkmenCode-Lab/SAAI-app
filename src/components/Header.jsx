@@ -53,9 +53,9 @@ const Header = () => {
           <MaterialCommunityIcons
             name="star-four-points-outline"
             size={20}
-            color={colors.vitally}
+            color={colors.principally}
           />
-          <Text style={[styles.getProText, { color: colors.vitally }]}>
+          <Text style={[styles.getProText, { color: colors.principally }]}>
             Get Pro
           </Text>
         </TouchableOpacity>

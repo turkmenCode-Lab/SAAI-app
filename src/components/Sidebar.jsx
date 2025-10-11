@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useTheme } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Sidebar = ({
   chats,
@@ -40,41 +41,45 @@ const Sidebar = ({
   );
 
   return (
-    <Animated.View
-      style={[
-        styles.sidebar,
-        {
-          transform: [{ translateX: slideValue }],
-          backgroundColor: colors.background,
-        },
-      ]}
-    >
-      <View
+    <SafeAreaView style={{ flex: 1 }}>
+      <Animated.View
         style={[
-          styles.sidebarHeader,
-          { borderBottomColor: colors.text + "33" },
+          styles.sidebar,
+          {
+            transform: [{ translateX: slideValue }],
+            backgroundColor: colors.background,
+          },
         ]}
       >
-        <Text style={[styles.sidebarTitle, { color: colors.text }]}>Chats</Text>
-        <TouchableOpacity onPress={onClose}>
-          <FontAwesome6 name="xmark" size={24} color={colors.text} />
+        <View
+          style={[
+            styles.sidebarHeader,
+            { borderBottomColor: colors.text + "33" },
+          ]}
+        >
+          <Text style={[styles.sidebarTitle, { color: colors.text }]}>
+            Chats
+          </Text>
+          <TouchableOpacity onPress={onClose}>
+            <FontAwesome6 name="xmark" size={24} color={colors.text} />
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          style={[styles.newChatBtn, { backgroundColor: colors.text + "0A" }]}
+          onPress={onNewChat}
+        >
+          <Text style={[styles.newChatText, { color: colors.text }]}>
+            New Chat
+          </Text>
         </TouchableOpacity>
-      </View>
-      <TouchableOpacity
-        style={[styles.newChatBtn, { backgroundColor: colors.text + "0A" }]}
-        onPress={onNewChat}
-      >
-        <Text style={[styles.newChatText, { color: colors.text }]}>
-          New Chat
-        </Text>
-      </TouchableOpacity>
-      <FlatList
-        data={chats}
-        renderItem={renderChatItem}
-        keyExtractor={(item) => item.id.toString()}
-        style={styles.chatList}
-      />
-    </Animated.View>
+        <FlatList
+          data={chats}
+          renderItem={renderChatItem}
+          keyExtractor={(item) => item.id.toString()}
+          style={styles.chatList}
+        />
+      </Animated.View>
+    </SafeAreaView>
   );
 };
 
@@ -87,6 +92,7 @@ const styles = StyleSheet.create({
     width: 300,
     padding: 15,
     zIndex: 10,
+    backgroundColor: colors.background,
   },
   sidebarHeader: {
     flexDirection: "row",

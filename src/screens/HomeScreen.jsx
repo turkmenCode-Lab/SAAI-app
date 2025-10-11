@@ -4,16 +4,15 @@ import {
   StyleSheet,
   View,
   TouchableOpacity,
-  KeyboardAvoidingView,
   Platform,
   Alert,
-  ScrollView,
   ActivityIndicator,
   Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 import { useTheme } from "@react-navigation/native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Prompt from "../components/Prompt";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
@@ -194,12 +193,16 @@ const HomeScreen = ({ navigation }) => {
         slideValue={slideValue}
         isOpen={isNavOpen}
       />
-      <View style={styles.chatContainer}>
-        <ScrollView
-          ref={scrollRef}
-          style={styles.messagesContainer}
-          contentContainerStyle={styles.messagesContent}
-        >
+      <KeyboardAwareScrollView
+        style={styles.chatContainer}
+        contentContainerStyle={styles.chatContent}
+        ref={scrollRef}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+        extraScrollHeight={Platform.OS === "ios" ? 20 : 100} // Extra space for Android
+        enableAutomaticScroll={true}
+      >
+        <View style={styles.messagesContainer}>
           {messages.length === 0 ? (
             <Text
               style={[styles.greeting, { color: colors.text }]}
@@ -210,16 +213,13 @@ const HomeScreen = ({ navigation }) => {
           ) : (
             messages.map(renderMessage)
           )}
-        </ScrollView>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.keyboardAvoiding}
-        >
+        </View>
+        <View style={styles.inputContainer}>
           <View style={styles.content}>
             <Prompt onSubmit={handleSubmit} input={input} setInput={setInput} />
             <TouchableOpacity
               activeOpacity={0.7}
-              style={[styles.submit, { backgroundColor: colors.mostly }]}
+              style={[styles.submit, { backgroundColor: colors.primary }]} // Swap if 'primary' isn't in theme
               onPress={() => handleSubmit(input)}
               accessibilityLabel={isLoading ? "Sending" : "Submit input"}
               accessibilityRole="button"
@@ -232,8 +232,8 @@ const HomeScreen = ({ navigation }) => {
               )}
             </TouchableOpacity>
           </View>
-        </KeyboardAvoidingView>
-      </View>
+        </View>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 };
@@ -241,17 +241,20 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   chatContainer: { flex: 1 },
-  messagesContainer: { flex: 1 },
-  messagesContent: { paddingVertical: 20, paddingHorizontal: 15 },
-  keyboardAvoiding: {
-    justifyContent: "flex-end",
+  chatContent: {
+    flexGrow: 1, // Ensures content stretches to fill
+    paddingVertical: 20,
+    paddingHorizontal: 15,
+  },
+  messagesContainer: { flexGrow: 1 }, // Messages take available space
+  inputContainer: {
     paddingVertical: 10,
+    paddingHorizontal: 15,
   },
   content: {
-    paddingHorizontal: 15,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
   },
   submit: {
     borderRadius: 22.5,

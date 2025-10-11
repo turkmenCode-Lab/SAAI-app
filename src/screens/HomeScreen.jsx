@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useRef,
-  useMemo,
-  useEffect,
-  useCallback,
-} from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import {
   Text,
   StyleSheet,
@@ -13,12 +7,13 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  ScrollView,
   Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 import { useTheme } from "@react-navigation/native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Prompt from "../components/Prompt";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
@@ -39,17 +34,16 @@ const HomeScreen = ({ navigation }) => {
     return currentChat ? currentChat.messages : [];
   }, [chats, currentChatId]);
 
+  // Create first chat
   useEffect(() => {
-    if (chats.length === 0) {
-      createNewChat();
-    }
+    if (chats.length === 0) createNewChat();
   }, []);
 
+  // Scroll to bottom when messages update
   useEffect(() => {
-    // Delay for keyboard sync
     const timer = setTimeout(() => {
-      scrollRef.current?.scrollToEnd({ animated: false });
-    }, 100);
+      scrollRef.current?.scrollToEnd({ animated: true });
+    }, 150);
     return () => clearTimeout(timer);
   }, [messages]);
 
@@ -68,9 +62,12 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const toggleNav = () => {
+    if (!rotation || !slideValue) return; // ✅ avoid undefined refs
+
     const newOpen = !isNavOpen;
     const rotTo = newOpen ? 1 : 0;
     const slideTo = newOpen ? 0 : -300;
+
     Animated.parallel([
       Animated.timing(rotation, {
         toValue: rotTo,
@@ -83,6 +80,7 @@ const HomeScreen = ({ navigation }) => {
         useNativeDriver: true,
       }),
     ]).start();
+
     setIsNavOpen(newOpen);
   };
 
@@ -97,9 +95,7 @@ const HomeScreen = ({ navigation }) => {
       return;
     }
 
-    if (!currentChatId) {
-      createNewChat();
-    }
+    if (!currentChatId) createNewChat();
 
     setIsLoading(true);
 
@@ -118,23 +114,17 @@ const HomeScreen = ({ navigation }) => {
       )
     );
 
-    let updatedChats = chats.map((c) =>
-      c.id === currentChatId ? { ...c, messages: [...c.messages, userMsg] } : c
-    );
-
-    if (
-      updatedChats.find((c) => c.id === currentChatId)?.title === "New Chat"
-    ) {
-      updatedChats = updatedChats.map((c) =>
-        c.id === currentChatId
+    // Update title if new chat
+    setChats((prev) =>
+      prev.map((c) =>
+        c.id === currentChatId && c.title === "New Chat"
           ? {
               ...c,
               title: text.length > 50 ? text.substring(0, 50) + "..." : text,
             }
           : c
-      );
-      setChats(updatedChats);
-    }
+      )
+    );
 
     setInput("");
 
@@ -156,9 +146,7 @@ const HomeScreen = ({ navigation }) => {
     setIsLoading(false);
   };
 
-  const renderMessage = (
-    item // Simplified—no need for {item} destructuring since not FlatList
-  ) => (
+  const renderMessage = (item) => (
     <View
       key={item.id}
       style={[
@@ -179,7 +167,7 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView
-      edges={["left", "right", "top"]} // Avoid bottom interference
+      edges={["left", "right", "top"]}
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <Header
@@ -187,6 +175,7 @@ const HomeScreen = ({ navigation }) => {
         rotateInterpolate={rotateInterpolate}
         onToggleNav={toggleNav}
       />
+
       {isNavOpen && (
         <TouchableOpacity
           style={styles.overlay}
@@ -194,6 +183,7 @@ const HomeScreen = ({ navigation }) => {
           activeOpacity={1}
         />
       )}
+
       <Sidebar
         chats={chats}
         currentChatId={currentChatId}
@@ -206,39 +196,40 @@ const HomeScreen = ({ navigation }) => {
         slideValue={slideValue}
         isOpen={isNavOpen}
       />
-      <KeyboardAwareScrollView
-        style={styles.chatContainer}
-        contentContainerStyle={styles.chatContent} // Now with justifyContent: 'flex-end'
-        ref={scrollRef}
-        keyboardShouldPersistTaps="handled"
-        enableOnAndroid={true}
-        extraScrollHeight={Platform.OS === "ios" ? 20 : 80} // Tuned for input buffer
-        enableAutomaticScroll={true}
-        viewIsInsideTabBar={false}
-        resetScrollToCoords={false}
-        showsVerticalScrollIndicator={true}
+
+      {/* Keyboard avoiding container */}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
       >
-        {/* Messages directly here—no extra wrapper */}
-        {messages.length === 0 ? (
-          <Text
-            style={[styles.greeting, { color: colors.text }]}
-            accessibilityLabel="Greeting message"
-          >
-            How can I help you today?
-          </Text>
-        ) : (
-          messages.map(renderMessage)
-        )}
-        {/* Input sticks at bottom via justifyContent */}
+        <ScrollView
+          style={styles.chatContainer}
+          contentContainerStyle={styles.chatContent}
+          ref={scrollRef}
+          showsVerticalScrollIndicator={true}
+          keyboardShouldPersistTaps="handled"
+        >
+          {messages.length === 0 ? (
+            <Text
+              style={[styles.greeting, { color: colors.text }]}
+              accessibilityLabel="Greeting message"
+            >
+              How can I help you today?
+            </Text>
+          ) : (
+            messages.map(renderMessage)
+          )}
+        </ScrollView>
+
+        {/* Fixed input area */}
         <View style={styles.inputContainer}>
           <View style={styles.content}>
             <Prompt onSubmit={handleSubmit} input={input} setInput={setInput} />
             <TouchableOpacity
               activeOpacity={0.7}
-              style={[styles.submit, { backgroundColor: colors.primary }]} // Or colors.card if primary isn't set
+              style={[styles.submit, { backgroundColor: colors.primary }]}
               onPress={() => handleSubmit(input)}
-              accessibilityLabel={isLoading ? "Sending" : "Submit input"}
-              accessibilityRole="button"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -249,7 +240,7 @@ const HomeScreen = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         </View>
-      </KeyboardAwareScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -259,14 +250,15 @@ const styles = StyleSheet.create({
   chatContainer: { flex: 1 },
   chatContent: {
     flexGrow: 1,
-    justifyContent: "flex-end", // Pins input at bottom, messages above
+    justifyContent: "flex-end",
     paddingVertical: 20,
     paddingHorizontal: 15,
   },
   inputContainer: {
     paddingVertical: 10,
     paddingHorizontal: 15,
-    marginBottom: 10, // Extra bottom buffer
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "#ccc",
   },
   content: {
     flexDirection: "row",

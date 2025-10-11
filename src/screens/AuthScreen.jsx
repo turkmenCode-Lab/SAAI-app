@@ -4,9 +4,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import TypingErase from "../components/UI/TypingErase";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useAppTheme } from "../../src/theme";
 
 const AuthScreen = () => {
   const { colors } = useTheme();
+
+  const theme = useAppTheme();
+
+  Text.defaultProps = Text.defaultProps || {};
+  Text.defaultProps.style = [
+    { fontFamily: theme.fonts.regular, color: theme.colors.text },
+    ...(Text.defaultProps.style || []),
+  ];
 
   return (
     <SafeAreaView
@@ -17,22 +26,27 @@ const AuthScreen = () => {
         texts={[
           "Start developing with AI",
           "Hi I'm here, how can I help?",
-          "I build apps.",
+          "I may help to solve issues.",
         ]}
         typingSpeed={45}
         erasingSpeed={30}
         pauseBeforeErase={1000}
         pauseBeforeType={400}
         loop={true}
-        textStyle={{ fontSize: 30, color: colors.primary, fontWeight: "700" }}
+        textStyle={{
+          fontSize: 30,
+          color: colors.text,
+          fontWeight: "700",
+        }}
         cursorStyle={{
-          color: colors.mostly,
+          color: colors.neutral,
           fontSize: 44,
           fontWeight: "700",
         }}
       />
       <View style={styles.sso}>
         <TouchableOpacity
+          activeOpacity={0.75}
           style={[styles.buttons, { backgroundColor: colors.primary }]}
         >
           <MaterialIcons name="alternate-email" size={24} color={colors.text} />
@@ -41,6 +55,7 @@ const AuthScreen = () => {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
+          activeOpacity={0.75}
           style={[styles.buttons, { backgroundColor: colors.primary }]}
         >
           <AntDesign name="google" size={24} color={colors.text} />
@@ -49,6 +64,7 @@ const AuthScreen = () => {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
+          activeOpacity={0.75}
           style={[styles.buttons, { backgroundColor: colors.primary }]}
         >
           <AntDesign name="github" size={24} color={colors.text} />
@@ -59,7 +75,7 @@ const AuthScreen = () => {
       </View>
       <Text
         style={{
-          color: colors.gray,
+          color: colors.neutral,
           maxWidth: "70%",
           textAlign: "center",
           fontSize: 13,

@@ -6,6 +6,7 @@ import {
   FlatList,
   StyleSheet,
   Animated,
+  TextInput,
 } from "react-native";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useTheme } from "@react-navigation/native";
@@ -21,7 +22,7 @@ const Sidebar = ({
 }) => {
   const { colors } = useTheme();
 
-  const renderChatItem = ({ item }) => (
+  const renderChatItem = ({ item, onSubmit, searchQ, setSearchQ }) => (
     <TouchableOpacity
       style={styles.chatItem}
       onPress={() => onLoadChat(item.id)}
@@ -55,10 +56,15 @@ const Sidebar = ({
           { borderBottomColor: colors.text + "33" },
         ]}
       >
-        <Text style={[styles.sidebarTitle, { color: colors.text }]}>Chats</Text>
-        <TouchableOpacity onPress={onClose}>
-          <FontAwesome6 name="xmark" size={24} color={colors.text} />
-        </TouchableOpacity>
+        <TextInput
+          placeholder="Let's search your chat history"
+          placeholderTextColor={colors.text}
+          autoCapitalize="none"
+          value={searchQ}
+          onChangeText={setSearchQ}
+          onSubmitEditing={() => onSubmit(input)}
+          multiline
+        />
       </View>
       <TouchableOpacity
         style={[styles.newChatBtn, { backgroundColor: colors.text + "0A" }]}

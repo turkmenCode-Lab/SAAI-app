@@ -14,7 +14,6 @@ const Prompt = ({ onSubmit, input, setInput }) => {
           {
             color: colors.text,
             borderColor: colors.text,
-            backgroundColor: colors.primary,
           },
         ]}
         placeholder="Ask anything you want..."
@@ -41,12 +40,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontSize: 16,
     borderWidth: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    textAlignVertical: "center",
   },
 });
 

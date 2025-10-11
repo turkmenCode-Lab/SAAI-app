@@ -149,7 +149,17 @@ const HomeScreen = ({ navigation }) => {
       key={item.id}
       style={[
         styles.bubble,
-        item.role === "user" ? styles.userBubble : styles.assistantBubble,
+        item.role === "user"
+          ? {
+              alignSelf: "flex-end",
+              backgroundColor: bubble,
+              marginVertical: 4,
+              paddingHorizontal: 15,
+              paddingVertical: 10,
+              borderRadius: 15,
+              maxWidth: "80%",
+            }
+          : styles.assistantBubble,
       ]}
     >
       <Text
@@ -283,10 +293,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 15,
     maxWidth: "80%",
-  },
-  userBubble: {
-    alignSelf: "flex-end",
-    backgroundColor: bubble,
   },
   assistantBubble: {
     alignSelf: "flex-start",

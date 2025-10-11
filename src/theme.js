@@ -11,6 +11,7 @@ export const lightTheme = {
     mostly: "#2d72e2ff",
     vitally: "#8A4FFF",
     principally: "#ffb464",
+    gray: "#888888",
   },
 };
 
@@ -24,6 +25,7 @@ export const darkTheme = {
     mostly: "#2d72e2ff",
     vitally: "#D4A4FF",
     principally: "#ffb464",
+    gray: "#888888",
   },
 };
 

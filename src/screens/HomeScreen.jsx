@@ -219,12 +219,15 @@ const HomeScreen = ({ navigation }) => {
           keyboardShouldPersistTaps="handled"
         >
           {messages.length === 0 ? (
-            <Text
-              style={[styles.greeting, { color: colors.text }]}
-              accessibilityLabel="Greeting message"
-            >
-              How can I help you today?
-            </Text>
+            <>
+              <Text
+                style={[styles.greeting, { color: colors.text }]}
+                accessibilityLabel="Greeting message"
+              >
+                How can I help you today?
+              </Text>
+              <View></View>
+            </>
           ) : (
             messages.map(renderMessage)
           )}
@@ -277,7 +280,12 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
   },
-  greeting: { alignSelf: "center", fontSize: 24, fontWeight: "600" },
+  greeting: {
+    alignSelf: "center",
+    textAlign: "center",
+    fontSize: 24,
+    fontWeight: "600",
+  },
   overlay: {
     position: "absolute",
     top: 0,

@@ -233,7 +233,17 @@ const HomeScreen = ({ navigation }) => {
           )}
         </ScrollView>
 
-        <View style={styles.inputContainer}>
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              paddingBottom:
+                messages.length === 0
+                  ? 25 + (Platform.OS === "ios" ? 20 : 0)
+                  : 10 + (Platform.OS === "ios" ? 20 : 0),
+            },
+          ]}
+        >
           <View style={styles.content}>
             <Prompt onSubmit={handleSubmit} input={input} setInput={setInput} />
             <TouchableOpacity

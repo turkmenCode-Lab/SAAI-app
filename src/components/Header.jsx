@@ -42,7 +42,7 @@ const Header = () => {
             <FontAwesome6 name="bars-staggered" size={28} color={colors.text} />
           </Animated.View>
         </TouchableOpacity>
-        <Text style={[styles.heading, { color: colors.text }]}>Assistant</Text>
+        <Text style={[styles.heading, { color: colors.text }]}>Asisstant</Text>
       </View>
 
       <View style={styles.rightSection}>
@@ -80,16 +80,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  leftSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-  },
-  rightSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-  },
+  leftSection: { flexDirection: "row", alignItems: "center", gap: 5 },
+  rightSection: { flexDirection: "row", alignItems: "center", gap: 5 },
   heading: {
     fontSize: 18,
     fontWeight: "600",
@@ -103,11 +95,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 20,
   },
-  getProText: {
-    fontWeight: "600",
-    fontSize: 14,
-    marginLeft: 6,
-  },
+  getProText: { fontWeight: "600", fontSize: 14, marginLeft: 6 },
 });
 
 export default Header;

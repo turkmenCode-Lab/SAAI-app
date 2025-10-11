@@ -19,7 +19,6 @@ import Header from "../components/Header";
 const HomeScreen = ({ navigation }) => {
   const [input, setInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const { colors } = useTheme();
 
   const handleSubmit = async (text) => {
@@ -58,6 +57,7 @@ const HomeScreen = ({ navigation }) => {
           How can I help you today?
         </Text>
       </View>
+
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoiding}
@@ -66,7 +66,7 @@ const HomeScreen = ({ navigation }) => {
           <Prompt onSubmit={handleSubmit} input={input} setInput={setInput} />
           <TouchableOpacity
             activeOpacity={0.7}
-            style={styles.submit}
+            style={[styles.submit, { backgroundColor: colors.text }]}
             onPress={() =>
               isSubmitting ? handleCancel() : handleSubmit(input)
             }
@@ -76,9 +76,9 @@ const HomeScreen = ({ navigation }) => {
             accessibilityRole="button"
           >
             {isSubmitting ? (
-              <FontAwesome6 name="stop" size={28} color="black" />
+              <FontAwesome6 name="stop" size={28} color={colors.background} />
             ) : (
-              <Feather name="arrow-up" size={28} color="black" />
+              <Feather name="arrow-up" size={28} color={colors.background} />
             )}
           </TouchableOpacity>
         </View>
@@ -92,14 +92,8 @@ HomeScreen.propTypes = {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: AppTheme?.colors?.background || "#fff",
-  },
-  keyboardAvoiding: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
+  container: { flex: 1 },
+  keyboardAvoiding: { flex: 1, justifyContent: "flex-end" },
   content: {
     padding: 15,
     flexDirection: "row",
@@ -107,7 +101,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   submit: {
-    backgroundColor: AppTheme?.colors?.text || "#000",
     borderRadius: 22.5,
     padding: 12,
     alignItems: "center",
@@ -115,17 +108,8 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
   },
-  greeting: {
-    alignSelf: "center",
-    fontSize: 24,
-    fontWeight: "600",
-    color: AppTheme?.colors?.text || "#000",
-  },
-  main: {
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  greeting: { alignSelf: "center", fontSize: 24, fontWeight: "600" },
+  main: { width: "100%", alignItems: "center", justifyContent: "center" },
 });
 
 export default HomeScreen;

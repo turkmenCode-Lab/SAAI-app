@@ -10,6 +10,7 @@ import {
   FlatList,
   ScrollView,
   ActivityIndicator,
+  Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
@@ -17,7 +18,6 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useTheme } from "@react-navigation/native";
 import Prompt from "../components/Prompt";
 import Header from "../components/Header";
-import Animated, { interpolate } from "react-native-reanimated";
 
 const HomeScreen = ({ navigation }) => {
   const [input, setInput] = useState("");
@@ -207,7 +207,12 @@ const HomeScreen = ({ navigation }) => {
           },
         ]}
       >
-        <View style={styles.sidebarHeader}>
+        <View
+          style={[
+            styles.sidebarHeader,
+            { borderBottomColor: colors.text + "33" },
+          ]}
+        >
           <Text style={[styles.sidebarTitle, { color: colors.text }]}>
             Chats
           </Text>
@@ -216,7 +221,7 @@ const HomeScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
         <TouchableOpacity
-          style={styles.newChatBtn}
+          style={[styles.newChatBtn, { backgroundColor: colors.text + "0A" }]}
           onPress={() => {
             createNewChat();
             toggleNav();
@@ -325,7 +330,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.1)",
     marginBottom: 15,
   },
   sidebarTitle: {
@@ -336,7 +340,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
-    backgroundColor: "rgba(0,0,0,0.05)",
     alignItems: "center",
     marginBottom: 10,
   },

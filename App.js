@@ -16,8 +16,8 @@ export default function App() {
       <Stack.Navigator
         screenOptions={{ headerShown: false, animation: "fade" }}
       >
-        <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Auth" component={AuthScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} />
       </Stack.Navigator>
       <ToastManager />
     </NavigationContainer>

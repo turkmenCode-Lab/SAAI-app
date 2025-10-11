@@ -8,9 +8,10 @@ import {
 } from "react-native";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { AppTheme } from "../theme";
+import { useTheme } from "@react-navigation/native";
 
 const Header = () => {
+  const { colors } = useTheme();
   const [isNavOpen, setIsNavOpen] = useState(false);
   const rotation = useRef(new Animated.Value(0)).current;
 
@@ -30,7 +31,7 @@ const Header = () => {
   });
 
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, { backgroundColor: colors.background }]}>
       <View style={styles.leftSection}>
         <TouchableOpacity
           activeOpacity={0.7}
@@ -38,31 +39,32 @@ const Header = () => {
           onPress={toggleNav}
         >
           <Animated.View style={{ transform: [{ rotate: rotateInterpolate }] }}>
-            <FontAwesome6
-              name="bars-staggered"
-              size={28}
-              color={AppTheme.colors.text}
-            />
+            <FontAwesome6 name="bars-staggered" size={28} color={colors.text} />
           </Animated.View>
         </TouchableOpacity>
-        <Text style={styles.heading}>Asisstant</Text>
+        <Text style={[styles.heading, { color: colors.text }]}>Assistant</Text>
       </View>
 
       <View style={styles.rightSection}>
-        <TouchableOpacity activeOpacity={0.7} style={styles.getPro}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={[styles.getPro, { backgroundColor: colors.secondary }]}
+        >
           <MaterialCommunityIcons
             name="star-four-points-outline"
             size={20}
-            color={AppTheme.colors.vitally}
+            color={colors.vitally}
           />
-          <Text style={styles.getProText}>Get Pro</Text>
+          <Text style={[styles.getProText, { color: colors.vitally }]}>
+            Get Pro
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity activeOpacity={0.7}>
           <MaterialCommunityIcons
             name="dots-vertical"
             style={{ marginRight: -15 }}
             size={28}
-            color={AppTheme.colors.text}
+            color={colors.text}
           />
         </TouchableOpacity>
       </View>
@@ -77,7 +79,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: AppTheme.colors.background,
   },
   leftSection: {
     flexDirection: "row",
@@ -92,20 +93,17 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 18,
     fontWeight: "600",
-    color: AppTheme.colors.text,
     letterSpacing: 0.5,
     marginLeft: 8,
   },
   getPro: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: AppTheme.colors.secondary,
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 20,
   },
   getProText: {
-    color: AppTheme.colors.vitally,
     fontWeight: "600",
     fontSize: 14,
     marginLeft: 6,

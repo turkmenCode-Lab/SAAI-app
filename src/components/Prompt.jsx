@@ -1,15 +1,24 @@
 import React from "react";
 import { TextInput, View, StyleSheet } from "react-native";
-import { AppTheme } from "../theme";
+import { useTheme } from "@react-navigation/native";
 
 const Prompt = ({ onSubmit, input, setInput }) => {
+  const { colors } = useTheme();
+
   return (
     <View style={styles.container}>
       <TextInput
         autoCorrect={false}
-        style={styles.input}
+        style={[
+          styles.input,
+          {
+            color: colors.text,
+            borderColor: colors.text,
+            backgroundColor: colors.primary,
+          },
+        ]}
         placeholder="Ask anything you want..."
-        placeholderTextColor={AppTheme.colors.text}
+        placeholderTextColor={colors.text}
         autoCapitalize="none"
         value={input}
         onChangeText={setInput}
@@ -26,14 +35,11 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: AppTheme.colors.text,
     borderRadius: 27.5,
     paddingVertical: 12,
     paddingHorizontal: 15,
     fontSize: 16,
-    borderColor: AppTheme.colors.text,
     borderWidth: 2,
-    backgroundColor: AppTheme.colors.primary,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,

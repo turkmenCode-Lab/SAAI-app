@@ -11,14 +11,16 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { useTheme } from "@react-navigation/native";
 import PropTypes from "prop-types";
 import Prompt from "../components/Prompt";
 import Header from "../components/Header";
-import { AppTheme } from "../theme";
 
 const HomeScreen = ({ navigation }) => {
   const [input, setInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { colors } = useTheme();
 
   const handleSubmit = async (text) => {
     if (!text.trim()) {
@@ -44,10 +46,15 @@ const HomeScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
       <Header />
       <View style={styles.main}>
-        <Text style={styles.greeting} accessibilityLabel="Greeting message">
+        <Text
+          style={[styles.greeting, { color: colors.text }]}
+          accessibilityLabel="Greeting message"
+        >
           How can I help you today?
         </Text>
       </View>

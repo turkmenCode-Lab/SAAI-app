@@ -17,7 +17,7 @@ const Sidebar = ({
   onLoadChat,
   onNewChat,
   onClose,
-  slideTranslate,
+  slideValue,
   isOpen,
   onSubmit,
   searchQ,
@@ -48,7 +48,7 @@ const Sidebar = ({
       style={[
         styles.sidebar,
         {
-          transform: [{ translateX: slideTranslate }],
+          transform: [{ translateX: slideValue }],
           backgroundColor: colors.background,
         },
       ]}
@@ -74,10 +74,9 @@ const Sidebar = ({
           value={searchQ}
           onChangeText={setSearchQ}
           onSubmitEditing={() => onSubmit(searchQ)}
-          multiline
         />
         <TouchableOpacity onPress={onClose}>
-          <MaterialCommunityIcons name="backburger" size={24} color="black" />
+          <MaterialCommunityIcons name="backburger" size={30} color="black" />
         </TouchableOpacity>
       </View>
       <TouchableOpacity
@@ -115,6 +114,7 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     borderBottomWidth: 1,
     marginBottom: 15,
+    gap: 5,
   },
   sidebarTitle: {
     fontSize: 20,

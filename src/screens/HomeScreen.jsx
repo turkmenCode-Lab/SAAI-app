@@ -10,6 +10,8 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Animated,
+  Dimensions,
+  Easing,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
@@ -29,8 +31,8 @@ const HomeScreen = ({ navigation }) => {
   const bubble = colors.text;
   const scrollRef = useRef(null);
   const rotation = useRef(new Animated.Value(0)).current;
-  const slideValue = useRef(new Animated.Value(0)).current;
-
+  const SCREEN_WIDTH = Dimensions.get("window").width;
+  const slideValue = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
   const messages = useMemo(() => {
     const currentChat = chats.find((chat) => chat.id === currentChatId);
     return currentChat ? currentChat.messages : [];
@@ -46,11 +48,6 @@ const HomeScreen = ({ navigation }) => {
     }, 150);
     return () => clearTimeout(timer);
   }, [messages]);
-
-  const slideTranslate = slideValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["-100%", "0%"],
-  });
 
   const createNewChat = () => {
     const newId = Date.now();
@@ -69,8 +66,9 @@ const HomeScreen = ({ navigation }) => {
   const toggleNav = () => {
     const newOpen = !isNavOpen;
     Animated.timing(slideValue, {
-      toValue: newOpen ? 1 : 0,
-      duration: 250,
+      toValue: newOpen ? 0 : -SCREEN_WIDTH,
+      duration: 525,
+      easing: Easing.out(Easing.exp),
       useNativeDriver: true,
     }).start();
     setIsNavOpen(newOpen);
@@ -198,7 +196,7 @@ const HomeScreen = ({ navigation }) => {
           toggleNav();
         }}
         onClose={toggleNav}
-        slideValue={slideTranslate}
+        slideValue={slideValue}
         isOpen={isNavOpen}
         searchQ={searchQ}
         setSearchQ={setSearchQ}
@@ -212,7 +210,10 @@ const HomeScreen = ({ navigation }) => {
       >
         <ScrollView
           style={styles.chatContainer}
-          contentContainerStyle={styles.chatContent}
+          contentContainerStyle={[
+            styles.chatContent,
+            { justifyContent: messages.length === 0 ? "center" : "flex-end" },
+          ]}
           ref={scrollRef}
           showsVerticalScrollIndicator={true}
           keyboardShouldPersistTaps="handled"
@@ -256,7 +257,6 @@ const styles = StyleSheet.create({
   chatContainer: { flex: 1 },
   chatContent: {
     flexGrow: 1,
-    justifyContent: "flex-end",
     paddingVertical: 20,
     paddingHorizontal: 15,
   },

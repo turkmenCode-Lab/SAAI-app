@@ -223,7 +223,6 @@ const HomeScreen = ({ navigation }) => {
           )}
         </ScrollView>
 
-        {/* Fixed input area */}
         <View style={styles.inputContainer}>
           <View style={styles.content}>
             <Prompt onSubmit={handleSubmit} input={input} setInput={setInput} />

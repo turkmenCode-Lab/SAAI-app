@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   },
   cursor: {
     fontSize: 18,
-    lineHeight: 38,
+    lineHeight: 40,
     marginLeft: 2,
   },
 });

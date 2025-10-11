@@ -25,6 +25,7 @@ const HomeScreen = ({ navigation }) => {
   const [currentChatId, setCurrentChatId] = useState(null);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const { colors } = useTheme();
+  const bubble = colors.text;
   const scrollRef = useRef(null);
   const rotation = useRef(new Animated.Value(0)).current;
   const slideValue = useRef(new Animated.Value(-300)).current;
@@ -228,7 +229,7 @@ const HomeScreen = ({ navigation }) => {
             <Prompt onSubmit={handleSubmit} input={input} setInput={setInput} />
             <TouchableOpacity
               activeOpacity={0.7}
-              style={[styles.submit, { backgroundColor: colors.primary }]}
+              style={[styles.submit, { backgroundColor: colors.mostly }]}
               onPress={() => handleSubmit(input)}
               disabled={isLoading}
             >
@@ -257,8 +258,6 @@ const styles = StyleSheet.create({
   inputContainer: {
     paddingVertical: 10,
     paddingHorizontal: 15,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "#ccc",
   },
   content: {
     flexDirection: "row",
@@ -292,7 +291,7 @@ const styles = StyleSheet.create({
   },
   userBubble: {
     alignSelf: "flex-end",
-    backgroundColor: "#2d72e2ff",
+    backgroundColor: bubble,
   },
   assistantBubble: {
     alignSelf: "flex-start",

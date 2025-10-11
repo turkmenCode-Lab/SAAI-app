@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useRef } from "react";
 import {
   Text,
   View,
@@ -10,25 +10,8 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useTheme } from "@react-navigation/native";
 
-const Header = () => {
+const Header = ({ isNavOpen, rotateInterpolate, onToggleNav }) => {
   const { colors } = useTheme();
-  const [isNavOpen, setIsNavOpen] = useState(false);
-  const rotation = useRef(new Animated.Value(0)).current;
-
-  const toggleNav = () => {
-    const toValue = isNavOpen ? 0 : 1;
-    Animated.timing(rotation, {
-      toValue,
-      duration: 125,
-      useNativeDriver: true,
-    }).start();
-    setIsNavOpen(!isNavOpen);
-  };
-
-  const rotateInterpolate = rotation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "90deg"],
-  });
 
   return (
     <View style={[styles.header, { backgroundColor: colors.background }]}>
@@ -36,13 +19,13 @@ const Header = () => {
         <TouchableOpacity
           activeOpacity={0.7}
           style={isNavOpen && styles.bar}
-          onPress={toggleNav}
+          onPress={onToggleNav}
         >
           <Animated.View style={{ transform: [{ rotate: rotateInterpolate }] }}>
             <FontAwesome6 name="bars-staggered" size={28} color={colors.text} />
           </Animated.View>
         </TouchableOpacity>
-        <Text style={[styles.heading, { color: colors.text }]}>Asisstant</Text>
+        <Text style={[styles.heading, { color: colors.text }]}>Assistant</Text>
       </View>
 
       <View style={styles.rightSection}>
@@ -87,6 +70,9 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     letterSpacing: 0.5,
     marginLeft: 8,
+  },
+  bar: {
+    opacity: 0.7,
   },
   getPro: {
     flexDirection: "row",

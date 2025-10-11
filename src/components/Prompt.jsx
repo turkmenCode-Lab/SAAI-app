@@ -23,6 +23,7 @@ const Prompt = ({ onSubmit, input, setInput }) => {
         value={input}
         onChangeText={setInput}
         onSubmitEditing={() => onSubmit(input)}
+        multiline
       />
     </View>
   );
@@ -45,6 +46,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+    textAlignVertical: "center",
   },
 });
 

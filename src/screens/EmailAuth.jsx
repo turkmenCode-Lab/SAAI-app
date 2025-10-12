@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,6 +7,9 @@ import {
   View,
   KeyboardAvoidingView,
   Platform,
+  Animated,
+  Easing,
+  Alert,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -20,12 +23,70 @@ const EmailAuth = ({ navigation }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rePassword, setRePassword] = useState("");
+
+  // Animation refs
+  const shakeEmail = useRef(new Animated.Value(0)).current;
+  const shakePassword = useRef(new Animated.Value(0)).current;
+  const shakeRePassword = useRef(new Animated.Value(0)).current;
 
   Text.defaultProps = Text.defaultProps || {};
   Text.defaultProps.style = [
     { fontFamily: theme.fonts.regular, color: theme.colors.text },
     ...(Text.defaultProps.style || []),
   ];
+
+  const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
+  const validatePassword = (pass) => pass.length >= 6;
+
+  const shake = (animatedValue) => {
+    animatedValue.setValue(0);
+    Animated.sequence([
+      Animated.timing(animatedValue, {
+        toValue: 10,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animatedValue, {
+        toValue: -10,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animatedValue, {
+        toValue: 6,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animatedValue, {
+        toValue: -6,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animatedValue, {
+        toValue: 0,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const handleSubmit = () => {
+    if (!validateEmail(email)) {
+      shake(shakeEmail);
+      return;
+    }
+    if (!validatePassword(password)) {
+      shake(shakePassword);
+      return;
+    }
+    if (!isLogin && password !== rePassword) {
+      shake(shakeRePassword);
+      return;
+    }
+
+    // Here you can handle login/signup API
+    Alert.alert(isLogin ? "Login Success" : "Signup Success");
+  };
 
   return (
     <SafeAreaView
@@ -41,44 +102,81 @@ const EmailAuth = ({ navigation }) => {
         </Text>
 
         <View style={styles.form}>
-          <View
-            style={[styles.inputContainer, { borderColor: colors.primary }]}
-          >
-            <MaterialIcons
-              name="alternate-email"
-              size={22}
-              color={colors.neutral}
-            />
-            <TextInput
-              placeholder="Email"
-              placeholderTextColor={colors.neutral}
-              value={email}
-              onChangeText={setEmail}
-              style={[styles.input, { color: colors.text }]}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
+          <Animated.View style={{ transform: [{ translateX: shakeEmail }] }}>
+            <View
+              style={[styles.inputContainer, { borderColor: colors.primary }]}
+            >
+              <MaterialIcons
+                name="alternate-email"
+                size={22}
+                color={colors.neutral}
+              />
+              <TextInput
+                placeholder="Email"
+                placeholderTextColor={colors.neutral}
+                value={email}
+                onChangeText={setEmail}
+                style={[styles.input, { color: colors.text }]}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
+          </Animated.View>
 
-          <View
-            style={[styles.inputContainer, { borderColor: colors.primary }]}
-          >
-            <AntDesign name="lock" size={22} color={colors.neutral} />
-            <TextInput
-              placeholder="Password"
-              placeholderTextColor={colors.neutral}
-              value={password}
-              onChangeText={setPassword}
-              style={[styles.input, { color: colors.text }]}
-              secureTextEntry
-              autoCorrect={false}
-            />
-          </View>
+          <Animated.View style={{ transform: [{ translateX: shakePassword }] }}>
+            <View
+              style={[styles.inputContainer, { borderColor: colors.primary }]}
+            >
+              <AntDesign name="lock" size={22} color={colors.neutral} />
+              <TextInput
+                placeholder="Password"
+                placeholderTextColor={colors.neutral}
+                value={password}
+                onChangeText={setPassword}
+                style={[styles.input, { color: colors.text }]}
+                secureTextEntry
+                autoCorrect={false}
+              />
+            </View>
+          </Animated.View>
+
+          {!isLogin && (
+            <Animated.View
+              style={{ transform: [{ translateX: shakeRePassword }] }}
+            >
+              <View
+                style={[styles.inputContainer, { borderColor: colors.primary }]}
+              >
+                <AntDesign name="lock" size={22} color={colors.neutral} />
+                <TextInput
+                  placeholder="Re-enter Password"
+                  placeholderTextColor={colors.neutral}
+                  value={rePassword}
+                  onChangeText={setRePassword}
+                  style={[styles.input, { color: colors.text }]}
+                  secureTextEntry
+                  autoCorrect={false}
+                />
+              </View>
+            </Animated.View>
+          )}
 
           <TouchableOpacity
             activeOpacity={0.75}
-            style={[styles.button, { backgroundColor: colors.primary }]}
+            style={[
+              styles.button,
+              {
+                backgroundColor:
+                  email && password && (isLogin || password === rePassword)
+                    ? colors.primary
+                    : colors.primary + "80",
+              },
+            ]}
+            onPress={handleSubmit}
+            disabled={
+              !email || !password || (!isLogin && password !== rePassword)
+            }
           >
             <Text style={[styles.buttonText, { color: colors.text }]}>
               {isLogin ? "Login" : "Sign Up"}
@@ -109,25 +207,10 @@ const EmailAuth = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  inner: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 30,
-  },
-  header: {
-    fontSize: 28,
-    fontWeight: "700",
-    textAlign: "center",
-  },
-  form: {
-    width: "80%",
-    alignItems: "center",
-    gap: 20,
-  },
+  container: { flex: 1 },
+  inner: { flex: 1, alignItems: "center", justifyContent: "center", gap: 30 },
+  header: { fontSize: 28, fontWeight: "700", textAlign: "center" },
+  form: { width: "80%", alignItems: "center", gap: 20 },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -138,12 +221,7 @@ const styles = StyleSheet.create({
     gap: 10,
     width: "100%",
   },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    outlineStyle: "none",
-    outlineWidth: 0,
-  },
+  input: { flex: 1, fontSize: 16, outlineStyle: "none", outlineWidth: 0 },
   button: {
     marginTop: 10,
     borderRadius: 100,
@@ -152,10 +230,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "100%",
   },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
+  buttonText: { fontSize: 16, fontWeight: "600" },
 });
 
 export default EmailAuth;

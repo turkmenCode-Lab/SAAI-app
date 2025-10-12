@@ -12,6 +12,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useTheme } from "@react-navigation/native";
 import { useAuthStore } from "../../store/authStore";
 import Entypo from "@expo/vector-icons/Entypo";
+import { useNavigation } from "@react-navigation/native";
 
 const Sidebar = ({
   chats,
@@ -24,9 +25,10 @@ const Sidebar = ({
   onSubmit,
   searchQ,
   setSearchQ,
-  navigation,
 }) => {
   const { colors } = useTheme();
+
+  const navigation = useNavigation();
 
   const user = useAuthStore((state) => state.user);
 
@@ -122,7 +124,7 @@ const Sidebar = ({
               fontSize: 24,
             }}
           >
-            {user.email[0]}
+            {user?.email ? user.email[0].toUpperCase() : "?"}
           </Text>
         </View>
         <Text
@@ -133,13 +135,21 @@ const Sidebar = ({
             fontSize: 18,
           }}
         >
-          {user.email}
+          {user?.email ?? "Guest"}
         </Text>
         <TouchableOpacity
           style={{ marginLeft: "auto" }}
           onPress={() => {
-            navigation.navigate("Auth");
-            useAuthStore.getState().logout();
+            try {
+              useAuthStore.getState().logout();
+              if (navigation.canGoBack()) {
+                navigation.goBack();
+              } else {
+                navigation.navigate("Auth");
+              }
+            } catch (e) {
+              console.error("Logout navigation error:", e);
+            }
           }}
         >
           <Entypo name="log-out" size={24} color={colors.neutral} />

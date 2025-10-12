@@ -201,7 +201,6 @@ const HomeScreen = ({ navigation }) => {
         searchQ={searchQ}
         setSearchQ={setSearchQ}
         onSubmit={handleSearchQ}
-        navigation={navigation}
       />
 
       <KeyboardAvoidingView

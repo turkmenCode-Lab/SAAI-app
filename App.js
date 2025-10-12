@@ -5,7 +5,6 @@ import { Text, ActivityIndicator, View } from "react-native";
 import HomeScreen from "./src/screens/HomeScreen";
 import AuthScreen from "./src/screens/AuthScreen";
 import EmailAuth from "./src/screens/EmailAuth";
-import ToastManager from "toastify-react-native";
 import { useAppTheme } from "./src/theme";
 import * as Font from "expo-font";
 import { useAuthStore } from "./store/authStore";
@@ -14,7 +13,6 @@ const Stack = createStackNavigator();
 
 export default function App() {
   const AppTheme = useAppTheme();
-
   const token = useAuthStore((state) => state.token);
 
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -56,7 +54,10 @@ export default function App() {
   return (
     <NavigationContainer theme={AppTheme}>
       <Stack.Navigator
-        screenOptions={{ headerShown: false, animation: "fade" }}
+        screenOptions={{
+          headerShown: false,
+          animation: "fade",
+        }}
       >
         {token ? (
           <Stack.Screen name="Home" component={HomeScreen} />
@@ -67,7 +68,6 @@ export default function App() {
           </>
         )}
       </Stack.Navigator>
-      <ToastManager />
     </NavigationContainer>
   );
 }

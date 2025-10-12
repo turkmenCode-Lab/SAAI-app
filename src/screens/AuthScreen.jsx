@@ -31,9 +31,11 @@ const AuthScreen = ({ navigation }) => {
           borderStartStartRadius: 100,
           borderStartEndRadius: 100,
           borderColor: colors.neutral,
+          borderBottomLeftRadius: 100,
+          borderBottomRightRadius: 100,
           borderLeftWidth: 1,
           borderRightWidth: 1,
-          borderTopWidth: 3,
+          borderBottomWidth: 3,
         }}
       >
         <Text

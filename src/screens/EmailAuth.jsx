@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Animated,
-  Easing,
   Alert,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
@@ -25,7 +24,6 @@ const EmailAuth = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [rePassword, setRePassword] = useState("");
 
-  // Animation refs
   const shakeEmail = useRef(new Animated.Value(0)).current;
   const shakePassword = useRef(new Animated.Value(0)).current;
   const shakeRePassword = useRef(new Animated.Value(0)).current;
@@ -83,8 +81,6 @@ const EmailAuth = ({ navigation }) => {
       shake(shakeRePassword);
       return;
     }
-
-    // Here you can handle login/signup API
     Alert.alert(isLogin ? "Login Success" : "Signup Success");
   };
 
@@ -210,22 +206,22 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   inner: { flex: 1, alignItems: "center", justifyContent: "center", gap: 30 },
   header: { fontSize: 28, fontWeight: "700", textAlign: "center" },
-  form: { width: "80%", alignItems: "center", gap: 20 },
+  form: { width: "90%", alignItems: "center", gap: 20 },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1.2,
     borderRadius: 100,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    gap: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    gap: 15,
     width: "100%",
   },
-  input: { flex: 1, fontSize: 16, outlineStyle: "none", outlineWidth: 0 },
+  input: { flex: 1, fontSize: 16 },
   button: {
     marginTop: 10,
     borderRadius: 100,
-    paddingVertical: 14,
+    paddingVertical: 16,
     alignItems: "center",
     justifyContent: "center",
     width: "100%",

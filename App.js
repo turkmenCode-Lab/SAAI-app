@@ -13,7 +13,7 @@ import { useAuthStore } from "./store/authStore";
 const Stack = createStackNavigator();
 
 export default function App() {
-  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [fontsLoaded, setFontsLoaded] = React.useState(false);
 
   useEffect(() => {
     async function loadFonts() {

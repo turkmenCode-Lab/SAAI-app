@@ -22,6 +22,42 @@ const AuthScreen = ({ navigation }) => {
       edges={["left", "right", "top"]}
       style={[styles.container, { backgroundColor: colors.background }]}
     >
+      <View
+        style={{
+          alignItems: "center",
+          justifyContent: "center",
+          paddingVertical: 10,
+          paddingHorizontal: 55,
+          borderStartStartRadius: 100,
+          borderStartEndRadius: 100,
+          borderColor: colors.neutral,
+          borderLeftWidth: 1,
+          borderRightWidth: 1,
+          borderTopWidth: 3,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 48,
+            fontFamily: "InterSemiBold",
+            fontWeight: "bold",
+            color: colors.neutral,
+            textAlign: "center",
+          }}
+        >
+          SA-AI
+        </Text>
+      </View>
+      <Text
+        style={{
+          fontSize: 14,
+          fontFamily: "InterMedium",
+          color: colors.neutral,
+          textAlign: "center",
+        }}
+      >
+        You’ll get smarter responses and can upload files and more.
+      </Text>
       <TypingErase
         texts={[
           "Start developing with AI",

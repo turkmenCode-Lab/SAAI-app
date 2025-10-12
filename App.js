@@ -4,6 +4,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { Text, ActivityIndicator } from "react-native";
 import HomeScreen from "./src/screens/HomeScreen";
 import AuthScreen from "./src/screens/AuthScreen";
+import EmailAuth from "./src/screens/EmailAuth";
 import ToastManager from "toastify-react-native";
 import { useAppTheme } from "./src/theme";
 import { useFonts } from "expo-font";
@@ -35,6 +36,7 @@ export default function App() {
       >
         <Stack.Screen name="Auth" component={AuthScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="EmailAuth" component={EmailAuth} />
       </Stack.Navigator>
       <ToastManager />
     </NavigationContainer>

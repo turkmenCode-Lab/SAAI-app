@@ -6,7 +6,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useAppTheme } from "../../src/theme";
 
-const AuthScreen = () => {
+const AuthScreen = ({ navigation }) => {
   const { colors } = useTheme();
 
   const theme = useAppTheme();
@@ -46,6 +46,7 @@ const AuthScreen = () => {
       />
       <View style={styles.sso}>
         <TouchableOpacity
+          onPress={() => navigation.navigate("EmailAuth")}
           activeOpacity={0.75}
           style={[styles.buttons, { backgroundColor: colors.primary }]}
         >
@@ -117,9 +118,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 15,
-    paddingHorizontal: 50,
+    paddingHorizontal: 30,
     borderRadius: 100,
-    width: 280,
+    width: 300,
     gap: 10,
   },
   title: {

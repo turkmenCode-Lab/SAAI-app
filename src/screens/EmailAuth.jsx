@@ -57,6 +57,7 @@ const EmailAuth = ({ navigation }) => {
               style={[styles.input, { color: colors.text }]}
               keyboardType="email-address"
               autoCapitalize="none"
+              autoCorrect={false}
             />
           </View>
 
@@ -139,6 +140,8 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
+    outlineStyle: "none",
+    outlineWidth: 0,
   },
   button: {
     marginTop: 10,

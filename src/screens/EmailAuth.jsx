@@ -72,6 +72,7 @@ const EmailAuth = ({ navigation }) => {
               onChangeText={setPassword}
               style={[styles.input, { color: colors.text }]}
               secureTextEntry
+              autoCorrect={false}
             />
           </View>
 

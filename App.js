@@ -7,22 +7,26 @@ import AuthScreen from "./src/screens/AuthScreen";
 import EmailAuth from "./src/screens/EmailAuth";
 import ToastManager from "toastify-react-native";
 import { useAppTheme } from "./src/theme";
-import { useFonts } from "expo-font";
+import * as Font from "expo-font";
 import { useAuthStore } from "./store/authStore";
 
 const Stack = createStackNavigator();
 
 export default function App() {
-  const AppTheme = useAppTheme();
-  const token = useAuthStore((state) => state.token);
-  const loading = useAuthStore((state) => state.loading);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
 
-  const [fontsLoaded] = useFonts({
-    InterRegular: require("./assets/fonts/Inter-Regular.ttf"),
-    InterBold: require("./assets/fonts/Inter-Bold.ttf"),
-    InterSemiBold: require("./assets/fonts/Inter-SemiBold.ttf"),
-    InterMedium: require("./assets/fonts/Inter-Medium.ttf"),
-  });
+  useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync({
+        InterRegular: require("./assets/fonts/Inter-Regular.ttf"),
+        InterBold: require("./assets/fonts/Inter-Bold.ttf"),
+        InterSemiBold: require("./assets/fonts/Inter-SemiBold.ttf"),
+        InterMedium: require("./assets/fonts/Inter-Medium.ttf"),
+      });
+      setFontsLoaded(true);
+    }
+    loadFonts();
+  }, []);
 
   if (!fontsLoaded) {
     return (

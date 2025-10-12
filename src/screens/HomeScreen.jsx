@@ -69,7 +69,7 @@ const HomeScreen = ({ navigation }) => {
       toValue: newOpen ? 0 : -SCREEN_WIDTH,
       duration: 525,
       easing: Easing.out(Easing.exp),
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start();
     setIsNavOpen(newOpen);
   };

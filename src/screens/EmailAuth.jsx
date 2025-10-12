@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     gap: 15,
     width: "100%",
   },
-  input: { flex: 1, fontSize: 16 },
+  input: { flex: 1, fontSize: 16, minWidth: 250 },
   button: {
     marginTop: 10,
     borderRadius: 100,

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Animated, StyleSheet } from "react-native";
+import { View, Text, Animated, StyleSheet, Dimensions } from "react-native";
 
 export default function TypingErase({
   texts = "Hello, world!",
@@ -14,6 +14,7 @@ export default function TypingErase({
   const textArray = Array.isArray(texts) ? texts : [texts];
 
   const [displayed, setDisplayed] = useState("");
+  const [fontSize, setFontSize] = useState(28);
   const textIndexRef = useRef(0);
   const charIndexRef = useRef(0);
   const typingRef = useRef(true);
@@ -21,6 +22,22 @@ export default function TypingErase({
   const mountedRef = useRef(true);
 
   const cursorOpacity = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const { width } = Dimensions.get("window");
+    if (width < 400) setFontSize(24);
+    else if (width < 500) setFontSize(26);
+    else setFontSize(28);
+
+    const sub = Dimensions.addEventListener("change", ({ window }) => {
+      if (window.width < 400) setFontSize(24);
+      else if (window.width < 500) setFontSize(26);
+      else setFontSize(28);
+    });
+
+    return () => sub?.remove?.();
+  }, []);
+
   useEffect(() => {
     const blink = Animated.loop(
       Animated.sequence([
@@ -43,7 +60,6 @@ export default function TypingErase({
   useEffect(() => {
     mountedRef.current = true;
     startCycle();
-
     return () => {
       mountedRef.current = false;
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -91,14 +107,11 @@ export default function TypingErase({
       } else {
         const nextIndex = textIndexRef.current + 1;
         if (nextIndex >= textArray.length) {
-          if (!loop) {
-            return;
-          }
+          if (!loop) return;
           textIndexRef.current = 0;
         } else {
           textIndexRef.current = nextIndex;
         }
-
         timeoutRef.current = setTimeout(() => {
           typingRef.current = true;
           scheduleNext();
@@ -109,11 +122,22 @@ export default function TypingErase({
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.textBase, textStyle]} selectable={false}>
+      <Text
+        style={[
+          styles.textBase,
+          { fontSize, lineHeight: fontSize + 10 },
+          textStyle,
+        ]}
+        selectable={false}
+      >
         {displayed}
       </Text>
       <Animated.Text
-        style={[styles.cursor, cursorStyle, { opacity: cursorOpacity }]}
+        style={[
+          styles.cursor,
+          { fontSize, lineHeight: fontSize + 10, opacity: cursorOpacity },
+          cursorStyle,
+        ]}
       >
         |
       </Animated.Text>
@@ -127,12 +151,9 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   textBase: {
-    fontSize: 18,
-    lineHeight: 38,
+    fontWeight: "500",
   },
   cursor: {
-    fontSize: 18,
-    lineHeight: 40,
     marginLeft: 2,
   },
 });

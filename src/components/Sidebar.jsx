@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useTheme } from "@react-navigation/native";
+import { useAuthStore } from "../../store/authStore";
+import Entypo from "@expo/vector-icons/Entypo";
 
 const Sidebar = ({
   chats,
@@ -22,8 +24,11 @@ const Sidebar = ({
   onSubmit,
   searchQ,
   setSearchQ,
+  navigation,
 }) => {
   const { colors } = useTheme();
+
+  const user = useAuthStore((state) => state.user);
 
   const renderChatItem = ({ item }) => (
     <TouchableOpacity
@@ -97,6 +102,49 @@ const Sidebar = ({
         keyExtractor={(item) => item.id.toString()}
         style={styles.chatList}
       />
+      <View style={[styles.sidebarUser, { borderTopColor: colors.neutral }]}>
+        <View
+          style={{
+            backgroundColor: colors.primary,
+            borderRadius: 100,
+            width: 44,
+            height: 44,
+            alignItems: "center",
+            justifyContent: "center",
+            borderWidth: 3,
+            borderColor: colors.mostly,
+          }}
+        >
+          <Text
+            style={{
+              color: colors.text,
+              fontFamily: "InterSemiBold",
+              fontSize: 24,
+            }}
+          >
+            {user.email[0]}
+          </Text>
+        </View>
+        <Text
+          style={{
+            color: colors.text,
+            fontFamily: "InterMedium",
+            fontWeight: 500,
+            fontSize: 18,
+          }}
+        >
+          {user.email}
+        </Text>
+        <TouchableOpacity
+          style={{ marginLeft: "auto" }}
+          onPress={() => {
+            navigation.navigate("Auth");
+            useAuthStore.getState().logout();
+          }}
+        >
+          <Entypo name="log-out" size={24} color={colors.neutral} />
+        </TouchableOpacity>
+      </View>
     </Animated.View>
   );
 };
@@ -157,6 +205,13 @@ const styles = StyleSheet.create({
     borderRadius: 27.5,
     padding: 10,
     borderWidth: 1,
+  },
+  sidebarUser: {
+    flexDirection: "row",
+    borderWidth: 1,
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 10,
   },
 });
 

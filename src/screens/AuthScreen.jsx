@@ -72,7 +72,6 @@ const AuthScreen = ({ navigation }) => {
         pauseBeforeType={400}
         loop={true}
         textStyle={{
-          fontSize: 30,
           color: colors.text,
           fontWeight: "700",
         }}

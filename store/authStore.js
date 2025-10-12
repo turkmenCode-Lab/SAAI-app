@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
-import { EXPO_API_URI } from "@env";
+import { EXPO_API_URI } from "../config";
 
 export const useAuthStore = create((set) => ({
   user: null,
@@ -11,7 +11,7 @@ export const useAuthStore = create((set) => ({
   register: async (email, password) => {
     set({ loading: true, error: null });
     try {
-      const res = await axios.post(`${EXPO_API_URI}/auth/register`, {
+      const res = await axios.post(`${EXPO_API_URI}/register`, {
         email,
         password,
       });
@@ -28,15 +28,11 @@ export const useAuthStore = create((set) => ({
   login: async (email, password) => {
     set({ loading: true, error: null });
     try {
-      const res = await axios.post(`${EXPO_API_URI}/auth/login`, {
+      const res = await axios.post(`${EXPO_API_URI}/login`, {
         email,
         password,
       });
-      set({
-        user: res.data.user,
-        token: res.data.token,
-        loading: false,
-      });
+      set({ user: res.data.user, token: res.data.token, loading: false });
       return res.data;
     } catch (err) {
       set({

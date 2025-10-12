@@ -11,7 +11,7 @@ export const useAuthStore = create((set) => ({
   register: async (email, password) => {
     set({ loading: true, error: null });
     try {
-      const res = await axios.post(`${EXPO_API_URI}/register`, {
+      const res = await axios.post(`${EXPO_API_URI}/auth/register`, {
         email,
         password,
       });
@@ -28,7 +28,7 @@ export const useAuthStore = create((set) => ({
   login: async (email, password) => {
     set({ loading: true, error: null });
     try {
-      const res = await axios.post(`${EXPO_API_URI}/login`, {
+      const res = await axios.post(`${EXPO_API_URI}/auth/login`, {
         email,
         password,
       });

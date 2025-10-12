@@ -21,7 +21,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.uniquemerdan.SAAIapp",
+      "package": "com.turkmencodelab.SAAI",
       "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
@@ -32,9 +32,7 @@
         "projectId": "83b63db9-3b27-49a4-9085-44ade470cbbf"
       }
     },
-    "plugins": [
-      "expo-font"
-    ],
+    "plugins": ["expo-font"],
     "owner": "turkmencodelab"
   }
 }

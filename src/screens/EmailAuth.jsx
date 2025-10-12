@@ -9,16 +9,19 @@ import {
   Platform,
   Animated,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useAppTheme } from "../../src/theme";
+import { useAuthStore } from "../../store/authStore";
 
 const EmailAuth = ({ navigation }) => {
   const { colors } = useTheme();
   const theme = useAppTheme();
+  const { login, register, loading, error, user } = useAuthStore();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -68,20 +71,21 @@ const EmailAuth = ({ navigation }) => {
     ]).start();
   };
 
-  const handleSubmit = () => {
-    if (!validateEmail(email)) {
-      shake(shakeEmail);
-      return;
+  const handleSubmit = async () => {
+    if (!validateEmail(email)) return shake(shakeEmail);
+    if (!validatePassword(password)) return shake(shakePassword);
+    if (!isLogin && password !== rePassword) return shake(shakeRePassword);
+
+    const result = isLogin
+      ? await login(email, password)
+      : await register(email, password);
+
+    if (result && result.user) {
+      Alert.alert(isLogin ? "Login Successful" : "Signup Successful");
+      navigation?.goBack();
+    } else if (error) {
+      Alert.alert("Error", error);
     }
-    if (!validatePassword(password)) {
-      shake(shakePassword);
-      return;
-    }
-    if (!isLogin && password !== rePassword) {
-      shake(shakeRePassword);
-      return;
-    }
-    Alert.alert(isLogin ? "Login Success" : "Signup Success");
   };
 
   return (
@@ -112,7 +116,10 @@ const EmailAuth = ({ navigation }) => {
                 placeholderTextColor={colors.neutral}
                 value={email}
                 onChangeText={setEmail}
-                style={[styles.input, { color: colors.text }]}
+                style={[
+                  styles.input,
+                  { backgroundColor: colors.background, color: colors.text },
+                ]}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -130,7 +137,10 @@ const EmailAuth = ({ navigation }) => {
                 placeholderTextColor={colors.neutral}
                 value={password}
                 onChangeText={setPassword}
-                style={[styles.input, { color: colors.text }]}
+                style={[
+                  styles.input,
+                  { backgroundColor: colors.background, color: colors.text },
+                ]}
                 secureTextEntry
                 autoCorrect={false}
               />
@@ -150,7 +160,10 @@ const EmailAuth = ({ navigation }) => {
                   placeholderTextColor={colors.neutral}
                   value={rePassword}
                   onChangeText={setRePassword}
-                  style={[styles.input, { color: colors.text }]}
+                  style={[
+                    styles.input,
+                    { backgroundColor: colors.background, color: colors.text },
+                  ]}
                   secureTextEntry
                   autoCorrect={false}
                 />
@@ -171,12 +184,19 @@ const EmailAuth = ({ navigation }) => {
             ]}
             onPress={handleSubmit}
             disabled={
-              !email || !password || (!isLogin && password !== rePassword)
+              loading ||
+              !email ||
+              !password ||
+              (!isLogin && password !== rePassword)
             }
           >
-            <Text style={[styles.buttonText, { color: colors.text }]}>
-              {isLogin ? "Login" : "Sign Up"}
-            </Text>
+            {loading ? (
+              <ActivityIndicator color={colors.text} />
+            ) : (
+              <Text style={[styles.buttonText, { color: colors.text }]}>
+                {isLogin ? "Login" : "Sign Up"}
+              </Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation?.goBack()}>
@@ -205,8 +225,8 @@ const EmailAuth = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   inner: { flex: 1, alignItems: "center", justifyContent: "center", gap: 30 },
-  header: { fontSize: 28, fontWeight: "700", textAlign: "center" },
-  form: { width: "90%", alignItems: "center", gap: 20 },
+  header: { fontSize: 32, fontWeight: "700", textAlign: "center" },
+  form: { width: "80%", alignItems: "center", gap: 20 },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -217,7 +237,7 @@ const styles = StyleSheet.create({
     gap: 15,
     width: "100%",
   },
-  input: { flex: 1, fontSize: 16, minWidth: 250 },
+  input: { flex: 1, fontSize: 16, minWidth: 250, outlineWidth: 0 },
   button: {
     marginTop: 10,
     borderRadius: 100,

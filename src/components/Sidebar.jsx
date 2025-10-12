@@ -76,7 +76,11 @@ const Sidebar = ({
           onSubmitEditing={() => onSubmit(searchQ)}
         />
         <TouchableOpacity onPress={onClose}>
-          <MaterialCommunityIcons name="backburger" size={30} color="black" />
+          <MaterialCommunityIcons
+            name="backburger"
+            size={30}
+            color={colors.neutral}
+          />
         </TouchableOpacity>
       </View>
       <TouchableOpacity
@@ -100,7 +104,7 @@ const Sidebar = ({
 const styles = StyleSheet.create({
   sidebar: {
     position: "absolute",
-    top: 25,
+    top: 0,
     left: 0,
     bottom: 0,
     width: "100%",
@@ -115,6 +119,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     marginBottom: 15,
     gap: 5,
+    outlineWidth: 0,
   },
   sidebarTitle: {
     fontSize: 20,

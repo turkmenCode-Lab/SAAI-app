@@ -46,3 +46,6 @@ yarn-error.*
 
 #config files
 config.js
+
+# build configs
+eas.json

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { Text, ActivityIndicator } from "react-native";
+import { Text, ActivityIndicator, View } from "react-native";
 import HomeScreen from "./src/screens/HomeScreen";
 import AuthScreen from "./src/screens/AuthScreen";
 import EmailAuth from "./src/screens/EmailAuth";
@@ -14,6 +14,8 @@ const Stack = createStackNavigator();
 
 export default function App() {
   const AppTheme = useAppTheme();
+  const token = useAuthStore((state) => state.token);
+  const loading = useAuthStore((state) => state.loading);
 
   const [fontsLoaded] = useFonts({
     InterRegular: require("./assets/fonts/Inter-Regular.ttf"),
@@ -22,22 +24,40 @@ export default function App() {
     InterMedium: require("./assets/fonts/Inter-Medium.ttf"),
   });
 
-  if (fontsLoaded) {
-    Text.defaultProps = Text.defaultProps || {};
-    Text.defaultProps.style = [
-      { fontFamily: "InterRegular" },
-      ...(Text.defaultProps.style || []),
-    ];
+  if (!fontsLoaded) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#000",
+        }}
+      >
+        <ActivityIndicator size="large" color="#fff" />
+      </View>
+    );
   }
+
+  Text.defaultProps = Text.defaultProps || {};
+  Text.defaultProps.style = [
+    { fontFamily: "InterRegular" },
+    ...(Text.defaultProps.style || []),
+  ];
 
   return (
     <NavigationContainer theme={AppTheme}>
       <Stack.Navigator
         screenOptions={{ headerShown: false, animation: "fade" }}
       >
-        <Stack.Screen name="Auth" component={AuthScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="EmailAuth" component={EmailAuth} />
+        {token ? (
+          <Stack.Screen name="Home" component={HomeScreen} />
+        ) : (
+          <>
+            <Stack.Screen name="Auth" component={AuthScreen} />
+            <Stack.Screen name="EmailAuth" component={EmailAuth} />
+          </>
+        )}
       </Stack.Navigator>
       <ToastManager />
     </NavigationContainer>

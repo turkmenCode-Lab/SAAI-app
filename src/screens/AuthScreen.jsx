@@ -27,7 +27,7 @@ const AuthScreen = ({ navigation }) => {
           alignItems: "center",
           justifyContent: "center",
           paddingVertical: 10,
-          paddingHorizontal: 55,
+          paddingHorizontal: 50,
           borderStartStartRadius: 100,
           borderStartEndRadius: 100,
           borderColor: colors.neutral,

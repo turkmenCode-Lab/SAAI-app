@@ -8,6 +8,7 @@ import EmailAuth from "./src/screens/EmailAuth";
 import ToastManager from "toastify-react-native";
 import { useAppTheme } from "./src/theme";
 import { useFonts } from "expo-font";
+import { useAuthStore } from "./store/authStore";
 
 const Stack = createStackNavigator();
 

@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Text, ActivityIndicator, View } from "react-native";
@@ -13,7 +13,11 @@ import { useAuthStore } from "./store/authStore";
 const Stack = createStackNavigator();
 
 export default function App() {
-  const [fontsLoaded, setFontsLoaded] = React.useState(false);
+  const AppTheme = useAppTheme();
+
+  const token = useAuthStore((state) => state.token);
+
+  const [fontsLoaded, setFontsLoaded] = useState(false);
 
   useEffect(() => {
     async function loadFonts() {

@@ -6,10 +6,6 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
-import io from "socket.io-client";
-import { EXPO_API_URI } from "../../../config";
-
-const socket = io(EXPO_API_URI || "http://localhost:5000");
 
 const Chat = ({
   chats,
@@ -18,34 +14,46 @@ const Chat = ({
   colors,
   scrollRef,
   isLoading,
+  socket,
 }) => {
   const messages =
     chats.find((chat) => chat.id === currentChatId)?.messages || [];
 
   useEffect(() => {
-    if (currentChatId) socket.emit("joinChat", currentChatId);
-    socket.on("receiveMessage", (data) => {
-      setChats((prev) =>
-        prev.map((c) =>
-          c.id === data.chatId
-            ? {
-                ...c,
-                messages: [
-                  ...c.messages,
-                  {
-                    id: Date.now(),
-                    role: data.role,
-                    text: data.content,
-                    timestamp: new Date().toISOString(),
-                  },
-                ],
-              }
-            : c
-        )
-      );
-    });
-    return () => socket.off("receiveMessage");
-  }, [currentChatId]);
+    if (currentChatId && socket) {
+      socket.emit("joinChat", currentChatId);
+    }
+
+    if (socket) {
+      socket.on("receiveMessage", (data) => {
+        // Ignore user messages (already added locally)
+        if (data.role === "user") return;
+
+        setChats((prev) =>
+          prev.map((c) =>
+            c.id === data.chatId
+              ? {
+                  ...c,
+                  messages: [
+                    ...c.messages,
+                    {
+                      id: Date.now(),
+                      role: data.role,
+                      text: data.content,
+                      timestamp: new Date().toISOString(),
+                    },
+                  ],
+                }
+              : c
+          )
+        );
+      });
+    }
+
+    return () => {
+      if (socket) socket.off("receiveMessage");
+    };
+  }, [currentChatId, socket]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -70,37 +78,44 @@ const Chat = ({
           How can I help you today?
         </Text>
       ) : (
-        messages.map((item) => (
-          <View
-            key={item.id}
-            style={[
-              styles.bubble,
-              item.role === "user"
-                ? {
-                    alignSelf: "flex-end",
-                    backgroundColor: colors.text,
-                  }
-                : styles.assistantBubble,
-            ]}
-          >
-            <Text
+        messages.map(
+          (
+            item,
+            index // Fallback to index if no id
+          ) => (
+            <View
+              key={item.id || index}
               style={[
-                styles.bubbleText,
-                {
-                  color: item.role === "user" ? colors.background : colors.text,
-                },
+                styles.bubble,
+                item.role === "user"
+                  ? {
+                      alignSelf: "flex-end",
+                      backgroundColor: colors.text,
+                    }
+                  : styles.assistantBubble,
               ]}
             >
-              {item.text}
-            </Text>
-          </View>
-        ))
+              <Text
+                style={[
+                  styles.bubbleText,
+                  {
+                    color:
+                      item.role === "user" ? colors.background : colors.text,
+                  },
+                ]}
+              >
+                {item.text}
+              </Text>
+            </View>
+          )
+        )
       )}
       {isLoading && <ActivityIndicator style={{ marginTop: 10 }} />}
     </ScrollView>
   );
 };
 
+// Styles unchanged
 const styles = StyleSheet.create({
   chatContainer: { flex: 1 },
   chatContent: { flexGrow: 1, paddingVertical: 20, paddingHorizontal: 15 },

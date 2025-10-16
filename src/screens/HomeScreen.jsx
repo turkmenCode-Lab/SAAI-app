@@ -18,7 +18,7 @@ import { useTheme } from "@react-navigation/native";
 import Prompt from "../components/Prompt";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
-import Chat from "../components/Chat";
+import Chat from "../components/UI/Chat";
 import io from "socket.io-client";
 import { EXPO_API_URI } from "../../config";
 

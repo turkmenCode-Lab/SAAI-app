@@ -28,14 +28,12 @@ const AuthScreen = ({ navigation }) => {
           justifyContent: "center",
           paddingVertical: 10,
           paddingHorizontal: 50,
-          borderStartStartRadius: 100,
-          borderStartEndRadius: 100,
           borderColor: colors.neutral,
           borderBottomLeftRadius: 100,
           borderBottomRightRadius: 100,
           borderLeftWidth: 1,
           borderRightWidth: 1,
-          borderBottomWidth: 3,
+          borderBottomWidth: 2,
         }}
       >
         <Text

@@ -13,6 +13,7 @@ export const lightTheme = {
     principally: "#ffb464",
     neutral: "#888888",
     success: "#4BB543",
+    error: "#FF3333",
   },
   fonts: {
     regular: "InterRegular",
@@ -34,6 +35,7 @@ export const darkTheme = {
     principally: "#ffb464",
     neutral: "#f2f2f2",
     success: "#4BB543",
+    error: "#FF3333",
   },
   fonts: {
     regular: "InterRegular",

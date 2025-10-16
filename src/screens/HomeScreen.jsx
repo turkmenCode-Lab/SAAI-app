@@ -1,4 +1,10 @@
-import React, { useState, useRef, useMemo, useEffect } from "react";
+import React, {
+  useState,
+  useRef,
+  useMemo,
+  useEffect,
+  useCallback,
+} from "react";
 import {
   Text,
   StyleSheet,
@@ -47,6 +53,10 @@ const HomeScreen = ({ navigation }) => {
 
   const socket = useRef(io(EXPO_API_URI || "http://localhost:5000")).current;
 
+  const showToast = useCallback((message, status = "success") => {
+    setToast({ visible: true, message, status });
+  }, []);
+
   useEffect(() => {
     if (toast.visible) {
       const timer = setTimeout(
@@ -64,22 +74,25 @@ const HomeScreen = ({ navigation }) => {
       const response = await api.get("/chat");
       console.log("Chats:", response.data);
 
-      const loadedChats = response.data.map((chat) => ({
-        id: chat._id,
-        title: chat.title || "New Chat",
-        messages: chat.messages.map((msg, index) => ({
-          id: index,
-          role: msg.role,
-          text: msg.content,
-          timestamp: chat.createdAt || new Date().toISOString(),
-        })),
-      }));
+      const loadedChats = response.data
+        .filter((chat) => chat && chat._id)
+        .map((chat) => ({
+          id: chat._id,
+          title: chat.title || "New Chat",
+          messages: (chat.messages || []).map((msg, index) => ({
+            id: index,
+            role: msg.role,
+            text: msg.content,
+            timestamp: chat.createdAt || new Date().toISOString(),
+          })),
+        }));
       setChats(loadedChats);
       if (loadedChats.length > 0) {
         setCurrentChatId(loadedChats[0].id);
       }
     } catch (err) {
       console.error("Error fetching chats:", err.response?.data || err.message);
+      showToast("Failed to load chats.", "error");
     }
   };
 
@@ -91,12 +104,15 @@ const HomeScreen = ({ navigation }) => {
         title: "New Chat",
         messages: [],
       });
+      if (!response.data?._id) {
+        throw new Error("Invalid response from server");
+      }
       const newChat = {
         id: response.data._id,
         title: response.data.title,
         messages: [],
       };
-      setChats((prev) => [...prev, newChat]);
+      setChats((prev) => [...(prev.filter((c) => c && c.id) || []), newChat]);
       setCurrentChatId(newChat.id);
     } catch (err) {
       console.error("Error creating chat:", err.response?.data || err.message);
@@ -112,6 +128,7 @@ const HomeScreen = ({ navigation }) => {
   }, [token]);
 
   const loadChat = (id) => {
+    if (!id) return;
     setCurrentChatId(id);
     socket.emit("joinChat", id);
     setIsNavOpen(false);
@@ -139,11 +156,15 @@ const HomeScreen = ({ navigation }) => {
       return;
     }
 
-    if (!currentChatId) {
-      if (token) {
-        await createNewChat();
+    let chatId = currentChatId;
+    if (!chatId) {
+      if (!token) return;
+      await createNewChat();
+      chatId = currentChatId;
+      if (!chatId) {
+        showToast("Failed to create chat.", "error");
+        return;
       }
-      return;
     }
 
     setIsLoading(true);
@@ -156,16 +177,16 @@ const HomeScreen = ({ navigation }) => {
     };
 
     setChats((prev) =>
-      prev.map((c) =>
-        c.id === currentChatId
-          ? { ...c, messages: [...c.messages, userMsg] }
+      (prev.filter((c) => c && c.id) || []).map((c) =>
+        c.id === chatId
+          ? { ...c, messages: [...(c.messages || []), userMsg] }
           : c
       )
     );
 
     setChats((prev) =>
-      prev.map((c) =>
-        c.id === currentChatId && c.title === "New Chat"
+      (prev.filter((c) => c && c.id) || []).map((c) =>
+        c.id === chatId && c.title === "New Chat"
           ? {
               ...c,
               title: text.length > 50 ? text.substring(0, 50) + "..." : text,
@@ -177,7 +198,7 @@ const HomeScreen = ({ navigation }) => {
     setInput("");
 
     socket.emit("sendMessage", {
-      chatId: currentChatId,
+      chatId,
       role: "user",
       content: text,
     });

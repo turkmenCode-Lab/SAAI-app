@@ -11,7 +11,7 @@ const Toast = ({ message, visible, status }) => {
   useEffect(() => {
     if (visible) setShow(true);
 
-    const timer = setTimeout(() => setShow(false), 2300);
+    const timer = setTimeout(() => setShow(false), 3000);
     return () => clearTimeout(timer);
   }, [visible]);
 
@@ -60,7 +60,7 @@ const Toast = ({ message, visible, status }) => {
       <Text
         style={[
           styles.message,
-          { color: status === "error" ? colors.primary : colors.success },
+          { color: status === "error" ? colors.error : colors.success },
         ]}
       >
         {message}
@@ -72,14 +72,15 @@ const Toast = ({ message, visible, status }) => {
 const styles = StyleSheet.create({
   toast: {
     position: "absolute",
-    bottom: 50,
+    top: 50,
     left: 20,
     right: 20,
     padding: 16,
     borderRadius: 8,
   },
   message: {
-    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
     textAlign: "center",
   },
 });

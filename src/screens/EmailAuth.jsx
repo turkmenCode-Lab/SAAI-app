@@ -44,7 +44,6 @@ const EmailAuth = ({ navigation }) => {
     ...(Text.defaultProps.style || []),
   ];
 
-  // --- Toast helper ---
   const showToast = (message, status = "success") => {
     setToast({ visible: true, message, status });
   };

@@ -44,7 +44,7 @@ const Toast = ({ message, visible, status }) => {
       style={[
         styles.toast,
         {
-          backgroundColor: status === "error" ? colors.primary : colors.success,
+          backgroundColor: colors.primary,
           opacity,
           transform: [
             {
@@ -57,7 +57,14 @@ const Toast = ({ message, visible, status }) => {
         },
       ]}
     >
-      <Text style={styles.message}>{message}</Text>
+      <Text
+        style={[
+          styles.message,
+          { color: status === "error" ? colors.primary : colors.success },
+        ]}
+      >
+        {message}
+      </Text>
     </Animated.View>
   );
 };

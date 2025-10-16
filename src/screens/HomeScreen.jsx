@@ -27,10 +27,6 @@ import { createAPI } from "../utils/api";
 const HomeScreen = ({ navigation }) => {
   const { token } = useAuthStore();
 
-  useEffect(() => {
-    console.log(token);
-  });
-
   const [input, setInput] = useState("");
   const [searchQ, setSearchQ] = useState("");
   const [isLoading, setIsLoading] = useState(false);

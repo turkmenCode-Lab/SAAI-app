@@ -15,6 +15,7 @@ import { useTheme } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useAppTheme } from "../../src/theme";
 import { useAuthStore } from "../../store/authStore";
 
@@ -199,9 +200,22 @@ const EmailAuth = ({ navigation }) => {
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation?.goBack()}>
-            <Text style={{ color: colors.neutral, marginTop: 20 }}>
-              ← Go Back
+          <TouchableOpacity
+            style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+            onPress={() => navigation?.goBack()}
+          >
+            <Ionicons
+              name="arrow-back-outline"
+              size={16}
+              color={colors.neutral}
+            />
+            <Text
+              style={{
+                color: colors.neutral,
+                fontSize: 16,
+              }}
+            >
+              Go Back
             </Text>
           </TouchableOpacity>
         </View>

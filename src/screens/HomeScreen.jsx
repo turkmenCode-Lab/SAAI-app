@@ -8,7 +8,6 @@ import {
   Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
-  ScrollView,
   Animated,
   Dimensions,
   Easing,
@@ -19,6 +18,11 @@ import { useTheme } from "@react-navigation/native";
 import Prompt from "../components/Prompt";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
+import Chat from "../components/Chat";
+import io from "socket.io-client";
+import { EXPO_API_URI } from "../../config";
+
+const socket = io(EXPO_API_URI || "http://localhost:5000");
 
 const HomeScreen = ({ navigation }) => {
   const [input, setInput] = useState("");
@@ -33,21 +37,10 @@ const HomeScreen = ({ navigation }) => {
   const rotation = useRef(new Animated.Value(0)).current;
   const SCREEN_WIDTH = Dimensions.get("window").width;
   const slideValue = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
-  const messages = useMemo(() => {
-    const currentChat = chats.find((chat) => chat.id === currentChatId);
-    return currentChat ? currentChat.messages : [];
-  }, [chats, currentChatId]);
 
   useEffect(() => {
     if (chats.length === 0) createNewChat();
   }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      scrollRef.current?.scrollToEnd({ animated: true });
-    }, 150);
-    return () => clearTimeout(timer);
-  }, [messages]);
 
   const createNewChat = () => {
     const newId = Date.now();
@@ -79,10 +72,6 @@ const HomeScreen = ({ navigation }) => {
     outputRange: ["0deg", "90deg"],
   });
 
-  const handleSearchQ = async (query) => {
-    console.log(query);
-  };
-
   const handleSubmit = async (text) => {
     if (!text.trim()) {
       Alert.alert("Error", "Please enter some text before submitting.");
@@ -90,7 +79,6 @@ const HomeScreen = ({ navigation }) => {
     }
 
     if (!currentChatId) createNewChat();
-
     setIsLoading(true);
 
     const userMsg = {
@@ -120,53 +108,13 @@ const HomeScreen = ({ navigation }) => {
     );
 
     setInput("");
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    const aiMsg = {
-      id: Date.now() + 1,
-      role: "assistant",
-      text: `This is a response to your query: ${text}`,
-      timestamp: new Date().toISOString(),
-    };
-
-    setChats((prev) =>
-      prev.map((c) =>
-        c.id === currentChatId ? { ...c, messages: [...c.messages, aiMsg] } : c
-      )
-    );
-
+    socket.emit("sendMessage", {
+      chatId: currentChatId,
+      role: "user",
+      content: text,
+    });
     setIsLoading(false);
   };
-
-  const renderMessage = (item) => (
-    <View
-      key={item.id}
-      style={[
-        styles.bubble,
-        item.role === "user"
-          ? {
-              alignSelf: "flex-end",
-              backgroundColor: bubble,
-              marginVertical: 4,
-              paddingHorizontal: 15,
-              paddingVertical: 10,
-              borderRadius: 15,
-              maxWidth: "80%",
-            }
-          : styles.assistantBubble,
-      ]}
-    >
-      <Text
-        style={[
-          styles.bubbleText,
-          { color: item.role === "user" ? colors.background : colors.text },
-        ]}
-      >
-        {item.text}
-      </Text>
-    </View>
-  );
 
   return (
     <SafeAreaView
@@ -178,7 +126,6 @@ const HomeScreen = ({ navigation }) => {
         rotateInterpolate={rotateInterpolate}
         onToggleNav={toggleNav}
       />
-
       {isNavOpen && (
         <TouchableOpacity
           style={styles.overlay}
@@ -186,7 +133,6 @@ const HomeScreen = ({ navigation }) => {
           activeOpacity={1}
         />
       )}
-
       <Sidebar
         chats={chats}
         currentChatId={currentChatId}
@@ -200,47 +146,25 @@ const HomeScreen = ({ navigation }) => {
         isOpen={isNavOpen}
         searchQ={searchQ}
         setSearchQ={setSearchQ}
-        onSubmit={handleSearchQ}
       />
-
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
       >
-        <ScrollView
-          style={styles.chatContainer}
-          contentContainerStyle={[
-            styles.chatContent,
-            { justifyContent: messages.length === 0 ? "center" : "flex-end" },
-          ]}
-          ref={scrollRef}
-          showsVerticalScrollIndicator={true}
-          keyboardShouldPersistTaps="handled"
-        >
-          {messages.length === 0 ? (
-            <>
-              <Text
-                style={[styles.greeting, { color: colors.text }]}
-                accessibilityLabel="Greeting message"
-              >
-                How can I help you today?
-              </Text>
-              <View></View>
-            </>
-          ) : (
-            messages.map(renderMessage)
-          )}
-        </ScrollView>
-
+        <Chat
+          chats={chats}
+          currentChatId={currentChatId}
+          setChats={setChats}
+          colors={colors}
+          scrollRef={scrollRef}
+          isLoading={isLoading}
+        />
         <View
           style={[
             styles.inputContainer,
             {
-              paddingBottom:
-                messages.length === 0
-                  ? 25 + (Platform.OS === "ios" ? 20 : 0)
-                  : 10 + (Platform.OS === "ios" ? 20 : 0),
+              paddingBottom: 10 + (Platform.OS === "ios" ? 20 : 0),
             },
           ]}
         >
@@ -267,16 +191,7 @@ const HomeScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  chatContainer: { flex: 1 },
-  chatContent: {
-    flexGrow: 1,
-    paddingVertical: 20,
-    paddingHorizontal: 15,
-  },
-  inputContainer: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-  },
+  inputContainer: { paddingVertical: 10, paddingHorizontal: 15 },
   content: {
     flexDirection: "row",
     alignItems: "center",
@@ -290,12 +205,6 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
   },
-  greeting: {
-    alignSelf: "center",
-    textAlign: "center",
-    fontSize: 24,
-    fontWeight: "600",
-  },
   overlay: {
     position: "absolute",
     top: 0,
@@ -304,21 +213,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: "transparent",
     zIndex: 5,
-  },
-  bubble: {
-    marginVertical: 4,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 15,
-    maxWidth: "80%",
-  },
-  assistantBubble: {
-    alignSelf: "flex-start",
-    backgroundColor: "#f2f2f2",
-  },
-  bubbleText: {
-    fontSize: 16,
-    lineHeight: 20,
   },
 });
 

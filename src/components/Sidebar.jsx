@@ -221,7 +221,6 @@ const styles = StyleSheet.create({
   },
   sidebarUser: {
     flexDirection: "row",
-    borderWidth: 1,
     alignItems: "center",
     gap: 10,
     paddingVertical: 10,

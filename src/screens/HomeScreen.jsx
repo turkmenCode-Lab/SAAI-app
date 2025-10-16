@@ -215,7 +215,13 @@ const HomeScreen = ({ navigation }) => {
   return (
     <SafeAreaView
       edges={["left", "right", "top"]}
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.background,
+          paddingBottom: 10 + (Platform.OS === "ios" ? 20 : 0),
+        },
+      ]}
     >
       <Header
         isNavOpen={isNavOpen}
@@ -257,14 +263,7 @@ const HomeScreen = ({ navigation }) => {
           isLoading={isLoading}
           socket={socket}
         />
-        <View
-          style={[
-            styles.inputContainer,
-            {
-              paddingBottom: 10 + (Platform.OS === "ios" ? 20 : 0),
-            },
-          ]}
-        >
+        <View style={[styles.inputContainer]}>
           <View style={styles.content}>
             <Prompt onSubmit={handleSubmit} input={input} setInput={setInput} />
             <TouchableOpacity

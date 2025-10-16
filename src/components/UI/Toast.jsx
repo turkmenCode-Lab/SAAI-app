@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, StyleSheet, Animated, Easing } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Animated,
+  Easing,
+  TouchableOpacity,
+} from "react-native";
 import { useTheme } from "@react-navigation/native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const Toast = ({ message, visible, status }) => {
   const { colors } = useTheme();
@@ -44,7 +52,7 @@ const Toast = ({ message, visible, status }) => {
       style={[
         styles.toast,
         {
-          backgroundColor: colors.primary,
+          backgroundColor: status === "error" ? colors.error : colors.success,
           opacity,
           transform: [
             {
@@ -57,14 +65,16 @@ const Toast = ({ message, visible, status }) => {
         },
       ]}
     >
-      <Text
-        style={[
-          styles.message,
-          { color: status === "error" ? colors.error : colors.success },
-        ]}
-      >
+      <Text style={[styles.message, { color: colors.background }]}>
         {message}
       </Text>
+      <TouchableOpacity activeOpacity={0.75} onPress={setShow(false)}>
+        <Ionicons
+          name="close"
+          size={24}
+          color={status === "error" ? colors.background : colors.success}
+        />
+      </TouchableOpacity>
     </Animated.View>
   );
 };
@@ -77,6 +87,9 @@ const styles = StyleSheet.create({
     right: 20,
     padding: 16,
     borderRadius: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   message: {
     fontSize: 16,

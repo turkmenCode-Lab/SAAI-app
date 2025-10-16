@@ -254,8 +254,6 @@ const EmailAuth = ({ navigation }) => {
           </Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
-
-      {/* --- Toast --- */}
       <Toast
         message={toast.message}
         visible={toast.visible}

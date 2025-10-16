@@ -1,5 +1,6 @@
 import axios from "axios";
 import { EXPO_API_URI } from "../../config";
+import { useAuthStore } from "../store/authStore";
 
 export const createAPI = () => {
   const token = useAuthStore((state) => state.token);

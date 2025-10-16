@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Animated,
-  Alert,
   ActivityIndicator,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
@@ -18,15 +17,22 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useAppTheme } from "../../src/theme";
 import { useAuthStore } from "../../store/authStore";
+import Toast from "../components/UI/Toast";
 
 const EmailAuth = ({ navigation }) => {
   const { colors } = useTheme();
   const theme = useAppTheme();
-  const { login, register, loading, error, user } = useAuthStore();
+  const { login, register, loading, error } = useAuthStore();
+
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rePassword, setRePassword] = useState("");
+  const [toast, setToast] = useState({
+    visible: false,
+    message: "",
+    status: "success",
+  });
 
   const shakeEmail = useRef(new Animated.Value(0)).current;
   const shakePassword = useRef(new Animated.Value(0)).current;
@@ -37,6 +43,21 @@ const EmailAuth = ({ navigation }) => {
     { fontFamily: theme.fonts.regular, color: theme.colors.text },
     ...(Text.defaultProps.style || []),
   ];
+
+  // --- Toast helper ---
+  const showToast = (message, status = "success") => {
+    setToast({ visible: true, message, status });
+  };
+
+  useEffect(() => {
+    if (toast.visible) {
+      const timer = setTimeout(
+        () => setToast((prev) => ({ ...prev, visible: false })),
+        2300
+      );
+      return () => clearTimeout(timer);
+    }
+  }, [toast.visible]);
 
   const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
   const validatePassword = (pass) => pass.length >= 6;
@@ -73,19 +94,27 @@ const EmailAuth = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
-    if (!validateEmail(email)) return shake(shakeEmail);
-    if (!validatePassword(password)) return shake(shakePassword);
-    if (!isLogin && password !== rePassword) return shake(shakeRePassword);
+    if (!validateEmail(email))
+      return shake(shakeEmail) && showToast("Invalid email", "error");
+    if (!validatePassword(password))
+      return (
+        shake(shakePassword) &&
+        showToast("Password must be at least 6 characters", "error")
+      );
+    if (!isLogin && password !== rePassword)
+      return (
+        shake(shakeRePassword) && showToast("Passwords do not match", "error")
+      );
 
     const result = isLogin
       ? await login(email, password)
       : await register(email, password);
 
     if (result && result.user) {
-      Alert.alert(isLogin ? "Login Successful" : "Signup Successful");
+      showToast(isLogin ? "Login Successful" : "Signup Successful", "success");
       navigation?.goBack();
     } else if (error) {
-      Alert.alert("Error", error);
+      showToast(error, "error");
     }
   };
 
@@ -210,14 +239,7 @@ const EmailAuth = ({ navigation }) => {
               size={16}
               color={colors.neutral}
             />
-            <Text
-              style={{
-                color: colors.neutral,
-                fontSize: 16,
-              }}
-            >
-              Go Back
-            </Text>
+            <Text style={{ color: colors.neutral, fontSize: 16 }}>Go Back</Text>
           </TouchableOpacity>
         </View>
 
@@ -233,6 +255,13 @@ const EmailAuth = ({ navigation }) => {
           </Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
+
+      {/* --- Toast --- */}
+      <Toast
+        message={toast.message}
+        visible={toast.visible}
+        status={toast.status}
+      />
     </SafeAreaView>
   );
 };

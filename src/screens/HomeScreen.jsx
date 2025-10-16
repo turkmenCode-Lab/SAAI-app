@@ -23,6 +23,7 @@ import Chat from "../components/UI/Chat";
 import io from "socket.io-client";
 import { EXPO_API_URI } from "../../config";
 import { createAPI } from "../utils/api";
+import Toast from "../components/UI/Toast";
 
 const HomeScreen = ({ navigation }) => {
   const { token } = useAuthStore();
@@ -33,13 +34,28 @@ const HomeScreen = ({ navigation }) => {
   const [chats, setChats] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const [toast, setToast] = useState({
+    visible: false,
+    message: "",
+    status: "success",
+  });
   const { colors } = useTheme();
   const scrollRef = useRef(null);
   const rotation = useRef(new Animated.Value(0)).current;
   const SCREEN_WIDTH = Dimensions.get("window").width;
   const slideValue = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
 
-  const socket = io(EXPO_API_URI || "http://localhost:5000");
+  const socket = useRef(io(EXPO_API_URI || "http://localhost:5000")).current;
+
+  useEffect(() => {
+    if (toast.visible) {
+      const timer = setTimeout(
+        () => setToast((prev) => ({ ...prev, visible: false })),
+        2300
+      );
+      return () => clearTimeout(timer);
+    }
+  }, [toast.visible]);
 
   const fetchChats = async () => {
     if (!token) return;
@@ -84,7 +100,7 @@ const HomeScreen = ({ navigation }) => {
       setCurrentChatId(newChat.id);
     } catch (err) {
       console.error("Error creating chat:", err.response?.data || err.message);
-      Alert.alert("Error", "Failed to create new chat.");
+      showToast("Failed to create new chat.", "error");
     }
   };
 
@@ -119,7 +135,7 @@ const HomeScreen = ({ navigation }) => {
 
   const handleSubmit = async (text) => {
     if (!text.trim()) {
-      Alert.alert("Error", "Please enter some text before submitting.");
+      showToast("Please enter some text before submitting.", "error");
       return;
     }
 
@@ -245,6 +261,11 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </View>
       </KeyboardAvoidingView>
+      <Toast
+        message={toast.message}
+        visible={toast.visible}
+        status={toast.status}
+      />
     </SafeAreaView>
   );
 };

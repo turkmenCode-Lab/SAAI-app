@@ -32,6 +32,7 @@ export const useAuthStore = create((set) => ({
         email,
         password,
       });
+      console.log(res.data);
       set({ user: res.data.user, token: res.data.token, loading: false });
       return res.data;
     } catch (err) {

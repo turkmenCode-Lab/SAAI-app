@@ -15,6 +15,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 import { useTheme } from "@react-navigation/native";
+import { useAuthStore } from "../../store/authStore";
 import Prompt from "../components/Prompt";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
@@ -24,6 +25,7 @@ import { EXPO_API_URI } from "../../config";
 import { createAPI } from "../utils/api";
 
 const HomeScreen = ({ navigation }) => {
+  const { token } = useAuthStore();
   const [input, setInput] = useState("");
   const [searchQ, setSearchQ] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -39,6 +41,7 @@ const HomeScreen = ({ navigation }) => {
   const socket = io(EXPO_API_URI || "http://localhost:5000");
 
   const fetchChats = async () => {
+    if (!token) return;
     try {
       const api = createAPI();
       const response = await api.get("/chat");
@@ -64,6 +67,7 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const createNewChat = async () => {
+    if (!token) return;
     try {
       const api = createAPI();
       const response = await api.post("/chat", {
@@ -84,9 +88,11 @@ const HomeScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
-    fetchChats();
+    if (token) {
+      fetchChats();
+    }
     return () => socket.disconnect();
-  }, []);
+  }, [token]);
 
   const loadChat = (id) => {
     setCurrentChatId(id);
@@ -117,7 +123,10 @@ const HomeScreen = ({ navigation }) => {
     }
 
     if (!currentChatId) {
-      await createNewChat();
+      if (token) {
+        await createNewChat();
+      }
+      return;
     }
 
     setIsLoading(true);
@@ -160,10 +169,10 @@ const HomeScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
-    if (chats.length === 0 && !isLoading) {
+    if (chats.length === 0 && !isLoading && token) {
       createNewChat();
     }
-  }, [chats.length]);
+  }, [chats.length, token]);
 
   return (
     <SafeAreaView

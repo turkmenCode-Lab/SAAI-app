@@ -144,6 +144,7 @@ const EmailAuth = ({ navigation }) => {
                 ]}
                 secureTextEntry
                 autoCorrect={false}
+                autoCapitalize="none"
               />
             </View>
           </Animated.View>

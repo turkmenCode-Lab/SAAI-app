@@ -36,10 +36,8 @@ const HomeScreen = ({ navigation }) => {
   const SCREEN_WIDTH = Dimensions.get("window").width;
   const slideValue = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
 
-  // Single socket instance
   const socket = io(EXPO_API_URI || "http://localhost:5000");
 
-  // API helpers (using component state)
   const fetchChats = async () => {
     try {
       const api = createAPI();
@@ -47,13 +45,13 @@ const HomeScreen = ({ navigation }) => {
       console.log("Chats:", response.data);
 
       const loadedChats = response.data.map((chat) => ({
-        id: chat._id, // Map _id to id
+        id: chat._id,
         title: chat.title || "New Chat",
         messages: chat.messages.map((msg, index) => ({
-          id: index, // Assign temp id for keys
+          id: index,
           role: msg.role,
           text: msg.content,
-          timestamp: chat.createdAt || new Date().toISOString(), // Use chat timestamp as fallback
+          timestamp: chat.createdAt || new Date().toISOString(),
         })),
       }));
       setChats(loadedChats);
@@ -75,7 +73,7 @@ const HomeScreen = ({ navigation }) => {
       const newChat = {
         id: response.data._id,
         title: response.data.title,
-        messages: [], // Empty initially
+        messages: [],
       };
       setChats((prev) => [...prev, newChat]);
       setCurrentChatId(newChat.id);
@@ -92,7 +90,7 @@ const HomeScreen = ({ navigation }) => {
 
   const loadChat = (id) => {
     setCurrentChatId(id);
-    socket.emit("joinChat", id); // Join on load
+    socket.emit("joinChat", id);
     setIsNavOpen(false);
   };
 
@@ -120,7 +118,6 @@ const HomeScreen = ({ navigation }) => {
 
     if (!currentChatId) {
       await createNewChat();
-      return; // Re-trigger after create
     }
 
     setIsLoading(true);
@@ -132,7 +129,6 @@ const HomeScreen = ({ navigation }) => {
       timestamp: new Date().toISOString(),
     };
 
-    // Add user message locally for instant feedback
     setChats((prev) =>
       prev.map((c) =>
         c.id === currentChatId
@@ -141,7 +137,6 @@ const HomeScreen = ({ navigation }) => {
       )
     );
 
-    // Update title if it's a new chat
     setChats((prev) =>
       prev.map((c) =>
         c.id === currentChatId && c.title === "New Chat"
@@ -155,7 +150,6 @@ const HomeScreen = ({ navigation }) => {
 
     setInput("");
 
-    // Emit via WebSocket for backend save & broadcast
     socket.emit("sendMessage", {
       chatId: currentChatId,
       role: "user",
@@ -163,11 +157,8 @@ const HomeScreen = ({ navigation }) => {
     });
 
     setIsLoading(false);
-
-    // TODO: Here, you could call an AI API in backend to generate & emit assistant response
   };
 
-  // If no chats and not loading, create one
   useEffect(() => {
     if (chats.length === 0 && !isLoading) {
       createNewChat();
@@ -217,7 +208,7 @@ const HomeScreen = ({ navigation }) => {
           colors={colors}
           scrollRef={scrollRef}
           isLoading={isLoading}
-          socket={socket} // Pass socket
+          socket={socket}
         />
         <View
           style={[
@@ -248,7 +239,6 @@ const HomeScreen = ({ navigation }) => {
   );
 };
 
-// Styles unchanged
 const styles = StyleSheet.create({
   container: { flex: 1 },
   inputContainer: { paddingVertical: 10, paddingHorizontal: 15 },

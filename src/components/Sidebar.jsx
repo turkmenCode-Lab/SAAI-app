@@ -13,6 +13,7 @@ import { useTheme } from "@react-navigation/native";
 import { useAuthStore } from "../../store/authStore";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Sidebar = ({
   chats,
@@ -51,111 +52,113 @@ const Sidebar = ({
   );
 
   return (
-    <Animated.View
-      style={[
-        styles.sidebar,
-        {
-          transform: [{ translateX: slideValue }],
-          backgroundColor: colors.background,
-        },
-      ]}
-    >
-      <View
+    <SafeAreaView style={{ flex: 1 }}>
+      <Animated.View
         style={[
-          styles.sidebarHeader,
-          { borderBottomColor: colors.text + "33" },
+          styles.sidebar,
+          {
+            transform: [{ translateX: slideValue }],
+            backgroundColor: colors.background,
+          },
         ]}
       >
-        <TextInput
-          style={[
-            styles.searchInput,
-            {
-              color: colors.text,
-              borderColor: colors.text,
-            },
-          ]}
-          autoCorrect={false}
-          placeholder="Let's search your chat history!?"
-          placeholderTextColor={colors.text}
-          autoCapitalize="none"
-          value={searchQ}
-          onChangeText={setSearchQ}
-          onSubmitEditing={() => onSubmit(searchQ)}
-        />
-        <TouchableOpacity onPress={onClose}>
-          <MaterialCommunityIcons
-            name="backburger"
-            size={30}
-            color={colors.neutral}
-          />
-        </TouchableOpacity>
-      </View>
-      <TouchableOpacity
-        style={[styles.newChatBtn, { backgroundColor: colors.text + "0A" }]}
-        onPress={onNewChat}
-      >
-        <Text style={[styles.newChatText, { color: colors.text }]}>
-          New Chat
-        </Text>
-      </TouchableOpacity>
-      <FlatList
-        data={chats}
-        renderItem={renderChatItem}
-        keyExtractor={(item) => item.id.toString()}
-        style={styles.chatList}
-      />
-      <View style={[styles.sidebarUser, { borderTopColor: colors.neutral }]}>
         <View
-          style={{
-            backgroundColor: colors.primary,
-            borderRadius: 100,
-            width: 44,
-            height: 44,
-            alignItems: "center",
-            justifyContent: "center",
-            borderWidth: 3,
-            borderColor: colors.mostly,
-          }}
+          style={[
+            styles.sidebarHeader,
+            { borderBottomColor: colors.text + "33" },
+          ]}
         >
+          <TextInput
+            style={[
+              styles.searchInput,
+              {
+                color: colors.text,
+                borderColor: colors.text,
+              },
+            ]}
+            autoCorrect={false}
+            placeholder="Let's search your chat history!?"
+            placeholderTextColor={colors.text}
+            autoCapitalize="none"
+            value={searchQ}
+            onChangeText={setSearchQ}
+            onSubmitEditing={() => onSubmit(searchQ)}
+          />
+          <TouchableOpacity onPress={onClose}>
+            <MaterialCommunityIcons
+              name="backburger"
+              size={30}
+              color={colors.neutral}
+            />
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          style={[styles.newChatBtn, { backgroundColor: colors.text + "0A" }]}
+          onPress={onNewChat}
+        >
+          <Text style={[styles.newChatText, { color: colors.text }]}>
+            New Chat
+          </Text>
+        </TouchableOpacity>
+        <FlatList
+          data={chats}
+          renderItem={renderChatItem}
+          keyExtractor={(item) => item.id.toString()}
+          style={styles.chatList}
+        />
+        <View style={[styles.sidebarUser, { borderTopColor: colors.neutral }]}>
+          <View
+            style={{
+              backgroundColor: colors.primary,
+              borderRadius: 100,
+              width: 44,
+              height: 44,
+              alignItems: "center",
+              justifyContent: "center",
+              borderWidth: 3,
+              borderColor: colors.mostly,
+            }}
+          >
+            <Text
+              style={{
+                color: colors.text,
+                fontFamily: "InterSemiBold",
+                fontSize: 24,
+              }}
+            >
+              {user?.email ? user.email[0].toUpperCase() : "?"}
+            </Text>
+          </View>
           <Text
             style={{
               color: colors.text,
-              fontFamily: "InterSemiBold",
-              fontSize: 24,
+              fontFamily: "InterMedium",
+              fontWeight: 500,
+              fontSize: 18,
             }}
           >
-            {user?.email ? user.email[0].toUpperCase() : "?"}
+            {user?.email ?? "Guest"}
           </Text>
-        </View>
-        <Text
-          style={{
-            color: colors.text,
-            fontFamily: "InterMedium",
-            fontWeight: 500,
-            fontSize: 18,
-          }}
-        >
-          {user?.email ?? "Guest"}
-        </Text>
-        <TouchableOpacity
-          style={{ marginLeft: "auto" }}
-          onPress={() => {
-            try {
-              useAuthStore.getState().logout();
-              if (navigation.canGoBack()) {
-                navigation.goBack();
-              } else {
-                navigation.navigate("Auth");
+          <TouchableOpacity
+            style={{ marginLeft: "auto" }}
+            onPress={() => {
+              try {
+                useAuthStore.getState().logout();
+                if (navigation.canGoBack()) {
+                  navigation.goBack();
+                } else {
+                  navigation.navigate("Auth");
+                }
+              } catch (e) {
+                console.error("Logout navigation error:", e);
               }
-            } catch (e) {
-              console.error("Logout navigation error:", e);
-            }
-          }}
-        >
-          <Entypo name="log-out" size={24} color={colors.neutral} />
-        </TouchableOpacity>
-      </View>
-    </Animated.View>
+            }}
+          >
+            <Entypo name="log-out" size={24} color={colors.neutral} />
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
+    </SafeAreaView>
   );
 };
 

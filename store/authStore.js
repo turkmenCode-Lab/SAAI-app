@@ -15,7 +15,7 @@ export const useAuthStore = create((set) => ({
         email,
         password,
       });
-      set({ user: res.data.user, loading: false });
+      set({ user: res.data.user, token: res.data.token, loading: false });
       return res.data;
     } catch (err) {
       set({

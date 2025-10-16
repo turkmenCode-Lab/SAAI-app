@@ -49,3 +49,6 @@ config.js
 
 # build configs
 eas.json
+
+# images
+*.png

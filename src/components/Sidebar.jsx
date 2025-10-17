@@ -59,8 +59,8 @@ const Sidebar = ({
           position: "absolute",
           top: 0,
           left: 0,
-          height: "100%",
-          width: "100%",
+          bottom: 0,
+          right: 0,
           backgroundColor: colors.background,
           transform: [{ translateX: slideValue }],
           zIndex: 1000,
@@ -151,11 +151,10 @@ const Sidebar = ({
           onPress={() => {
             try {
               useAuthStore.getState().logout();
-              if (navigation.canGoBack()) {
-                navigation.goBack();
-              } else {
-                navigation.navigate("Auth");
-              }
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "Auth" }],
+              });
             } catch (e) {
               console.error("Logout navigation error:", e);
             }

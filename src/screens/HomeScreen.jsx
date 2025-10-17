@@ -121,12 +121,16 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     if (token) {
       apiRef.current = createAPI();
+      if (socket.current) {
+        socket.current.disconnect();
+      }
       socket.current = io(EXPO_API_URI || "http://localhost:5000");
       fetchChats();
     }
     return () => {
       if (socket.current) {
         socket.current.disconnect();
+        socket.current = null;
       }
       apiRef.current = null;
     };
@@ -280,7 +284,7 @@ const HomeScreen = ({ navigation }) => {
           colors={colors}
           scrollRef={scrollRef}
           isLoading={isLoading}
-          socket={socket}
+          socket={socket.current}
         />
         <View style={[styles.inputContainer, { paddingHorizontal: 15 }]}>
           <View style={styles.content}>

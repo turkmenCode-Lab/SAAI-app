@@ -350,7 +350,7 @@ const HomeScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  inputContainer: { paddingVertical: 15 },
+  inputContainer: { paddingVertical: 10 },
   content: {
     flexDirection: "row",
     alignItems: "center",

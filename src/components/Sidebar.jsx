@@ -154,7 +154,7 @@ const Sidebar = ({
         >
           <Text
             style={{
-              color: colors.background,
+              color: colors.text,
               fontFamily: "InterSemiBold",
               fontSize: 24,
             }}

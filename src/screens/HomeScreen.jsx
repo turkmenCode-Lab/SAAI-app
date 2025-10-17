@@ -241,7 +241,6 @@ const HomeScreen = ({ navigation }) => {
         ];
       });
 
-      // Update title on backend if it's a new chat or was "New Chat"
       if (
         (isNewChat ||
           chats.find((c) => c.id === chatId)?.title === "New Chat") &&
@@ -251,7 +250,6 @@ const HomeScreen = ({ navigation }) => {
           await apiRef.current.put(`/chat/${chatId}`, { title: newTitle });
         } catch (err) {
           console.error("Error updating chat title:", err);
-          // Don't show toast for title update failure, as chat still works
         }
       }
 
@@ -352,7 +350,7 @@ const HomeScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  inputContainer: { paddingVertical: 10 },
+  inputContainer: { paddingVertical: 15 },
   content: {
     flexDirection: "row",
     alignItems: "center",

@@ -139,7 +139,12 @@ const Sidebar = ({
         keyExtractor={(item) => item.id.toString()}
         style={styles.chatList}
       />
-      <View style={[styles.sidebarUser, { borderTopColor: colors.neutral }]}>
+      <View
+        style={[
+          styles.sidebarUser,
+          { borderTopColor: colors.neutral, marginBottom: 15 },
+        ]}
+      >
         <View
           style={{
             backgroundColor: colors.primary,

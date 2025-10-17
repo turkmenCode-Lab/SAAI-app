@@ -80,7 +80,7 @@ const AuthScreen = ({ navigation }) => {
           fontWeight: "700",
         }}
         cursorStyle={{
-          color: colors.neutral,
+          color: colors.vitally,
           fontSize: 44,
           fontWeight: "700",
         }}

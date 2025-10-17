@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, Text, Animated, StyleSheet, Dimensions } from "react-native";
+import Octicons from "@expo/vector-icons/Octicons";
 
 export default function TypingErase({
   texts = "Hello, world!",
@@ -135,11 +136,15 @@ export default function TypingErase({
       <Animated.Text
         style={[
           styles.cursor,
-          { fontSize, lineHeight: fontSize + 10, opacity: cursorOpacity },
+          {
+            fontSize,
+            lineHeight: fontSize + 10,
+            opacity: cursorOpacity,
+          },
           cursorStyle,
         ]}
       >
-        |
+        <Octicons name="sparkle-fill" size={fontSize} color={cursorStyle} />
       </Animated.Text>
     </View>
   );

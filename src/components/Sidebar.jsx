@@ -52,6 +52,14 @@ const Sidebar = ({
     </TouchableOpacity>
   );
 
+  const handleLogout = () => {
+    try {
+      useAuthStore.getState().logout();
+    } catch (e) {
+      console.error("Logout error:", e);
+    }
+  };
+
   return (
     <Animated.View
       style={[
@@ -89,7 +97,7 @@ const Sidebar = ({
           autoCapitalize="none"
           value={searchQ}
           onChangeText={setSearchQ}
-          onSubmitEditing={() => onSubmit(searchQ)}
+          onSubmitEditing={() => onSubmit && onSubmit(searchQ)}
         />
         <TouchableOpacity onPress={onClose}>
           <MaterialCommunityIcons
@@ -128,7 +136,7 @@ const Sidebar = ({
         >
           <Text
             style={{
-              color: colors.text,
+              color: colors.background,
               fontFamily: "InterSemiBold",
               fontSize: 24,
             }}
@@ -146,20 +154,7 @@ const Sidebar = ({
         >
           {user?.email ?? "Guest"}
         </Text>
-        <TouchableOpacity
-          style={{ marginLeft: "auto" }}
-          onPress={() => {
-            try {
-              useAuthStore.getState().logout();
-              navigation.reset({
-                index: 0,
-                routes: [{ name: "Auth" }],
-              });
-            } catch (e) {
-              console.error("Logout navigation error:", e);
-            }
-          }}
-        >
+        <TouchableOpacity style={{ marginLeft: "auto" }} onPress={handleLogout}>
           <Entypo name="log-out" size={24} color={colors.neutral} />
         </TouchableOpacity>
       </View>

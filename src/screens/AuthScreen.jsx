@@ -1,5 +1,11 @@
 import { useTheme } from "@react-navigation/native";
-import { Text, StyleSheet, View, TouchableOpacity } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Linking,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import TypingErase from "../components/UI/TypingErase";
 import AntDesign from "@expo/vector-icons/AntDesign";

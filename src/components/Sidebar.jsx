@@ -27,6 +27,7 @@ const Sidebar = ({
   onSubmit,
   searchQ,
   setSearchQ,
+  onDeleteChat,
 }) => {
   const { colors } = useTheme();
 
@@ -35,21 +36,38 @@ const Sidebar = ({
   const user = useAuthStore((state) => state.user);
 
   const renderChatItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.chatItem}
-      onPress={() => onLoadChat(item.id)}
-    >
-      <Text style={styles.chatTitle} numberOfLines={1}>
-        {item.title}
-      </Text>
-      <Text style={styles.chatSubtitle}>
-        {item.messages.length > 0
-          ? new Date(
-              item.messages[item.messages.length - 1].timestamp
-            ).toLocaleDateString()
-          : ""}
-      </Text>
-    </TouchableOpacity>
+    <View style={styles.chatItemContainer}>
+      <TouchableOpacity
+        style={[
+          styles.chatItem,
+          currentChatId === item.id && {
+            backgroundColor: colors.primary + "0F",
+          },
+        ]}
+        onPress={() => onLoadChat(item.id)}
+      >
+        <Text style={styles.chatTitle} numberOfLines={1}>
+          {item.title}
+        </Text>
+        <Text style={styles.chatSubtitle}>
+          {item.messages.length > 0
+            ? new Date(
+                item.messages[item.messages.length - 1].timestamp
+              ).toLocaleDateString()
+            : ""}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.deleteBtn}
+        onPress={() => onDeleteChat(item.id)}
+      >
+        <MaterialCommunityIcons
+          name="delete"
+          size={20}
+          color={colors.danger || "#FF3B30"}
+        />
+      </TouchableOpacity>
+    </View>
   );
 
   const handleLogout = () => {
@@ -200,11 +218,14 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   chatList: { flex: 1 },
+  chatItemContainer: {
+    position: "relative",
+    marginBottom: 4,
+  },
   chatItem: {
     paddingVertical: 12,
     paddingHorizontal: 8,
     borderRadius: 8,
-    marginBottom: 4,
   },
   chatTitle: {
     fontSize: 16,
@@ -214,6 +235,12 @@ const styles = StyleSheet.create({
   chatSubtitle: {
     fontSize: 14,
     opacity: 0.7,
+  },
+  deleteBtn: {
+    position: "absolute",
+    right: 8,
+    top: 12,
+    padding: 4,
   },
   searchInput: {
     flex: 1,

@@ -67,6 +67,12 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [toast.visible]);
 
+  useEffect(() => {
+    if (!token) {
+      navigation.replace("Auth");
+    }
+  }, [token, navigation]);
+
   const fetchChats = useCallback(async () => {
     if (!token || !apiRef.current) return;
     try {
@@ -117,6 +123,27 @@ const HomeScreen = ({ navigation }) => {
       showToast("Failed to create new chat.", "error");
     }
   }, [token, showToast]);
+
+  const deleteChat = useCallback(
+    async (chatId) => {
+      if (!token || !apiRef.current || !chatId) return;
+      try {
+        await apiRef.current.delete(`/chat/${chatId}`);
+        setChats((prev) => prev.filter((c) => c.id !== chatId));
+        if (currentChatId === chatId) {
+          setCurrentChatId(null);
+        }
+        showToast("Chat deleted successfully.", "success");
+      } catch (err) {
+        console.error(
+          "Error deleting chat:",
+          err.response?.data || err.message
+        );
+        showToast("Failed to delete chat.", "error");
+      }
+    },
+    [token, currentChatId, showToast]
+  );
 
   useEffect(() => {
     if (token) {
@@ -171,7 +198,8 @@ const HomeScreen = ({ navigation }) => {
       }
 
       let chatId = currentChatId;
-      if (!chatId) {
+      let isNewChat = !chatId;
+      if (isNewChat) {
         if (!token) return;
         await createNewChat();
         chatId = currentChatId;
@@ -190,6 +218,8 @@ const HomeScreen = ({ navigation }) => {
         timestamp: new Date().toISOString(),
       };
 
+      const newTitle = text.length > 35 ? text.substring(0, 35) + "..." : text;
+
       setChats((prev) => {
         const filteredPrev = prev.filter((c) => c && c.id) || [];
         const chatIndex = filteredPrev.findIndex((c) => c.id === chatId);
@@ -199,10 +229,8 @@ const HomeScreen = ({ navigation }) => {
           ...filteredPrev[chatIndex],
           messages: [...(filteredPrev[chatIndex].messages || []), userMsg],
           title:
-            filteredPrev[chatIndex].title === "New Chat"
-              ? text.length > 50
-                ? text.substring(0, 50) + "..."
-                : text
+            isNewChat || filteredPrev[chatIndex].title === "New Chat"
+              ? newTitle
               : filteredPrev[chatIndex].title,
         };
 
@@ -212,6 +240,20 @@ const HomeScreen = ({ navigation }) => {
           ...filteredPrev.slice(chatIndex + 1),
         ];
       });
+
+      // Update title on backend if it's a new chat or was "New Chat"
+      if (
+        (isNewChat ||
+          chats.find((c) => c.id === chatId)?.title === "New Chat") &&
+        apiRef.current
+      ) {
+        try {
+          await apiRef.current.put(`/chat/${chatId}`, { title: newTitle });
+        } catch (err) {
+          console.error("Error updating chat title:", err);
+          // Don't show toast for title update failure, as chat still works
+        }
+      }
 
       setInput("");
 
@@ -225,19 +267,13 @@ const HomeScreen = ({ navigation }) => {
 
       setIsLoading(false);
     },
-    [currentChatId, token, createNewChat, showToast]
+    [currentChatId, token, createNewChat, showToast, chats]
   );
 
   const handleNewChat = useCallback(() => {
     createNewChat();
     toggleNav();
   }, [createNewChat, toggleNav]);
-
-  useEffect(() => {
-    if (chats.length === 0 && !isLoading && token) {
-      createNewChat();
-    }
-  }, [chats.length, isLoading, token, createNewChat]);
 
   return (
     <SafeAreaView
@@ -271,6 +307,7 @@ const HomeScreen = ({ navigation }) => {
         isOpen={isNavOpen}
         searchQ={searchQ}
         setSearchQ={setSearchQ}
+        onDeleteChat={deleteChat}
       />
       <KeyboardAvoidingView
         style={{ flex: 1 }}

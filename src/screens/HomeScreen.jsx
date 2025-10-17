@@ -11,7 +11,6 @@ import {
   View,
   TouchableOpacity,
   Platform,
-  Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Animated,
@@ -51,7 +50,8 @@ const HomeScreen = ({ navigation }) => {
   const SCREEN_WIDTH = Dimensions.get("window").width;
   const slideValue = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
 
-  const socket = useRef(io(EXPO_API_URI || "http://localhost:5000")).current;
+  const socket = useRef(null).current;
+  const apiRef = useRef(null);
 
   const showToast = useCallback((message, status = "success") => {
     setToast({ visible: true, message, status });
@@ -67,11 +67,10 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [toast.visible]);
 
-  const fetchChats = async () => {
-    if (!token) return;
+  const fetchChats = useCallback(async () => {
+    if (!token || !apiRef.current) return;
     try {
-      const api = createAPI();
-      const response = await api.get("/chat");
+      const response = await apiRef.current.get("/chat");
       console.log("Chats:", response.data);
 
       const loadedChats = response.data
@@ -94,13 +93,12 @@ const HomeScreen = ({ navigation }) => {
       console.error("Error fetching chats:", err.response?.data || err.message);
       showToast("Failed to load chats.", "error");
     }
-  };
+  }, [token, showToast]);
 
-  const createNewChat = async () => {
-    if (!token) return;
+  const createNewChat = useCallback(async () => {
+    if (!token || !apiRef.current) return;
     try {
-      const api = createAPI();
-      const response = await api.post("/chat", {
+      const response = await apiRef.current.post("/chat", {
         title: "New Chat",
         messages: [],
       });
@@ -118,23 +116,30 @@ const HomeScreen = ({ navigation }) => {
       console.error("Error creating chat:", err.response?.data || err.message);
       showToast("Failed to create new chat.", "error");
     }
-  };
+  }, [token, showToast]);
 
   useEffect(() => {
     if (token) {
+      apiRef.current = createAPI();
+      socket.current = io(EXPO_API_URI || "http://localhost:5000");
       fetchChats();
     }
-    return () => socket.disconnect();
-  }, [token]);
+    return () => {
+      if (socket.current) {
+        socket.current.disconnect();
+      }
+      apiRef.current = null;
+    };
+  }, [token, fetchChats]);
 
-  const loadChat = (id) => {
-    if (!id) return;
+  const loadChat = useCallback((id) => {
+    if (!id || !socket.current) return;
     setCurrentChatId(id);
-    socket.emit("joinChat", id);
+    socket.current.emit("joinChat", id);
     setIsNavOpen(false);
-  };
+  }, []);
 
-  const toggleNav = () => {
+  const toggleNav = useCallback(() => {
     const newOpen = !isNavOpen;
     Animated.timing(slideValue, {
       toValue: newOpen ? 0 : -SCREEN_WIDTH,
@@ -143,74 +148,92 @@ const HomeScreen = ({ navigation }) => {
       useNativeDriver: false,
     }).start();
     setIsNavOpen(newOpen);
-  };
+  }, [isNavOpen]);
 
-  const rotateInterpolate = rotation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "90deg"],
-  });
+  const rotateInterpolate = useMemo(
+    () =>
+      rotation.interpolate({
+        inputRange: [0, 1],
+        outputRange: ["0deg", "90deg"],
+      }),
+    []
+  );
 
-  const handleSubmit = async (text) => {
-    if (!text.trim()) {
-      showToast("Please enter some text before submitting.", "error");
-      return;
-    }
-
-    let chatId = currentChatId;
-    if (!chatId) {
-      if (!token) return;
-      await createNewChat();
-      chatId = currentChatId;
-      if (!chatId) {
-        showToast("Failed to create chat.", "error");
+  const handleSubmit = useCallback(
+    async (text) => {
+      if (!text.trim()) {
+        showToast("Please enter some text before submitting.", "error");
         return;
       }
-    }
 
-    setIsLoading(true);
+      let chatId = currentChatId;
+      if (!chatId) {
+        if (!token) return;
+        await createNewChat();
+        chatId = currentChatId;
+        if (!chatId) {
+          showToast("Failed to create chat.", "error");
+          return;
+        }
+      }
 
-    const userMsg = {
-      id: Date.now(),
-      role: "user",
-      text,
-      timestamp: new Date().toISOString(),
-    };
+      setIsLoading(true);
 
-    setChats((prev) =>
-      (prev.filter((c) => c && c.id) || []).map((c) =>
-        c.id === chatId
-          ? { ...c, messages: [...(c.messages || []), userMsg] }
-          : c
-      )
-    );
+      const userMsg = {
+        id: Date.now(),
+        role: "user",
+        text,
+        timestamp: new Date().toISOString(),
+      };
 
-    setChats((prev) =>
-      (prev.filter((c) => c && c.id) || []).map((c) =>
-        c.id === chatId && c.title === "New Chat"
-          ? {
-              ...c,
-              title: text.length > 50 ? text.substring(0, 50) + "..." : text,
-            }
-          : c
-      )
-    );
+      setChats((prev) => {
+        const filteredPrev = prev.filter((c) => c && c.id) || [];
+        const chatIndex = filteredPrev.findIndex((c) => c.id === chatId);
+        if (chatIndex === -1) return filteredPrev;
 
-    setInput("");
+        const updatedChat = {
+          ...filteredPrev[chatIndex],
+          messages: [...(filteredPrev[chatIndex].messages || []), userMsg],
+          title:
+            filteredPrev[chatIndex].title === "New Chat"
+              ? text.length > 50
+                ? text.substring(0, 50) + "..."
+                : text
+              : filteredPrev[chatIndex].title,
+        };
 
-    socket.emit("sendMessage", {
-      chatId,
-      role: "user",
-      content: text,
-    });
+        return [
+          ...filteredPrev.slice(0, chatIndex),
+          updatedChat,
+          ...filteredPrev.slice(chatIndex + 1),
+        ];
+      });
 
-    setIsLoading(false);
-  };
+      setInput("");
+
+      if (socket.current) {
+        socket.current.emit("sendMessage", {
+          chatId,
+          role: "user",
+          content: text,
+        });
+      }
+
+      setIsLoading(false);
+    },
+    [currentChatId, token, createNewChat, showToast]
+  );
+
+  const handleNewChat = useCallback(() => {
+    createNewChat();
+    toggleNav();
+  }, [createNewChat, toggleNav]);
 
   useEffect(() => {
     if (chats.length === 0 && !isLoading && token) {
       createNewChat();
     }
-  }, [chats.length, token]);
+  }, [chats.length, isLoading, token, createNewChat]);
 
   return (
     <SafeAreaView
@@ -219,7 +242,6 @@ const HomeScreen = ({ navigation }) => {
         styles.container,
         {
           backgroundColor: colors.background,
-          paddingBottom: 10 + (Platform.OS === "ios" ? 20 : 0),
         },
       ]}
     >
@@ -239,10 +261,7 @@ const HomeScreen = ({ navigation }) => {
         chats={chats}
         currentChatId={currentChatId}
         onLoadChat={loadChat}
-        onNewChat={() => {
-          createNewChat();
-          toggleNav();
-        }}
+        onNewChat={handleNewChat}
         onClose={toggleNav}
         slideValue={slideValue}
         isOpen={isNavOpen}
@@ -263,7 +282,7 @@ const HomeScreen = ({ navigation }) => {
           isLoading={isLoading}
           socket={socket}
         />
-        <View style={[styles.inputContainer]}>
+        <View style={[styles.inputContainer, { paddingHorizontal: 15 }]}>
           <View style={styles.content}>
             <Prompt onSubmit={handleSubmit} input={input} setInput={setInput} />
             <TouchableOpacity
@@ -292,7 +311,7 @@ const HomeScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  inputContainer: { paddingVertical: 10, paddingHorizontal: 15 },
+  inputContainer: { paddingVertical: 10 },
   content: {
     flexDirection: "row",
     alignItems: "center",

@@ -50,7 +50,7 @@ const HomeScreen = ({ navigation }) => {
   const SCREEN_WIDTH = Dimensions.get("window").width;
   const slideValue = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
 
-  const socket = useRef(null).current;
+  const socket = useRef(null);
   const apiRef = useRef(null);
 
   const showToast = useCallback((message, status = "success") => {

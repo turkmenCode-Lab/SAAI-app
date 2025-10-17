@@ -105,15 +105,26 @@ const EmailAuth = ({ navigation }) => {
         shake(shakeRePassword) && showToast("Passwords do not match", "error")
       );
 
-    const result = isLogin
-      ? await login(email, password)
-      : await register(email, password);
+    try {
+      const result = isLogin
+        ? await login(email, password)
+        : await register(email, password);
 
-    if (result && result.user) {
-      showToast(isLogin ? "Login Successful" : "Signup Successful", "success");
-      navigation?.goBack();
-    } else if (error) {
-      showToast(error, "error");
+      if (result && result.user) {
+        showToast(
+          isLogin ? "Login Successful" : "Signup Successful",
+          "success"
+        );
+        navigation?.goBack();
+      } else if (error) {
+        showToast(error, "error");
+      }
+    } catch (err) {
+      const errorMessage =
+        err.response?.status === 404
+          ? "User not found or resource unavailable"
+          : err.message || "An unexpected error occurred";
+      showToast(errorMessage, "error");
     }
   };
 

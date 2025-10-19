@@ -197,16 +197,28 @@ const HomeScreen = ({ navigation }) => {
         return;
       }
 
+      if (!token) {
+        showToast("Authentication required. Please log in.", "error");
+        navigation.replace("Auth");
+        return;
+      }
+
       let chatId = currentChatId;
       let isNewChat = !chatId;
       if (isNewChat) {
-        if (!token) return;
         await createNewChat();
         chatId = currentChatId;
         if (!chatId) {
           showToast("Failed to create chat.", "error");
+          setIsLoading(false); // Ensure reset if failed
           return;
         }
+      }
+
+      // Validate chatId exists post-creation
+      if (!chatId) {
+        showToast("Invalid chat ID.", "error");
+        return;
       }
 
       setIsLoading(true);
@@ -220,10 +232,11 @@ const HomeScreen = ({ navigation }) => {
 
       const newTitle = text.length > 35 ? text.substring(0, 35) + "..." : text;
 
+      // Optimistically add user message to local state
       setChats((prev) => {
         const filteredPrev = prev.filter((c) => c && c.id) || [];
         const chatIndex = filteredPrev.findIndex((c) => c.id === chatId);
-        if (chatIndex === -1) return filteredPrev;
+        if (chatIndex === -1) return filteredPrev; // Shouldn't happen, but safe
 
         const updatedChat = {
           ...filteredPrev[chatIndex],
@@ -241,33 +254,93 @@ const HomeScreen = ({ navigation }) => {
         ];
       });
 
+      // Update title on server if needed (async, non-blocking)
       if (
         (isNewChat ||
           chats.find((c) => c.id === chatId)?.title === "New Chat") &&
         apiRef.current
       ) {
-        try {
-          await apiRef.current.put(`/chat/${chatId}`, { title: newTitle });
-        } catch (err) {
-          console.error("Error updating chat title:", err);
-        }
+        (async () => {
+          try {
+            await apiRef.current.put(`/chat/${chatId}`, { title: newTitle });
+          } catch (err) {
+            console.error("Error updating chat title:", err);
+            // Non-critical, so no toast
+          }
+        })();
       }
 
       setInput("");
 
+      // Socket emit for server-side processing
       if (socket.current) {
+        // Re-join chat if needed (e.g., new chat)
+        socket.current.emit("joinChat", chatId);
+
+        const messageId = Date.now(); // Unique ID for this message's lifecycle
+        console.log(
+          `📤 Emitting sendMessage: chatId=${chatId}, msgId=${messageId}, text="${text}"`
+        );
+
         socket.current.emit("sendMessage", {
           chatId,
           role: "user",
           content: text,
+          messageId, // Optional: Pass for server to echo back if you want
         });
+
+        // Temp listener to reset loading on response (user or AI msg)
+        const handleResponse = (data) => {
+          console.log(
+            `📨 Received response for msgId? ${data.messageId || "N/A"}:`,
+            data
+          );
+          if (data.chatId === chatId && data.role !== "user") {
+            // Ignore user echo if any
+            setIsLoading(false);
+            socket.current.off("receiveMessage", handleResponse); // Cleanup
+          }
+        };
+
+        // Also listen for errors to reset loading
+        const handleError = (data) => {
+          if (data.chatId === chatId) {
+            console.error("Socket error for this msg:", data.message);
+            showToast(`Chat error: ${data.message}`, "error");
+            setIsLoading(false);
+            socket.current.off("chatError", handleError);
+          }
+        };
+
+        socket.current.on("receiveMessage", handleResponse);
+        socket.current.on("chatError", handleError);
+
+        // Fallback timeout (e.g., 30s) to prevent stuck loading
+        const timeoutId = setTimeout(() => {
+          console.warn("⏰ Message timeout – resetting loading");
+          setIsLoading(false);
+          socket.current.off("receiveMessage", handleResponse);
+          socket.current.off("chatError", handleError);
+          showToast("Response timed out. Try again?", "error");
+        }, 30000);
+
+        // Cleanup on any disconnect (in a real app, use a ref for this)
+        const origDisconnect = socket.current.disconnect;
+        socket.current.disconnect = () => {
+          clearTimeout(timeoutId);
+          socket.current.off("receiveMessage", handleResponse);
+          socket.current.off("chatError", handleError);
+          origDisconnect.call(socket.current);
+        };
+      } else {
+        // No socket? Fallback to REST (but warn)
+        console.warn("No socket available – can't send real-time");
+        showToast("Connection issue. Messages saved locally only.", "warning");
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     },
-    [currentChatId, token, createNewChat, showToast, chats]
+    [currentChatId, token, createNewChat, showToast, chats, navigation]
   );
-
   const handleNewChat = useCallback(() => {
     createNewChat();
     toggleNav();

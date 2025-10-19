@@ -22,7 +22,7 @@ import Toast from "../components/UI/Toast";
 const EmailAuth = ({ navigation }) => {
   const { colors } = useTheme();
   const theme = useAppTheme();
-  const { login, register, loading, error } = useAuthStore();
+  const authStore = useAuthStore();
 
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
@@ -48,15 +48,16 @@ const EmailAuth = ({ navigation }) => {
     setToast({ visible: true, message, status });
   };
 
+  const hideToast = () => {
+    setToast((prev) => ({ ...prev, visible: false }));
+  };
+
   useEffect(() => {
-    if (toast.visible) {
-      const timer = setTimeout(
-        () => setToast((prev) => ({ ...prev, visible: false })),
-        2300
-      );
-      return () => clearTimeout(timer);
+    if (authStore.error) {
+      showToast(authStore.error, "error");
+      authStore.setError?.("") || useAuthStore.setState({ error: "" });
     }
-  }, [toast.visible]);
+  }, [authStore.error]);
 
   const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
   const validatePassword = (pass) => pass.length >= 6;
@@ -107,17 +108,17 @@ const EmailAuth = ({ navigation }) => {
 
     try {
       const result = isLogin
-        ? await login(email, password)
-        : await register(email, password);
+        ? await authStore.login(email, password)
+        : await authStore.register(email, password);
 
       if (result && result.user) {
         showToast(
           isLogin ? "Login Successful" : "Signup Successful",
           "success"
         );
-        navigation?.goBack();
-      } else if (error) {
-        showToast(error, "error");
+        setTimeout(() => {
+          navigation?.navigate("Home");
+        }, 2000);
       }
     } catch (err) {
       const errorMessage =
@@ -225,13 +226,13 @@ const EmailAuth = ({ navigation }) => {
             ]}
             onPress={handleSubmit}
             disabled={
-              loading ||
+              authStore.loading ||
               !email ||
               !password ||
               (!isLogin && password !== rePassword)
             }
           >
-            {loading ? (
+            {authStore.loading ? (
               <ActivityIndicator color={colors.text} />
             ) : (
               <Text style={[styles.buttonText, { color: colors.text }]}>
@@ -269,6 +270,7 @@ const EmailAuth = ({ navigation }) => {
         message={toast.message}
         visible={toast.visible}
         status={toast.status}
+        onHide={hideToast}
       />
     </SafeAreaView>
   );

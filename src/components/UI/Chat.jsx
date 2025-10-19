@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ const Chat = ({
   isLoading,
   socket,
 }) => {
+  const [isThinking, setIsThinking] = useState(false);
   const messages =
     chats.find((chat) => chat.id === currentChatId)?.messages || [];
 
@@ -26,9 +27,7 @@ const Chat = ({
 
     if (socket) {
       socket.on("receiveMessage", (data) => {
-        // Ignore user messages (already added locally)
         if (data.role === "user") return;
-
         setChats((prev) =>
           prev.map((c) =>
             c.id === data.chatId
@@ -48,10 +47,17 @@ const Chat = ({
           )
         );
       });
+
+      socket.on("isThinking", ({ chatId, status }) => {
+        if (chatId === currentChatId) setIsThinking(status);
+      });
     }
 
     return () => {
-      if (socket) socket.off("receiveMessage");
+      if (socket) {
+        socket.off("receiveMessage");
+        socket.off("isThinking");
+      }
     };
   }, [currentChatId, socket]);
 
@@ -60,7 +66,7 @@ const Chat = ({
       scrollRef.current?.scrollToEnd({ animated: true });
     }, 150);
     return () => clearTimeout(timer);
-  }, [messages]);
+  }, [messages, isThinking]);
 
   return (
     <ScrollView
@@ -78,44 +84,36 @@ const Chat = ({
           How can I help you today?
         </Text>
       ) : (
-        messages.map(
-          (
-            item,
-            index // Fallback to index if no id
-          ) => (
-            <View
-              key={item.id || index}
+        messages.map((item, index) => (
+          <View
+            key={item.id || index}
+            style={[
+              styles.bubble,
+              item.role === "user"
+                ? { alignSelf: "flex-end", backgroundColor: colors.text }
+                : styles.assistantBubble,
+            ]}
+          >
+            <Text
               style={[
-                styles.bubble,
-                item.role === "user"
-                  ? {
-                      alignSelf: "flex-end",
-                      backgroundColor: colors.text,
-                    }
-                  : styles.assistantBubble,
+                styles.bubbleText,
+                {
+                  color: item.role === "user" ? colors.background : colors.text,
+                },
               ]}
             >
-              <Text
-                style={[
-                  styles.bubbleText,
-                  {
-                    color:
-                      item.role === "user" ? colors.background : colors.text,
-                  },
-                ]}
-              >
-                {item.text}
-              </Text>
-            </View>
-          )
-        )
+              {item.text}
+            </Text>
+          </View>
+        ))
       )}
-      {isLoading && <ActivityIndicator style={{ marginTop: 10 }} />}
+      {(isLoading || isThinking) && (
+        <ActivityIndicator style={{ marginTop: 10 }} color={colors.mostly} />
+      )}
     </ScrollView>
   );
 };
 
-// Styles unchanged
 const styles = StyleSheet.create({
   chatContainer: { flex: 1 },
   chatContent: { flexGrow: 1, paddingVertical: 20, paddingHorizontal: 15 },

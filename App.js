@@ -59,14 +59,10 @@ export default function App() {
           animation: "fade",
         }}
       >
-        {token ? (
-          <Stack.Screen name="Home" component={HomeScreen} />
-        ) : (
-          <>
-            <Stack.Screen name="Auth" component={AuthScreen} />
-            <Stack.Screen name="EmailAuth" component={EmailAuth} />
-          </>
-        )}
+        <Stack.Screen name="Home" component={HomeScreen} />
+
+        <Stack.Screen name="Auth" component={AuthScreen} />
+        <Stack.Screen name="EmailAuth" component={EmailAuth} />
       </Stack.Navigator>
     </NavigationContainer>
   );

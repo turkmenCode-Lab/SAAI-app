@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,42 +10,57 @@ import {
 import { useTheme } from "@react-navigation/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
-const Toast = ({ message, visible, status }) => {
+const Toast = ({ message, visible: propVisible, status, onHide }) => {
   const { colors } = useTheme();
   const opacity = useRef(new Animated.Value(0)).current;
-
-  const [show, setShow] = useState(visible);
-
-  useEffect(() => {
-    if (visible) setShow(true);
-
-    const timer = setTimeout(() => setShow(false), 3000);
-    return () => clearTimeout(timer);
-  }, [visible]);
+  const [internalVisible, setInternalVisible] = useState(false);
 
   useEffect(() => {
-    if (visible) {
+    if (propVisible && !internalVisible) {
+      setInternalVisible(true);
+      opacity.setValue(0);
       Animated.timing(opacity, {
         toValue: 1,
         duration: 300,
         easing: Easing.out(Easing.exp),
         useNativeDriver: true,
       }).start();
+    }
+  }, [propVisible]);
 
-      const timer = setTimeout(() => {
+  useEffect(() => {
+    let timer;
+    if (internalVisible) {
+      timer = setTimeout(() => {
         Animated.timing(opacity, {
           toValue: 0,
           duration: 300,
           easing: Easing.in(Easing.exp),
           useNativeDriver: true,
-        }).start();
-      }, 2000);
-
-      return () => clearTimeout(timer);
+        }).start(() => {
+          setInternalVisible(false);
+          if (onHide) onHide();
+        });
+      }, 2500);
     }
-  }, [visible]);
+    return () => clearTimeout(timer);
+  }, [internalVisible]);
 
-  if (!show) return null;
+  const hideToast = () => {
+    if (internalVisible) {
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 300,
+        easing: Easing.in(Easing.exp),
+        useNativeDriver: true,
+      }).start(() => {
+        setInternalVisible(false);
+        if (onHide) onHide();
+      });
+    }
+  };
+
+  if (!internalVisible) return null;
 
   return (
     <Animated.View
@@ -68,12 +83,8 @@ const Toast = ({ message, visible, status }) => {
       <Text style={[styles.message, { color: colors.background }]}>
         {message}
       </Text>
-      <TouchableOpacity activeOpacity={0.75} onPress={setShow(false)}>
-        <Ionicons
-          name="close"
-          size={24}
-          color={status === "error" ? colors.background : colors.success}
-        />
+      <TouchableOpacity activeOpacity={0.75} onPress={hideToast}>
+        <Ionicons name="close" size={24} color={colors.background} />
       </TouchableOpacity>
     </Animated.View>
   );
@@ -90,11 +101,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    zIndex: 1000,
   },
   message: {
     fontSize: 16,
     fontWeight: "600",
     textAlign: "center",
+    flex: 1,
   },
 });
 

@@ -137,7 +137,7 @@ const Sidebar = ({
         data={chats}
         renderItem={renderChatItem}
         keyExtractor={(item) => item.id.toString()}
-        style={styles.chatList}
+        style={[styles.chatList, { color: colors.text }]}
       />
       <View
         style={[

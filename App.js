@@ -9,29 +9,34 @@ import SettingScreen from "./src/screens/SettingScreen";
 import { useAppTheme } from "./src/theme";
 import * as Font from "expo-font";
 import { useAuthStore } from "./store/authStore";
+import { useThemeStore } from "./store/themeStore";
 
 const Stack = createStackNavigator();
 
 export default function App() {
   const AppTheme = useAppTheme();
   const token = useAuthStore((state) => state.token);
+  const getStoredSettings = useThemeStore((state) => state.getStoredSettings);
 
-  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [appReady, setAppReady] = useState(false);
 
   useEffect(() => {
-    async function loadFonts() {
+    async function initApp() {
       await Font.loadAsync({
         InterRegular: require("./assets/fonts/Inter-Regular.ttf"),
         InterBold: require("./assets/fonts/Inter-Bold.ttf"),
         InterSemiBold: require("./assets/fonts/Inter-SemiBold.ttf"),
         InterMedium: require("./assets/fonts/Inter-Medium.ttf"),
       });
-      setFontsLoaded(true);
-    }
-    loadFonts();
-  }, []);
 
-  if (!fontsLoaded) {
+      await getStoredSettings();
+
+      setAppReady(true);
+    }
+    initApp();
+  }, [getStoredSettings]);
+
+  if (!appReady) {
     return (
       <View
         style={{
@@ -52,9 +57,12 @@ export default function App() {
     ...(Text.defaultProps.style || []),
   ];
 
+  const initialRouteName = token ? "Home" : "Auth";
+
   return (
     <NavigationContainer theme={AppTheme}>
       <Stack.Navigator
+        initialRouteName={initialRouteName}
         screenOptions={{
           headerShown: false,
           animation: "fade",

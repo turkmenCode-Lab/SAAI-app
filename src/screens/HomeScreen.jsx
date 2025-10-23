@@ -20,6 +20,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 import { useTheme } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native"; // Add this for stable navigation
 import { useAuthStore } from "../../store/authStore";
 import Prompt from "../components/Prompt";
 import Header from "../components/Header";
@@ -30,7 +31,9 @@ import { EXPO_API_URI } from "../../config";
 import { createAPI } from "../utils/api";
 import Toast from "../components/UI/Toast";
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = () => {
+  // Remove navigation prop; use hook inside
+  const navigation = useNavigation();
   const { token } = useAuthStore();
 
   const [input, setInput] = useState("");
@@ -39,6 +42,7 @@ const HomeScreen = ({ navigation }) => {
   const [chats, setChats] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false); // New: Auth check flag
   const [toast, setToast] = useState({
     visible: false,
     message: "",
@@ -67,11 +71,22 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [toast.visible]);
 
+  // Initial auth check (mount-only)
   useEffect(() => {
-    if (!token) {
+    if (!hasCheckedAuth) {
+      if (!token) {
+        navigation.replace("Auth");
+      }
+      setHasCheckedAuth(true);
+    }
+  }, [hasCheckedAuth, token, navigation]);
+
+  // Runtime auth check (if token expires/changes)
+  useEffect(() => {
+    if (hasCheckedAuth && !token) {
       navigation.replace("Auth");
     }
-  }, [token, navigation]);
+  }, [hasCheckedAuth, token, navigation]);
 
   const fetchChats = useCallback(async () => {
     if (!token || !apiRef.current) return;
@@ -171,15 +186,17 @@ const HomeScreen = ({ navigation }) => {
   }, []);
 
   const toggleNav = useCallback(() => {
-    const newOpen = !isNavOpen;
-    Animated.timing(slideValue, {
-      toValue: newOpen ? 0 : -SCREEN_WIDTH,
-      duration: 525,
-      easing: Easing.out(Easing.exp),
-      useNativeDriver: false,
-    }).start();
-    setIsNavOpen(newOpen);
-  }, [isNavOpen]);
+    setIsNavOpen((prev) => {
+      const newOpen = !prev;
+      Animated.timing(slideValue, {
+        toValue: newOpen ? 0 : -SCREEN_WIDTH,
+        duration: 525,
+        easing: Easing.out(Easing.exp),
+        useNativeDriver: false,
+      }).start();
+      return newOpen;
+    });
+  }, []); // No deps: functional update makes it stable
 
   const rotateInterpolate = useMemo(
     () =>
@@ -210,12 +227,11 @@ const HomeScreen = ({ navigation }) => {
         chatId = currentChatId;
         if (!chatId) {
           showToast("Failed to create chat.", "error");
-          setIsLoading(false); // Ensure reset if failed
+          setIsLoading(false);
           return;
         }
       }
 
-      // Validate chatId exists post-creation
       if (!chatId) {
         showToast("Invalid chat ID.", "error");
         return;
@@ -232,11 +248,10 @@ const HomeScreen = ({ navigation }) => {
 
       const newTitle = text.length > 35 ? text.substring(0, 35) + "..." : text;
 
-      // Optimistically add user message to local state
       setChats((prev) => {
         const filteredPrev = prev.filter((c) => c && c.id) || [];
         const chatIndex = filteredPrev.findIndex((c) => c.id === chatId);
-        if (chatIndex === -1) return filteredPrev; // Shouldn't happen, but safe
+        if (chatIndex === -1) return filteredPrev;
 
         const updatedChat = {
           ...filteredPrev[chatIndex],
@@ -254,7 +269,6 @@ const HomeScreen = ({ navigation }) => {
         ];
       });
 
-      // Update title on server if needed (async, non-blocking)
       if (
         (isNewChat ||
           chats.find((c) => c.id === chatId)?.title === "New Chat") &&
@@ -265,19 +279,16 @@ const HomeScreen = ({ navigation }) => {
             await apiRef.current.put(`/chat/${chatId}`, { title: newTitle });
           } catch (err) {
             console.error("Error updating chat title:", err);
-            // Non-critical, so no toast
           }
         })();
       }
 
       setInput("");
 
-      // Socket emit for server-side processing
       if (socket.current) {
-        // Re-join chat if needed (e.g., new chat)
         socket.current.emit("joinChat", chatId);
 
-        const messageId = Date.now(); // Unique ID for this message's lifecycle
+        const messageId = Date.now();
         console.log(
           `📤 Emitting sendMessage: chatId=${chatId}, msgId=${messageId}, text="${text}"`
         );
@@ -286,36 +297,39 @@ const HomeScreen = ({ navigation }) => {
           chatId,
           role: "user",
           content: text,
-          messageId, // Optional: Pass for server to echo back if you want
+          messageId,
         });
 
-        // Temp listener to reset loading on response (user or AI msg)
-        const handleResponse = (data) => {
-          console.log(
-            `📨 Received response for msgId? ${data.messageId || "N/A"}:`,
-            data
-          );
-          if (data.chatId === chatId && data.role !== "user") {
-            // Ignore user echo if any
-            setIsLoading(false);
-            socket.current.off("receiveMessage", handleResponse); // Cleanup
-          }
-        };
+        const handleResponse = useCallback(
+          (data) => {
+            // Memoize listeners
+            console.log(
+              `📨 Received response for msgId? ${data.messageId || "N/A"}:`,
+              data
+            );
+            if (data.chatId === chatId && data.role !== "user") {
+              setIsLoading(false);
+              socket.current.off("receiveMessage", handleResponse);
+            }
+          },
+          [chatId]
+        );
 
-        // Also listen for errors to reset loading
-        const handleError = (data) => {
-          if (data.chatId === chatId) {
-            console.error("Socket error for this msg:", data.message);
-            showToast(`Chat error: ${data.message}`, "error");
-            setIsLoading(false);
-            socket.current.off("chatError", handleError);
-          }
-        };
+        const handleError = useCallback(
+          (data) => {
+            if (data.chatId === chatId) {
+              console.error("Socket error for this msg:", data.message);
+              showToast(`Chat error: ${data.message}`, "error");
+              setIsLoading(false);
+              socket.current.off("chatError", handleError);
+            }
+          },
+          [chatId, showToast]
+        );
 
         socket.current.on("receiveMessage", handleResponse);
         socket.current.on("chatError", handleError);
 
-        // Fallback timeout (e.g., 30s) to prevent stuck loading
         const timeoutId = setTimeout(() => {
           console.warn("⏰ Message timeout – resetting loading");
           setIsLoading(false);
@@ -324,7 +338,7 @@ const HomeScreen = ({ navigation }) => {
           showToast("Response timed out. Try again?", "error");
         }, 30000);
 
-        // Cleanup on any disconnect (in a real app, use a ref for this)
+        // Cleanup on disconnect
         const origDisconnect = socket.current.disconnect;
         socket.current.disconnect = () => {
           clearTimeout(timeoutId);
@@ -333,7 +347,6 @@ const HomeScreen = ({ navigation }) => {
           origDisconnect.call(socket.current);
         };
       } else {
-        // No socket? Fallback to REST (but warn)
         console.warn("No socket available – can't send real-time");
         showToast("Connection issue. Messages saved locally only.", "warning");
         setIsLoading(false);
@@ -341,10 +354,21 @@ const HomeScreen = ({ navigation }) => {
     },
     [currentChatId, token, createNewChat, showToast, chats, navigation]
   );
+
   const handleNewChat = useCallback(() => {
     createNewChat();
     toggleNav();
   }, [createNewChat, toggleNav]);
+
+  // Update rotation on nav toggle (side effect, not render)
+  useEffect(() => {
+    Animated.timing(rotation, {
+      toValue: isNavOpen ? 1 : 0,
+      duration: 525,
+      easing: Easing.out(Easing.exp),
+      useNativeDriver: true,
+    }).start();
+  }, [isNavOpen, rotation]);
 
   return (
     <SafeAreaView

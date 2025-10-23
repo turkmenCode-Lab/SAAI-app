@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -6,29 +6,166 @@ import {
   TouchableOpacity,
   Linking,
   StyleSheet,
+  Alert,
+  Platform,
+  Animated,
+  ActivityIndicator,
 } from "react-native";
 import { useAppTheme } from "../theme";
 import { Picker } from "@react-native-picker/picker";
+import Feather from "@expo/vector-icons/Feather";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useNavigation } from "@react-navigation/native";
+import { useAuthStore } from "../../store/authStore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useThemeStore } from "../../store/themeStore";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
   const theme = useAppTheme();
-  const [isDarkMode, setIsDarkMode] = useState(theme.dark || false);
+  const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
+
+  const token = useAuthStore((state) => state.token);
+  const {
+    setDarkMode,
+    setAccentColor: setStoredAccentColor,
+    getStoredSettings,
+  } = useThemeStore();
+
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [language, setLanguage] = useState("en");
   const [accentColor, setAccentColor] = useState("mostly");
+  const [loading, setLoading] = useState(true);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  const handleThemeToggle = () => {
-    setIsDarkMode((prev) => !prev);
-  };
+  useEffect(() => {
+    if (!token) {
+      navigation.replace("Auth");
+      return;
+    }
 
-  const openPrivacyPolicy = () => {
-    Linking.openURL("https://your-app.com/privacy-policy");
-  };
+    const loadSettings = async () => {
+      const stored = await getStoredSettings();
+      setIsDarkMode(stored.darkMode || false);
+      setLanguage(stored.language || "en");
+      setAccentColor(stored.accentColor || "mostly");
+      setLoading(false);
+    };
+    loadSettings();
+  }, [token, navigation, getStoredSettings]);
+
+  useEffect(() => {
+    if (!loading) {
+      AsyncStorage.setItem(
+        "appSettings",
+        JSON.stringify({ darkMode: isDarkMode, language, accentColor })
+      );
+    }
+  }, [isDarkMode, language, accentColor, loading]);
 
   const accentColorValue = theme.colors[accentColor];
 
+  const animateAccent = () => {
+    Animated.sequence([
+      Animated.spring(scaleAnim, { toValue: 1.2, useNativeDriver: true }),
+      Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true }),
+    ]).start();
+  };
+
+  const handleAccentChange = (value) => {
+    setAccentColor(value);
+    setStoredAccentColor(value);
+    animateAccent();
+  };
+
+  const handleThemeToggle = () => {
+    const newDark = !isDarkMode;
+    setIsDarkMode(newDark);
+    setDarkMode(newDark);
+  };
+
+  const handleLogout = () => {
+    Alert.alert("Logout", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: () => {
+          useAuthStore.getState().logout();
+          navigation.replace("Auth");
+        },
+      },
+    ]);
+  };
+
+  const openPrivacyPolicy = async () => {
+    const url = "https://your-app.com/privacy-policy";
+    const supported = await Linking.canOpenURL(url);
+    supported
+      ? await Linking.openURL(url)
+      : Alert.alert("Error", "Can't open URL.");
+  };
+
+  if (loading) {
+    return (
+      <View
+        style={[styles.center, { backgroundColor: theme.colors.background }]}
+      >
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
+
+  const renderCard = (children) => (
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: theme.colors.surface || theme.colors.card,
+        },
+      ]}
+    >
+      {children}
+    </View>
+  );
+
+  const renderRow = (icon, label, rightContent, onPress) => (
+    <TouchableOpacity
+      activeOpacity={onPress ? 0.7 : 1}
+      onPress={onPress}
+      style={styles.row}
+    >
+      <View style={styles.left}>
+        <MaterialIcons name={icon} size={20} color={accentColorValue} />
+        <Text
+          style={[
+            styles.label,
+            { color: theme.colors.text, fontFamily: theme.fonts.medium },
+          ]}
+        >
+          {label}
+        </Text>
+      </View>
+      {rightContent}
+    </TouchableOpacity>
+  );
+
+  const pickerCommon = {
+    color: theme.colors.text,
+    height: Platform.OS === "ios" ? 180 : 55,
+    width: Platform.OS === "ios" ? 180 : 140,
+  };
+
   return (
     <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.colors.background,
+          paddingBottom: insets.bottom + 16,
+        },
+      ]}
     >
       <Text
         style={[
@@ -40,106 +177,118 @@ export default function SettingsScreen() {
       </Text>
 
       <View style={styles.section}>
-        <Text
-          style={[
-            styles.label,
-            { color: theme.colors.text, fontFamily: theme.fonts.medium },
-          ]}
-        >
-          Change Language
-        </Text>
-        <View
-          style={[
-            styles.pickerContainer,
-            { backgroundColor: theme.colors.primary },
-          ]}
-        >
-          <Picker
-            selectedValue={language}
-            dropdownIconColor={theme.colors.text}
-            style={{ color: theme.colors.text }}
-            onValueChange={(value) => setLanguage(value)}
+        {renderCard(
+          renderRow(
+            "language",
+            "Language",
+            <Picker
+              selectedValue={language}
+              dropdownIconColor={theme.colors.text}
+              style={[styles.picker, pickerCommon]}
+              onValueChange={setLanguage}
+            >
+              <Picker.Item label="English" value="en" />
+              <Picker.Item label="Русский" value="ru" />
+              <Picker.Item label="Türkmençe" value="tk" />
+            </Picker>
+          )
+        )}
+      </View>
+
+      <View style={styles.section}>
+        {renderCard(
+          renderRow(
+            "palette",
+            "Accent Color",
+            <Picker
+              selectedValue={accentColor}
+              dropdownIconColor={theme.colors.text}
+              style={[styles.picker, pickerCommon]}
+              onValueChange={handleAccentChange}
+            >
+              <Picker.Item label="Blue" value="mostly" />
+              <Picker.Item label="Purple" value="vitally" />
+              <Picker.Item label="Orange" value="principally" />
+            </Picker>
+          )
+        )}
+
+        {renderCard(
+          renderRow(
+            "preview",
+            "Accent Preview",
+            <Animated.View
+              style={[
+                styles.accentPreview,
+                {
+                  backgroundColor: accentColorValue,
+                  transform: [{ scale: scaleAnim }],
+                },
+              ]}
+            />
+          )
+        )}
+      </View>
+
+      <View style={styles.section}>
+        {renderCard(
+          renderRow(
+            "monitor",
+            "Dark Mode",
+            <View style={styles.switchContainer}>
+              <Feather
+                name="sun"
+                size={18}
+                color={!isDarkMode ? accentColorValue : theme.colors.neutral}
+              />
+              <Switch
+                value={isDarkMode}
+                onValueChange={handleThemeToggle}
+                thumbColor={
+                  isDarkMode ? accentColorValue : theme.colors.neutral
+                }
+                trackColor={{
+                  false: theme.colors.neutral,
+                  true: accentColorValue,
+                }}
+                ios_backgroundColor={theme.colors.neutral}
+              />
+              <Feather
+                name="moon"
+                size={18}
+                color={isDarkMode ? accentColorValue : theme.colors.neutral}
+              />
+            </View>,
+            handleThemeToggle
+          )
+        )}
+      </View>
+
+      <View style={styles.footer}>
+        <TouchableOpacity onPress={openPrivacyPolicy} style={styles.footerRow}>
+          <Feather name="shield" size={18} color={accentColorValue} />
+          <Text
+            style={[
+              styles.footerText,
+              { color: accentColorValue, fontFamily: theme.fonts.semibold },
+            ]}
           >
-            <Picker.Item label="English" value="en" />
-            <Picker.Item label="Русский" value="ru" />
-            <Picker.Item label="Türkmençe" value="tk" />
-          </Picker>
-        </View>
-      </View>
+            Privacy Policy
+          </Text>
+        </TouchableOpacity>
 
-      <View style={styles.section}>
-        <Text
-          style={[
-            styles.label,
-            { color: theme.colors.text, fontFamily: theme.fonts.medium },
-          ]}
-        >
-          Accent Color
-        </Text>
-        <View
-          style={[
-            styles.pickerContainer,
-            { backgroundColor: theme.colors.primary },
-          ]}
-        >
-          <Picker
-            selectedValue={accentColor}
-            dropdownIconColor={theme.colors.text}
-            style={{ color: theme.colors.text }}
-            onValueChange={(value) => setAccentColor(value)}
+        <TouchableOpacity onPress={handleLogout} style={styles.footerRow}>
+          <Feather name="log-out" size={18} color="red" />
+          <Text
+            style={[
+              styles.footerText,
+              { color: "red", fontFamily: theme.fonts.semibold },
+            ]}
           >
-            <Picker.Item label="Blue" value="mostly" />
-            <Picker.Item label="Purple" value="vitally" />
-            <Picker.Item label="Orange" value="principally" />
-          </Picker>
-        </View>
+            Log Out
+          </Text>
+        </TouchableOpacity>
       </View>
-
-      <View style={styles.section}>
-        <Text
-          style={[
-            styles.label,
-            { color: theme.colors.text, fontFamily: theme.fonts.medium },
-          ]}
-        >
-          Accent Preview
-        </Text>
-        <View
-          style={[styles.accentPreview, { backgroundColor: accentColorValue }]}
-        />
-      </View>
-
-      <View style={styles.section}>
-        <Text
-          style={[
-            styles.label,
-            { color: theme.colors.text, fontFamily: theme.fonts.medium },
-          ]}
-        >
-          Dark Mode
-        </Text>
-        <Switch
-          value={isDarkMode}
-          onValueChange={handleThemeToggle}
-          thumbColor={accentColorValue}
-          trackColor={{
-            false: theme.colors.neutral,
-            true: theme.colors.secondary,
-          }}
-        />
-      </View>
-
-      {/* Privacy Policy */}
-      <TouchableOpacity onPress={openPrivacyPolicy} style={styles.section}>
-        <Text
-          style={[
-            styles.link,
-            { color: theme.colors.vitally, fontFamily: theme.fonts.semibold },
-          ]}
-        >
-          Privacy Policy
-        </Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -147,34 +296,73 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
-    fontSize: 26,
-    marginBottom: 20,
+    fontSize: 28,
+    textAlign: "center",
+    marginBottom: 32,
+    letterSpacing: 0.5,
   },
-  section: {
-    marginBottom: 25,
+  section: {},
+  card: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    elevation: 0,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    minHeight: 48,
+  },
+  left: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
   },
   label: {
     fontSize: 16,
+    letterSpacing: 0.2,
   },
-  pickerContainer: {
-    width: 150,
-    borderRadius: 10,
+  picker: {
+    height: "100%",
   },
   accentPreview: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    borderWidth: 2,
-    borderColor: "#ccc",
+    borderWidth: 1,
+    borderColor: "transparent",
   },
-  link: {
-    fontSize: 16,
-    textDecorationLine: "underline",
+  switchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  footer: {
+    marginTop: 40,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: "#e5e5e5",
+  },
+  footerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 12,
+  },
+  footerText: {
+    fontSize: 15,
+    letterSpacing: 0.3,
   },
 });

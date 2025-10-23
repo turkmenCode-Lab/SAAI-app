@@ -64,7 +64,7 @@ export default function SettingsScreen() {
     }
   }, [isDarkMode, language, accentColor, loading]);
 
-  const accentColorValue = theme.colors[accentColor];
+  const accentColorValue = theme.colors.accent;
 
   const animateAccent = () => {
     Animated.sequence([
@@ -264,7 +264,7 @@ export default function SettingsScreen() {
         )}
       </View>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { borderTopColor: theme.colors.border }]}>
         <TouchableOpacity onPress={openPrivacyPolicy} style={styles.footerRow}>
           <Feather name="shield" size={18} color={accentColorValue} />
           <Text
@@ -353,7 +353,6 @@ const styles = StyleSheet.create({
     marginTop: 40,
     paddingTop: 20,
     borderTopWidth: 1,
-    borderTopColor: "#e5e5e5",
   },
   footerRow: {
     flexDirection: "row",

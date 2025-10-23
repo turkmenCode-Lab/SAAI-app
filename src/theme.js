@@ -1,5 +1,6 @@
 import { DefaultTheme, DarkTheme } from "@react-navigation/native";
 import { useColorScheme } from "react-native";
+import { useThemeStore } from "../store/themeStore"; // Adjust path as needed
 
 export const lightTheme = {
   ...DefaultTheme,
@@ -47,5 +48,18 @@ export const darkTheme = {
 
 export const useAppTheme = () => {
   const scheme = useColorScheme();
-  return scheme === "dark" ? darkTheme : lightTheme;
+  const { darkMode, accentColor } = useThemeStore();
+
+  const isDark = darkMode !== null ? darkMode : scheme === "dark";
+  const base = isDark ? darkTheme : lightTheme;
+  const selectedAccent = base.colors[accentColor || "mostly"];
+
+  return {
+    ...base,
+    colors: {
+      ...base.colors,
+      accent: selectedAccent,
+      border: isDark ? "#333333" : "#e5e5e5",
+    },
+  };
 };

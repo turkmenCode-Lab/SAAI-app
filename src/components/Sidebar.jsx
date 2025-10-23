@@ -61,11 +61,7 @@ const Sidebar = ({
         style={styles.deleteBtn}
         onPress={() => onDeleteChat(item.id)}
       >
-        <MaterialCommunityIcons
-          name="delete"
-          size={20}
-          color={colors.danger || "#FF3B30"}
-        />
+        <MaterialCommunityIcons name="delete" size={20} color={colors.error} />
       </TouchableOpacity>
     </View>
   );
@@ -96,10 +92,7 @@ const Sidebar = ({
       ]}
     >
       <View
-        style={[
-          styles.sidebarHeader,
-          { borderBottomColor: colors.text + "33" },
-        ]}
+        style={[styles.sidebarHeader, { borderBottomColor: colors.border }]}
       >
         <TextInput
           style={[
@@ -142,7 +135,7 @@ const Sidebar = ({
       <View
         style={[
           styles.sidebarUser,
-          { borderTopColor: colors.neutral, marginBottom: 15 },
+          { borderTopColor: colors.border, marginBottom: 15 },
         ]}
       >
         <View
@@ -154,7 +147,7 @@ const Sidebar = ({
             alignItems: "center",
             justifyContent: "center",
             borderWidth: 3,
-            borderColor: colors.mostly,
+            borderColor: colors.accent,
           }}
         >
           <Text

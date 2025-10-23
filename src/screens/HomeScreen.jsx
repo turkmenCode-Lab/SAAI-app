@@ -423,7 +423,7 @@ const HomeScreen = () => {
             <Prompt onSubmit={handleSubmit} input={input} setInput={setInput} />
             <TouchableOpacity
               activeOpacity={0.7}
-              style={[styles.submit, { backgroundColor: colors.mostly }]}
+              style={[styles.submit, { backgroundColor: colors.accent }]}
               onPress={() => handleSubmit(input)}
               disabled={isLoading}
             >

@@ -5,6 +5,7 @@ import { Text, ActivityIndicator, View } from "react-native";
 import HomeScreen from "./src/screens/HomeScreen";
 import AuthScreen from "./src/screens/AuthScreen";
 import EmailAuth from "./src/screens/EmailAuth";
+import SettingScreen from "./src/screens/SettingScreen";
 import { useAppTheme } from "./src/theme";
 import * as Font from "expo-font";
 import { useAuthStore } from "./store/authStore";
@@ -63,6 +64,7 @@ export default function App() {
 
         <Stack.Screen name="Auth" component={AuthScreen} />
         <Stack.Screen name="EmailAuth" component={EmailAuth} />
+        <Stack.Screen name="Settings" component={SettingScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

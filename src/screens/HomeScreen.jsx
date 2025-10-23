@@ -381,7 +381,7 @@ const HomeScreen = ({ navigation }) => {
         onDeleteChat={deleteChat}
       />
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={{ flex: 1, paddingVertical: 15 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
       >

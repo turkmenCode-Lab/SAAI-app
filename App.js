@@ -61,10 +61,9 @@ export default function App() {
         }}
       >
         <Stack.Screen name="Home" component={HomeScreen} />
-
+        <Stack.Screen name="Settings" component={SettingScreen} />
         <Stack.Screen name="Auth" component={AuthScreen} />
         <Stack.Screen name="EmailAuth" component={EmailAuth} />
-        <Stack.Screen name="Settings" component={SettingScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

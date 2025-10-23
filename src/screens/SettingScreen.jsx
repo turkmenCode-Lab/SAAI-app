@@ -7,22 +7,24 @@ import {
   Linking,
   StyleSheet,
 } from "react-native";
-import { useAppTheme } from "../theme"; // adjust path if needed
+import { useAppTheme } from "../theme";
 import { Picker } from "@react-native-picker/picker";
 
 export default function SettingsScreen() {
   const theme = useAppTheme();
   const [isDarkMode, setIsDarkMode] = useState(theme.dark || false);
   const [language, setLanguage] = useState("en");
+  const [accentColor, setAccentColor] = useState("mostly");
 
   const handleThemeToggle = () => {
     setIsDarkMode((prev) => !prev);
-    // if you have theme persistence, add logic here
   };
 
   const openPrivacyPolicy = () => {
     Linking.openURL("https://your-app.com/privacy-policy");
   };
+
+  const accentColorValue = theme.colors[accentColor];
 
   return (
     <View
@@ -37,7 +39,6 @@ export default function SettingsScreen() {
         Settings
       </Text>
 
-      {/* Language Selection */}
       <View style={styles.section}>
         <Text
           style={[
@@ -66,7 +67,48 @@ export default function SettingsScreen() {
         </View>
       </View>
 
-      {/* Theme Toggle */}
+      <View style={styles.section}>
+        <Text
+          style={[
+            styles.label,
+            { color: theme.colors.text, fontFamily: theme.fonts.medium },
+          ]}
+        >
+          Accent Color
+        </Text>
+        <View
+          style={[
+            styles.pickerContainer,
+            { backgroundColor: theme.colors.primary },
+          ]}
+        >
+          <Picker
+            selectedValue={accentColor}
+            dropdownIconColor={theme.colors.text}
+            style={{ color: theme.colors.text }}
+            onValueChange={(value) => setAccentColor(value)}
+          >
+            <Picker.Item label="Blue" value="mostly" />
+            <Picker.Item label="Purple" value="vitally" />
+            <Picker.Item label="Orange" value="principally" />
+          </Picker>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text
+          style={[
+            styles.label,
+            { color: theme.colors.text, fontFamily: theme.fonts.medium },
+          ]}
+        >
+          Accent Preview
+        </Text>
+        <View
+          style={[styles.accentPreview, { backgroundColor: accentColorValue }]}
+        />
+      </View>
+
       <View style={styles.section}>
         <Text
           style={[
@@ -79,7 +121,7 @@ export default function SettingsScreen() {
         <Switch
           value={isDarkMode}
           onValueChange={handleThemeToggle}
-          thumbColor={theme.colors.mostly}
+          thumbColor={accentColorValue}
           trackColor={{
             false: theme.colors.neutral,
             true: theme.colors.secondary,
@@ -123,6 +165,13 @@ const styles = StyleSheet.create({
   pickerContainer: {
     width: 150,
     borderRadius: 10,
+  },
+  accentPreview: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: "#ccc",
   },
   link: {
     fontSize: 16,

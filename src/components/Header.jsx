@@ -9,6 +9,7 @@ import {
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useTheme } from "@react-navigation/native";
+import { Navigate } from "react-router-native";
 
 const Header = ({ isNavOpen, rotateInterpolate, onToggleNav }) => {
   const { colors } = useTheme();
@@ -42,7 +43,7 @@ const Header = ({ isNavOpen, rotateInterpolate, onToggleNav }) => {
             Get Pro
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.7}>
+        <TouchableOpacity onPress={Navigate("Settings")} activeOpacity={0.7}>
           <MaterialCommunityIcons
             name="dots-vertical"
             style={{ marginRight: -15 }}

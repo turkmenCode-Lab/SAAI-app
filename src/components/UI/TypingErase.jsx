@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, Text, Animated, StyleSheet, Dimensions } from "react-native";
 import Octicons from "@expo/vector-icons/Octicons";
-import { useLangStore } from "../../store/langStore"; // Import
+import { useLangStore } from "../../../store/langStore";
 
 export default function TypingErase({
   texts = "Hello, world!",
@@ -13,7 +13,7 @@ export default function TypingErase({
   textStyle,
   cursorStyle,
 }) {
-  const { t } = useLangStore(); // Get translation function
+  const { t } = useLangStore();
   const [displayed, setDisplayed] = useState("");
   const [fontSize, setFontSize] = useState(28);
   const textIndexRef = useRef(0);
@@ -23,7 +23,6 @@ export default function TypingErase({
   const mountedRef = useRef(true);
   const cursorOpacity = useRef(new Animated.Value(1)).current;
 
-  // Resolve texts with t() — supports both strings and translation keys
   const resolvedTexts = Array.isArray(texts)
     ? texts.map((item) => (typeof item === "string" ? t(item) || item : item))
     : [t(texts) || texts];

@@ -68,7 +68,6 @@ const AuthScreen = () => {
     }
   };
 
-  // Default font
   Text.defaultProps = Text.defaultProps || {};
   Text.defaultProps.style = [
     { fontFamily: theme.fonts.regular, color: theme.colors.text },

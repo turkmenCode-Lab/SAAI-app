@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, Text, Animated, StyleSheet, Dimensions } from "react-native";
 import Octicons from "@expo/vector-icons/Octicons";
+import { useLangStore } from "../../store/langStore"; // Import
 
 export default function TypingErase({
   texts = "Hello, world!",
@@ -12,8 +13,7 @@ export default function TypingErase({
   textStyle,
   cursorStyle,
 }) {
-  const textArray = Array.isArray(texts) ? texts : [texts];
-
+  const { t } = useLangStore(); // Get translation function
   const [displayed, setDisplayed] = useState("");
   const [fontSize, setFontSize] = useState(28);
   const textIndexRef = useRef(0);
@@ -21,8 +21,12 @@ export default function TypingErase({
   const typingRef = useRef(true);
   const timeoutRef = useRef(null);
   const mountedRef = useRef(true);
-
   const cursorOpacity = useRef(new Animated.Value(1)).current;
+
+  // Resolve texts with t() — supports both strings and translation keys
+  const resolvedTexts = Array.isArray(texts)
+    ? texts.map((item) => (typeof item === "string" ? t(item) || item : item))
+    : [t(texts) || texts];
 
   useEffect(() => {
     const { width } = Dimensions.get("window");
@@ -66,7 +70,7 @@ export default function TypingErase({
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [
-    texts,
+    resolvedTexts, // Re-run when translations change
     typingSpeed,
     erasingSpeed,
     pauseBeforeErase,
@@ -84,7 +88,8 @@ export default function TypingErase({
 
   function scheduleNext() {
     if (!mountedRef.current) return;
-    const currentText = textArray[textIndexRef.current];
+    const currentText = resolvedTexts[textIndexRef.current];
+
     if (typingRef.current) {
       if (charIndexRef.current < currentText.length) {
         timeoutRef.current = setTimeout(() => {
@@ -107,7 +112,7 @@ export default function TypingErase({
         }, erasingSpeed);
       } else {
         const nextIndex = textIndexRef.current + 1;
-        if (nextIndex >= textArray.length) {
+        if (nextIndex >= resolvedTexts.length) {
           if (!loop) return;
           textIndexRef.current = 0;
         } else {
@@ -144,7 +149,11 @@ export default function TypingErase({
           cursorStyle,
         ]}
       >
-        <Octicons name="sparkle-fill" size={fontSize} color={cursorStyle} />
+        <Octicons
+          name="sparkle-fill"
+          size={fontSize}
+          color={cursorStyle?.color || "#888"}
+        />
       </Animated.Text>
     </View>
   );

@@ -84,10 +84,8 @@ const AuthScreen = () => {
         <Text style={styles.logoText}>SA-AI</Text>
       </View>
 
-      {/* Subtitle */}
       <Text style={styles.subtitle}>{t("authSubtitle")}</Text>
 
-      {/* Typing Animation */}
       <TypingErase
         texts={[t("startDeveloping"), t("hiImHere"), t("mayHelpSolve")]}
         typingSpeed={45}
@@ -99,9 +97,7 @@ const AuthScreen = () => {
         cursorStyle={styles.typingCursor}
       />
 
-      {/* SSO Buttons */}
       <View style={styles.sso}>
-        {/* Email */}
         <TouchableOpacity
           onPress={() => navigation.navigate("EmailAuth")}
           activeOpacity={0.75}
@@ -113,7 +109,6 @@ const AuthScreen = () => {
           </Text>
         </TouchableOpacity>
 
-        {/* Google */}
         <TouchableOpacity
           activeOpacity={0.75}
           style={[
@@ -136,7 +131,6 @@ const AuthScreen = () => {
           </Text>
         </TouchableOpacity>
 
-        {/* Github (Placeholder) */}
         <TouchableOpacity
           activeOpacity={0.75}
           style={[styles.button, { backgroundColor: colors.primary }]}

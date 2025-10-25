@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "SAAI-app",
+    "name": "SA-AI",
     "slug": "saai",
     "scheme": "sa-ai",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "jsEngine": "hermes",
+    "newArchEnabled": false,
+    "jsEngine": "jsc",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -28,13 +28,16 @@
       "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "jsEngine": "jsc",
+      "bundler": "metro"
     },
     "extra": {
       "eas": {
         "projectId": "83b63db9-3b27-49a4-9085-44ade470cbbf"
       }
     },
-    "owner": "turkmencodelab"
+    "owner": "turkmencodelab",
+    "plugins": ["expo-localization"]
   }
 }

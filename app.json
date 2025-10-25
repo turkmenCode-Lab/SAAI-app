@@ -2,6 +2,7 @@
   "expo": {
     "name": "SAAI-app",
     "slug": "saai",
+    "scheme": "sa-ai",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -34,7 +35,16 @@
         "projectId": "83b63db9-3b27-49a4-9085-44ade470cbbf"
       }
     },
-    "plugins": ["expo-font"],
+    "plugins": [
+      "expo-font",
+      "expo-web-browser",
+      [
+        "expo-auth-session",
+        {
+          "manifestAndroid": true
+        }
+      ]
+    ],
     "owner": "turkmencodelab"
   }
 }

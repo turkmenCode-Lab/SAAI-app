@@ -20,9 +20,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 import { useTheme } from "@react-navigation/native";
-import { useNavigation } from "@react-navigation/native"; // Add this for stable navigation
+import { useNavigation } from "@react-navigation/native";
 import { useAuthStore } from "../../store/authStore";
-import { useLangStore } from "../../store/langStore"; // Added lang store
+import { useLangStore } from "../../store/langStore";
 import Prompt from "../components/Prompt";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
@@ -33,10 +33,9 @@ import { createAPI } from "../utils/api";
 import Toast from "../components/UI/Toast";
 
 const HomeScreen = () => {
-  // Remove navigation prop; use hook inside
   const navigation = useNavigation();
   const { token } = useAuthStore();
-  const { t } = useLangStore(); // Added for translations
+  const { t } = useLangStore();
 
   const [input, setInput] = useState("");
   const [searchQ, setSearchQ] = useState("");
@@ -44,7 +43,7 @@ const HomeScreen = () => {
   const [chats, setChats] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
   const [isNavOpen, setIsNavOpen] = useState(false);
-  const [hasCheckedAuth, setHasCheckedAuth] = useState(false); // New: Auth check flag
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
   const [toast, setToast] = useState({
     visible: false,
     message: "",
@@ -73,7 +72,6 @@ const HomeScreen = () => {
     }
   }, [toast.visible]);
 
-  // Initial auth check (mount-only)
   useEffect(() => {
     if (!hasCheckedAuth) {
       if (!token) {
@@ -83,7 +81,6 @@ const HomeScreen = () => {
     }
   }, [hasCheckedAuth, token, navigation]);
 
-  // Runtime auth check (if token expires/changes)
   useEffect(() => {
     if (hasCheckedAuth && !token) {
       navigation.replace("Auth");
@@ -100,7 +97,7 @@ const HomeScreen = () => {
         .filter((chat) => chat && chat._id)
         .map((chat) => ({
           id: chat._id,
-          title: chat.title || t("newChat"), // Use t if title is default
+          title: chat.title || t("newChat"),
           messages: (chat.messages || []).map((msg, index) => ({
             id: index,
             role: msg.role,
@@ -114,7 +111,7 @@ const HomeScreen = () => {
       }
     } catch (err) {
       console.error("Error fetching chats:", err.response?.data || err.message);
-      showToast(t("failedToLoadChats") || "Failed to load chats.", "error"); // Assume key or fallback
+      showToast(t("failedToLoadChats") || "Failed to load chats.", "error");
     }
   }, [token, showToast, t]);
 

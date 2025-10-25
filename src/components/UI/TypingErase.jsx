@@ -69,7 +69,7 @@ export default function TypingErase({
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [
-    resolvedTexts, // Re-run when translations change
+    resolvedTexts,
     typingSpeed,
     erasingSpeed,
     pauseBeforeErase,

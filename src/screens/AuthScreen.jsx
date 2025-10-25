@@ -11,9 +11,11 @@ import TypingErase from "../components/UI/TypingErase";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useAppTheme } from "../../src/theme";
+import { useLangStore } from "../../store/langStore";
 
 const AuthScreen = ({ navigation }) => {
   const { colors } = useTheme();
+  const { t } = useLangStore();
 
   const theme = useAppTheme();
 
@@ -62,14 +64,10 @@ const AuthScreen = ({ navigation }) => {
           textAlign: "center",
         }}
       >
-        You’ll get smarter responses and can upload files and more.
+        {t("authSubtitle")}
       </Text>
       <TypingErase
-        texts={[
-          "Start developing with AI",
-          "Hi I'm here, how can I help?",
-          "I may help to solve issues.",
-        ]}
+        texts={[t("startDeveloping"), t("hiImHere"), t("mayHelpSolve")]}
         typingSpeed={45}
         erasingSpeed={30}
         pauseBeforeErase={1000}
@@ -93,7 +91,7 @@ const AuthScreen = ({ navigation }) => {
         >
           <MaterialIcons name="alternate-email" size={24} color={colors.text} />
           <Text style={[styles.title, { color: colors.text }]}>
-            Sign In With Email
+            {t("signInWithEmail")}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -102,7 +100,7 @@ const AuthScreen = ({ navigation }) => {
         >
           <AntDesign name="google" size={24} color={colors.text} />
           <Text style={[styles.title, { color: colors.text }]}>
-            Sign In With Google
+            {t("signInWithGoogle")}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -111,7 +109,7 @@ const AuthScreen = ({ navigation }) => {
         >
           <AntDesign name="github" size={24} color={colors.text} />
           <Text style={[styles.title, { color: colors.text }]}>
-            Sign In With Github
+            {t("signInWithGithub")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -123,19 +121,19 @@ const AuthScreen = ({ navigation }) => {
           fontSize: 13,
         }}
       >
-        By continuing you agree to our{" "}
+        {t("byContinuing")}{" "}
         <Text
           style={{ fontWeight: "bold", color: colors.text }}
           onPress={() => Linking.openURL("https://example.com/terms")}
         >
-          Terms
+          {t("terms")}
         </Text>{" "}
-        and{" "}
+        {t("and")}{" "}
         <Text
           style={{ fontWeight: "bold", color: colors.text }}
           onPress={() => Linking.openURL("https://example.com/privacy")}
         >
-          Privacy Policy
+          {t("privacyPolicy")}
         </Text>
       </Text>
     </SafeAreaView>

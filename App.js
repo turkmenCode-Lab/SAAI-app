@@ -10,6 +10,7 @@ import { useAppTheme } from "./src/theme";
 import * as Font from "expo-font";
 import { useAuthStore } from "./store/authStore";
 import { useThemeStore } from "./store/themeStore";
+import * as Localization from "expo-localization";
 
 const Stack = createStackNavigator();
 

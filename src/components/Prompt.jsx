@@ -1,9 +1,11 @@
 import React from "react";
 import { TextInput, View, StyleSheet } from "react-native";
 import { useTheme } from "@react-navigation/native";
+import { useLangStore } from "../../store/langStore";
 
 const Prompt = ({ onSubmit, input, setInput }) => {
   const { colors } = useTheme();
+  const { t } = useLangStore();
 
   return (
     <View style={styles.container}>
@@ -16,7 +18,7 @@ const Prompt = ({ onSubmit, input, setInput }) => {
             borderColor: colors.text,
           },
         ]}
-        placeholder="Ask anything you want..."
+        placeholder={t("askAnything")}
         placeholderTextColor={colors.text}
         autoCapitalize="none"
         value={input}

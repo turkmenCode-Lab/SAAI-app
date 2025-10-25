@@ -15,6 +15,7 @@ import Entypo from "@expo/vector-icons/Entypo";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar, Platform } from "react-native";
+import { useLangStore } from "../../store/langStore";
 
 const Sidebar = ({
   chats,
@@ -30,6 +31,7 @@ const Sidebar = ({
   onDeleteChat,
 }) => {
   const { colors } = useTheme();
+  const { t } = useLangStore();
 
   const navigation = useNavigation();
 
@@ -103,7 +105,7 @@ const Sidebar = ({
             },
           ]}
           autoCorrect={false}
-          placeholder="Let's search your chat history!?"
+          placeholder={t("searchChats")}
           placeholderTextColor={colors.text}
           autoCapitalize="none"
           value={searchQ}
@@ -123,7 +125,7 @@ const Sidebar = ({
         onPress={onNewChat}
       >
         <Text style={[styles.newChatText, { color: colors.text }]}>
-          New Chat
+          {t("newChat")}
         </Text>
       </TouchableOpacity>
       <FlatList
@@ -168,7 +170,7 @@ const Sidebar = ({
             fontSize: 18,
           }}
         >
-          {user?.email ?? "Guest"}
+          {user?.email ?? t("guest")}
         </Text>
         <TouchableOpacity style={{ marginLeft: "auto" }} onPress={handleLogout}>
           <Entypo name="log-out" size={24} color={colors.neutral} />

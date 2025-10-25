@@ -22,6 +22,7 @@ import Feather from "@expo/vector-icons/Feather";
 import { useTheme } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native"; // Add this for stable navigation
 import { useAuthStore } from "../../store/authStore";
+import { useLangStore } from "../../store/langStore"; // Added lang store
 import Prompt from "../components/Prompt";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
@@ -35,6 +36,7 @@ const HomeScreen = () => {
   // Remove navigation prop; use hook inside
   const navigation = useNavigation();
   const { token } = useAuthStore();
+  const { t } = useLangStore(); // Added for translations
 
   const [input, setInput] = useState("");
   const [searchQ, setSearchQ] = useState("");
@@ -98,7 +100,7 @@ const HomeScreen = () => {
         .filter((chat) => chat && chat._id)
         .map((chat) => ({
           id: chat._id,
-          title: chat.title || "New Chat",
+          title: chat.title || t("newChat"), // Use t if title is default
           messages: (chat.messages || []).map((msg, index) => ({
             id: index,
             role: msg.role,
@@ -112,15 +114,15 @@ const HomeScreen = () => {
       }
     } catch (err) {
       console.error("Error fetching chats:", err.response?.data || err.message);
-      showToast("Failed to load chats.", "error");
+      showToast(t("failedToLoadChats") || "Failed to load chats.", "error"); // Assume key or fallback
     }
-  }, [token, showToast]);
+  }, [token, showToast, t]);
 
   const createNewChat = useCallback(async () => {
     if (!token || !apiRef.current) return;
     try {
       const response = await apiRef.current.post("/chat", {
-        title: "New Chat",
+        title: t("newChat"),
         messages: [],
       });
       if (!response.data?._id) {
@@ -135,9 +137,12 @@ const HomeScreen = () => {
       setCurrentChatId(newChat.id);
     } catch (err) {
       console.error("Error creating chat:", err.response?.data || err.message);
-      showToast("Failed to create new chat.", "error");
+      showToast(
+        t("failedToCreateChat") || "Failed to create new chat.",
+        "error"
+      );
     }
-  }, [token, showToast]);
+  }, [token, showToast, t]);
 
   const deleteChat = useCallback(
     async (chatId) => {
@@ -148,16 +153,16 @@ const HomeScreen = () => {
         if (currentChatId === chatId) {
           setCurrentChatId(null);
         }
-        showToast("Chat deleted successfully.", "success");
+        showToast(t("chatDeleted") || "Chat deleted successfully.", "success");
       } catch (err) {
         console.error(
           "Error deleting chat:",
           err.response?.data || err.message
         );
-        showToast("Failed to delete chat.", "error");
+        showToast(t("failedToDeleteChat") || "Failed to delete chat.", "error");
       }
     },
-    [token, currentChatId, showToast]
+    [token, currentChatId, showToast, t]
   );
 
   useEffect(() => {
@@ -196,7 +201,7 @@ const HomeScreen = () => {
       }).start();
       return newOpen;
     });
-  }, []); // No deps: functional update makes it stable
+  }, []);
 
   const rotateInterpolate = useMemo(
     () =>
@@ -210,12 +215,18 @@ const HomeScreen = () => {
   const handleSubmit = useCallback(
     async (text) => {
       if (!text.trim()) {
-        showToast("Please enter some text before submitting.", "error");
+        showToast(
+          t("pleaseEnterText") || "Please enter some text before submitting.",
+          "error"
+        );
         return;
       }
 
       if (!token) {
-        showToast("Authentication required. Please log in.", "error");
+        showToast(
+          t("authRequired") || "Authentication required. Please log in.",
+          "error"
+        );
         navigation.replace("Auth");
         return;
       }
@@ -226,14 +237,17 @@ const HomeScreen = () => {
         await createNewChat();
         chatId = currentChatId;
         if (!chatId) {
-          showToast("Failed to create chat.", "error");
+          showToast(
+            t("failedToCreateChat") || "Failed to create chat.",
+            "error"
+          );
           setIsLoading(false);
           return;
         }
       }
 
       if (!chatId) {
-        showToast("Invalid chat ID.", "error");
+        showToast(t("invalidChatId") || "Invalid chat ID.", "error");
         return;
       }
 
@@ -257,7 +271,7 @@ const HomeScreen = () => {
           ...filteredPrev[chatIndex],
           messages: [...(filteredPrev[chatIndex].messages || []), userMsg],
           title:
-            isNewChat || filteredPrev[chatIndex].title === "New Chat"
+            isNewChat || filteredPrev[chatIndex].title === t("newChat")
               ? newTitle
               : filteredPrev[chatIndex].title,
         };
@@ -271,7 +285,7 @@ const HomeScreen = () => {
 
       if (
         (isNewChat ||
-          chats.find((c) => c.id === chatId)?.title === "New Chat") &&
+          chats.find((c) => c.id === chatId)?.title === t("newChat")) &&
         apiRef.current
       ) {
         (async () => {
@@ -302,7 +316,6 @@ const HomeScreen = () => {
 
         const handleResponse = useCallback(
           (data) => {
-            // Memoize listeners
             console.log(
               `📨 Received response for msgId? ${data.messageId || "N/A"}:`,
               data
@@ -319,12 +332,15 @@ const HomeScreen = () => {
           (data) => {
             if (data.chatId === chatId) {
               console.error("Socket error for this msg:", data.message);
-              showToast(`Chat error: ${data.message}`, "error");
+              showToast(
+                t(`chatError.${data.message}`) || `Chat error: ${data.message}`,
+                "error"
+              );
               setIsLoading(false);
               socket.current.off("chatError", handleError);
             }
           },
-          [chatId, showToast]
+          [chatId, showToast, t]
         );
 
         socket.current.on("receiveMessage", handleResponse);
@@ -335,10 +351,12 @@ const HomeScreen = () => {
           setIsLoading(false);
           socket.current.off("receiveMessage", handleResponse);
           socket.current.off("chatError", handleError);
-          showToast("Response timed out. Try again?", "error");
+          showToast(
+            t("responseTimedOut") || "Response timed out. Try again?",
+            "error"
+          );
         }, 30000);
 
-        // Cleanup on disconnect
         const origDisconnect = socket.current.disconnect;
         socket.current.disconnect = () => {
           clearTimeout(timeoutId);
@@ -348,11 +366,15 @@ const HomeScreen = () => {
         };
       } else {
         console.warn("No socket available – can't send real-time");
-        showToast("Connection issue. Messages saved locally only.", "warning");
+        showToast(
+          t("connectionIssue") ||
+            "Connection issue. Messages saved locally only.",
+          "warning"
+        );
         setIsLoading(false);
       }
     },
-    [currentChatId, token, createNewChat, showToast, chats, navigation]
+    [currentChatId, token, createNewChat, showToast, chats, navigation, t]
   );
 
   const handleNewChat = useCallback(() => {
@@ -360,7 +382,6 @@ const HomeScreen = () => {
     toggleNav();
   }, [createNewChat, toggleNav]);
 
-  // Update rotation on nav toggle (side effect, not render)
   useEffect(() => {
     Animated.timing(rotation, {
       toValue: isNavOpen ? 1 : 0,

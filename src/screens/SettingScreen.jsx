@@ -17,8 +17,10 @@ import Feather from "@expo/vector-icons/Feather";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import { useAuthStore } from "../../store/authStore";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeStore } from "../../store/themeStore";
+import { useLangStore } from "../../store/langStore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Localization from "expo-localization";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
@@ -32,12 +34,25 @@ export default function SettingsScreen() {
     setAccentColor: setStoredAccentColor,
     getStoredSettings,
   } = useThemeStore();
+  const { t, setLang } = useLangStore();
 
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [language, setLanguage] = useState("en");
   const [accentColor, setAccentColor] = useState("mostly");
   const [loading, setLoading] = useState(true);
   const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const getDetectedLang = () => {
+    try {
+      const locale = Localization.locale;
+      const langCode = locale.split("-")[0].toLowerCase();
+      if (langCode === "ru") return "ru";
+      if (langCode === "tk") return "tk";
+      return "en";
+    } catch {
+      return "en";
+    }
+  };
 
   useEffect(() => {
     if (!token) {
@@ -48,12 +63,14 @@ export default function SettingsScreen() {
     const loadSettings = async () => {
       const stored = await getStoredSettings();
       setIsDarkMode(stored.darkMode || false);
-      setLanguage(stored.language || "en");
+      let lang = stored.language || getDetectedLang();
+      setLanguage(lang);
+      setLang(lang);
       setAccentColor(stored.accentColor || "mostly");
       setLoading(false);
     };
     loadSettings();
-  }, [token, navigation, getStoredSettings]);
+  }, [token, navigation, getStoredSettings, setLang]);
 
   useEffect(() => {
     if (!loading) {
@@ -61,8 +78,9 @@ export default function SettingsScreen() {
         "appSettings",
         JSON.stringify({ darkMode: isDarkMode, language, accentColor })
       );
+      setLang(language);
     }
-  }, [isDarkMode, language, accentColor, loading]);
+  }, [isDarkMode, language, accentColor, loading, setLang]);
 
   const accentColorValue = theme.colors.accent;
 
@@ -86,17 +104,21 @@ export default function SettingsScreen() {
   };
 
   const handleLogout = () => {
-    Alert.alert("Logout", "Are you sure you want to log out?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Logout",
-        style: "destructive",
-        onPress: () => {
-          useAuthStore.getState().logout();
-          navigation.replace("Auth");
+    Alert.alert(
+      t("logOut"),
+      t("confirmLogout") || "Are you sure you want to log out?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: t("logOut"),
+          style: "destructive",
+          onPress: () => {
+            useAuthStore.getState().logout();
+            navigation.replace("Auth");
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
   const openPrivacyPolicy = async () => {
@@ -144,7 +166,7 @@ export default function SettingsScreen() {
             { color: theme.colors.text, fontFamily: theme.fonts.medium },
           ]}
         >
-          {label}
+          {t(label)} // Dynamic label key
         </Text>
       </View>
       {rightContent}
@@ -173,23 +195,26 @@ export default function SettingsScreen() {
           { color: theme.colors.text, fontFamily: theme.fonts.bold },
         ]}
       >
-        Settings
+        {t("settings")}
       </Text>
 
       <View style={styles.section}>
         {renderCard(
           renderRow(
             "language",
-            "Language",
+            "language",
             <Picker
               selectedValue={language}
               dropdownIconColor={theme.colors.text}
               style={[styles.picker, pickerCommon]}
-              onValueChange={setLanguage}
+              onValueChange={(value) => {
+                setLanguage(value);
+                setLang(value);
+              }}
             >
-              <Picker.Item label="English" value="en" />
-              <Picker.Item label="Русский" value="ru" />
-              <Picker.Item label="Türkmençe" value="tk" />
+              <Picker.Item label={t("english")} value="en" />
+              <Picker.Item label={t("russian")} value="ru" />
+              <Picker.Item label={t("turkmen")} value="tk" />
             </Picker>
           )
         )}
@@ -199,16 +224,16 @@ export default function SettingsScreen() {
         {renderCard(
           renderRow(
             "palette",
-            "Accent Color",
+            "accentColor",
             <Picker
               selectedValue={accentColor}
               dropdownIconColor={theme.colors.text}
               style={[styles.picker, pickerCommon]}
               onValueChange={handleAccentChange}
             >
-              <Picker.Item label="Blue" value="mostly" />
-              <Picker.Item label="Purple" value="vitally" />
-              <Picker.Item label="Orange" value="principally" />
+              <Picker.Item label={t("blue")} value="mostly" />
+              <Picker.Item label={t("purple")} value="vitally" />
+              <Picker.Item label={t("orange")} value="principally" />
             </Picker>
           )
         )}
@@ -216,7 +241,7 @@ export default function SettingsScreen() {
         {renderCard(
           renderRow(
             "preview",
-            "Accent Preview",
+            "accentPreview",
             <Animated.View
               style={[
                 styles.accentPreview,
@@ -234,7 +259,7 @@ export default function SettingsScreen() {
         {renderCard(
           renderRow(
             "monitor",
-            "Dark Mode",
+            "darkMode",
             <View style={styles.switchContainer}>
               <Feather
                 name="sun"
@@ -273,7 +298,7 @@ export default function SettingsScreen() {
               { color: accentColorValue, fontFamily: theme.fonts.semibold },
             ]}
           >
-            Privacy Policy
+            {t("privacyPolicy")}
           </Text>
         </TouchableOpacity>
 
@@ -285,7 +310,7 @@ export default function SettingsScreen() {
               { color: "red", fontFamily: theme.fonts.semibold },
             ]}
           >
-            Log Out
+            {t("logOut")}
           </Text>
         </TouchableOpacity>
       </View>

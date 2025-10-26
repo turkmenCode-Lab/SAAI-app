@@ -26,7 +26,8 @@ const Chat = ({
     }
 
     if (socket) {
-      socket.on("receiveMessage", (data) => {
+      const handleReceiveMessage = (data) => {
+        if (data.chatId !== currentChatId) return;
         if (data.role === "user") return;
         setChats((prev) =>
           prev.map((c) =>
@@ -46,20 +47,21 @@ const Chat = ({
               : c
           )
         );
-      });
+      };
 
-      socket.on("isThinking", ({ chatId, status }) => {
+      const handleIsThinking = ({ chatId, status }) => {
         if (chatId === currentChatId) setIsThinking(status);
-      });
-    }
+      };
 
-    return () => {
-      if (socket) {
-        socket.off("receiveMessage");
-        socket.off("isThinking");
-      }
-    };
-  }, [currentChatId, socket]);
+      socket.on("receiveMessage", handleReceiveMessage);
+      socket.on("isThinking", handleIsThinking);
+
+      return () => {
+        socket.off("receiveMessage", handleReceiveMessage);
+        socket.off("isThinking", handleIsThinking);
+      };
+    }
+  }, [currentChatId, socket, setChats]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

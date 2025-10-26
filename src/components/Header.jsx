@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useCallback, memo } from "react";
 import {
   Text,
   View,
@@ -8,10 +8,19 @@ import {
 } from "react-native";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { useTheme } from "@react-navigation/native";
+import { useTheme, useNavigation } from "@react-navigation/native";
 
 const Header = ({ isNavOpen, rotateInterpolate, onToggleNav }) => {
   const { colors } = useTheme();
+  const navigation = useNavigation();
+
+  const handleToggleNav = useCallback(() => {
+    onToggleNav();
+  }, [onToggleNav]);
+
+  const handleSettingsPress = useCallback(() => {
+    navigation.navigate("Settings");
+  }, [navigation]);
 
   return (
     <View style={[styles.header, { backgroundColor: colors.background }]}>
@@ -19,7 +28,7 @@ const Header = ({ isNavOpen, rotateInterpolate, onToggleNav }) => {
         <TouchableOpacity
           activeOpacity={0.7}
           style={isNavOpen && styles.bar}
-          onPress={onToggleNav}
+          onPress={handleToggleNav}
         >
           <Animated.View style={{ transform: [{ rotate: rotateInterpolate }] }}>
             <FontAwesome6 name="bars-staggered" size={28} color={colors.text} />
@@ -42,7 +51,7 @@ const Header = ({ isNavOpen, rotateInterpolate, onToggleNav }) => {
             Get Pro
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.7}>
+        <TouchableOpacity onPress={handleSettingsPress} activeOpacity={0.7}>
           <MaterialCommunityIcons
             name="dots-vertical"
             style={{ marginRight: -15 }}
@@ -84,4 +93,4 @@ const styles = StyleSheet.create({
   getProText: { fontWeight: "600", fontSize: 14, marginLeft: 6 },
 });
 
-export default Header;
+export default memo(Header);

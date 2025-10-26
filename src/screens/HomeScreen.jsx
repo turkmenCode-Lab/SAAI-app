@@ -20,7 +20,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 import { useTheme } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { useAuthStore } from "../../store/authStore";
+import { useLangStore } from "../../store/langStore";
 import Prompt from "../components/Prompt";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
@@ -30,8 +32,10 @@ import { EXPO_API_URI } from "../../config";
 import { createAPI } from "../utils/api";
 import Toast from "../components/UI/Toast";
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = () => {
+  const navigation = useNavigation();
   const { token } = useAuthStore();
+  const { t } = useLangStore();
 
   const [input, setInput] = useState("");
   const [searchQ, setSearchQ] = useState("");
@@ -39,6 +43,7 @@ const HomeScreen = ({ navigation }) => {
   const [chats, setChats] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
   const [toast, setToast] = useState({
     visible: false,
     message: "",
@@ -68,10 +73,19 @@ const HomeScreen = ({ navigation }) => {
   }, [toast.visible]);
 
   useEffect(() => {
-    if (!token) {
+    if (!hasCheckedAuth) {
+      if (!token) {
+        navigation.replace("Auth");
+      }
+      setHasCheckedAuth(true);
+    }
+  }, [hasCheckedAuth, token, navigation]);
+
+  useEffect(() => {
+    if (hasCheckedAuth && !token) {
       navigation.replace("Auth");
     }
-  }, [token, navigation]);
+  }, [hasCheckedAuth, token, navigation]);
 
   const fetchChats = useCallback(async () => {
     if (!token || !apiRef.current) return;
@@ -83,7 +97,7 @@ const HomeScreen = ({ navigation }) => {
         .filter((chat) => chat && chat._id)
         .map((chat) => ({
           id: chat._id,
-          title: chat.title || "New Chat",
+          title: chat.title || t("newChat"),
           messages: (chat.messages || []).map((msg, index) => ({
             id: index,
             role: msg.role,
@@ -97,15 +111,15 @@ const HomeScreen = ({ navigation }) => {
       }
     } catch (err) {
       console.error("Error fetching chats:", err.response?.data || err.message);
-      showToast("Failed to load chats.", "error");
+      showToast(t("failedToLoadChats") || "Failed to load chats.", "error");
     }
-  }, [token, showToast]);
+  }, [token, showToast, t]);
 
   const createNewChat = useCallback(async () => {
     if (!token || !apiRef.current) return null;
     try {
       const response = await apiRef.current.post("/chat", {
-        title: "New Chat",
+        title: t("newChat"),
         messages: [],
       });
       if (!response.data?._id) {
@@ -124,10 +138,17 @@ const HomeScreen = ({ navigation }) => {
       return newChatState.id;
     } catch (err) {
       console.error("Error creating chat:", err.response?.data || err.message);
+<<<<<<< HEAD
       showToast("Failed to create new chat.", "error");
       return null;
+=======
+      showToast(
+        t("failedToCreateChat") || "Failed to create new chat.",
+        "error"
+      );
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
     }
-  }, [token, showToast]);
+  }, [token, showToast, t]);
 
   const deleteChat = useCallback(
     async (chatId) => {
@@ -138,16 +159,16 @@ const HomeScreen = ({ navigation }) => {
         if (currentChatId === chatId) {
           setCurrentChatId(null);
         }
-        showToast("Chat deleted successfully.", "success");
+        showToast(t("chatDeleted") || "Chat deleted successfully.", "success");
       } catch (err) {
         console.error(
           "Error deleting chat:",
           err.response?.data || err.message
         );
-        showToast("Failed to delete chat.", "error");
+        showToast(t("failedToDeleteChat") || "Failed to delete chat.", "error");
       }
     },
-    [token, currentChatId, showToast]
+    [token, currentChatId, showToast, t]
   );
 
   useEffect(() => {
@@ -178,15 +199,17 @@ const HomeScreen = ({ navigation }) => {
   }, []);
 
   const toggleNav = useCallback(() => {
-    const newOpen = !isNavOpen;
-    Animated.timing(slideValue, {
-      toValue: newOpen ? 0 : -SCREEN_WIDTH,
-      duration: 525,
-      easing: Easing.out(Easing.exp),
-      useNativeDriver: false,
-    }).start();
-    setIsNavOpen(newOpen);
-  }, [isNavOpen]);
+    setIsNavOpen((prev) => {
+      const newOpen = !prev;
+      Animated.timing(slideValue, {
+        toValue: newOpen ? 0 : -SCREEN_WIDTH,
+        duration: 525,
+        easing: Easing.out(Easing.exp),
+        useNativeDriver: false,
+      }).start();
+      return newOpen;
+    });
+  }, []);
 
   const rotateInterpolate = useMemo(
     () =>
@@ -200,12 +223,18 @@ const HomeScreen = ({ navigation }) => {
   const handleSubmit = useCallback(
     async (text) => {
       if (!text.trim()) {
-        showToast("Please enter some text before submitting.", "error");
+        showToast(
+          t("pleaseEnterText") || "Please enter some text before submitting.",
+          "error"
+        );
         return;
       }
 
       if (!token) {
-        showToast("Authentication required. Please log in.", "error");
+        showToast(
+          t("authRequired") || "Authentication required. Please log in.",
+          "error"
+        );
         navigation.replace("Auth");
         return;
       }
@@ -215,14 +244,21 @@ const HomeScreen = ({ navigation }) => {
       if (isNewChat) {
         chatId = await createNewChat();
         if (!chatId) {
+<<<<<<< HEAD
           showToast("Failed to create chat.", "error");
+=======
+          showToast(
+            t("failedToCreateChat") || "Failed to create chat.",
+            "error"
+          );
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
           setIsLoading(false);
           return;
         }
       }
 
       if (!chatId) {
-        showToast("Invalid chat ID.", "error");
+        showToast(t("invalidChatId") || "Invalid chat ID.", "error");
         return;
       }
 
@@ -240,6 +276,7 @@ const HomeScreen = ({ navigation }) => {
       setChats((prev) => {
         const filteredPrev = (prev || []).filter((c) => c && c.id);
         const chatIndex = filteredPrev.findIndex((c) => c.id === chatId);
+<<<<<<< HEAD
         let updatedChat;
         if (chatIndex === -1) {
           updatedChat = {
@@ -263,11 +300,29 @@ const HomeScreen = ({ navigation }) => {
             ...filteredPrev.slice(chatIndex + 1),
           ];
         }
+=======
+        if (chatIndex === -1) return filteredPrev;
+
+        const updatedChat = {
+          ...filteredPrev[chatIndex],
+          messages: [...(filteredPrev[chatIndex].messages || []), userMsg],
+          title:
+            isNewChat || filteredPrev[chatIndex].title === t("newChat")
+              ? newTitle
+              : filteredPrev[chatIndex].title,
+        };
+
+        return [
+          ...filteredPrev.slice(0, chatIndex),
+          updatedChat,
+          ...filteredPrev.slice(chatIndex + 1),
+        ];
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
       });
 
       if (
         (isNewChat ||
-          chats.find((c) => c.id === chatId)?.title === "New Chat") &&
+          chats.find((c) => c.id === chatId)?.title === t("newChat")) &&
         apiRef.current
       ) {
         (async () => {
@@ -296,6 +351,7 @@ const HomeScreen = ({ navigation }) => {
           messageId,
         });
 
+<<<<<<< HEAD
         const handleResponse = (data) => {
           console.log(
             `📨 Received response for msgId? ${data.messageId || "N/A"}:`,
@@ -315,6 +371,36 @@ const HomeScreen = ({ navigation }) => {
             socket.current.off("chatError", handleError);
           }
         };
+=======
+        const handleResponse = useCallback(
+          (data) => {
+            console.log(
+              `📨 Received response for msgId? ${data.messageId || "N/A"}:`,
+              data
+            );
+            if (data.chatId === chatId && data.role !== "user") {
+              setIsLoading(false);
+              socket.current.off("receiveMessage", handleResponse);
+            }
+          },
+          [chatId]
+        );
+
+        const handleError = useCallback(
+          (data) => {
+            if (data.chatId === chatId) {
+              console.error("Socket error for this msg:", data.message);
+              showToast(
+                t(`chatError.${data.message}`) || `Chat error: ${data.message}`,
+                "error"
+              );
+              setIsLoading(false);
+              socket.current.off("chatError", handleError);
+            }
+          },
+          [chatId, showToast, t]
+        );
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
 
         socket.current.on("receiveMessage", handleResponse);
         socket.current.on("chatError", handleError);
@@ -324,7 +410,10 @@ const HomeScreen = ({ navigation }) => {
           setIsLoading(false);
           socket.current.off("receiveMessage", handleResponse);
           socket.current.off("chatError", handleError);
-          showToast("Response timed out. Try again?", "error");
+          showToast(
+            t("responseTimedOut") || "Response timed out. Try again?",
+            "error"
+          );
         }, 30000);
 
         const origDisconnect = socket.current.disconnect;
@@ -336,17 +425,35 @@ const HomeScreen = ({ navigation }) => {
         };
       } else {
         console.warn("No socket available – can't send real-time");
-        showToast("Connection issue. Messages saved locally only.", "warning");
+        showToast(
+          t("connectionIssue") ||
+            "Connection issue. Messages saved locally only.",
+          "warning"
+        );
         setIsLoading(false);
       }
     },
-    [currentChatId, token, createNewChat, showToast, chats, navigation]
+    [currentChatId, token, createNewChat, showToast, chats, navigation, t]
   );
 
+<<<<<<< HEAD
   const handleNewChat = useCallback(async () => {
     await createNewChat();
+=======
+  const handleNewChat = useCallback(() => {
+    createNewChat();
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
     toggleNav();
   }, [createNewChat, toggleNav]);
+
+  useEffect(() => {
+    Animated.timing(rotation, {
+      toValue: isNavOpen ? 1 : 0,
+      duration: 525,
+      easing: Easing.out(Easing.exp),
+      useNativeDriver: true,
+    }).start();
+  }, [isNavOpen, rotation]);
 
   return (
     <SafeAreaView
@@ -383,7 +490,7 @@ const HomeScreen = ({ navigation }) => {
         onDeleteChat={deleteChat}
       />
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={{ flex: 1, paddingVertical: 15 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
       >
@@ -401,7 +508,7 @@ const HomeScreen = ({ navigation }) => {
             <Prompt onSubmit={handleSubmit} input={input} setInput={setInput} />
             <TouchableOpacity
               activeOpacity={0.7}
-              style={[styles.submit, { backgroundColor: colors.mostly }]}
+              style={[styles.submit, { backgroundColor: colors.accent }]}
               onPress={() => handleSubmit(input)}
               disabled={isLoading}
             >

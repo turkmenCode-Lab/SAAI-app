@@ -14,6 +14,7 @@ import { useAuthStore } from "../../store/authStore";
 import Entypo from "@expo/vector-icons/Entypo";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar, Platform } from "react-native";
+import { useLangStore } from "../../store/langStore";
 
 const Sidebar = ({
   chats,
@@ -28,6 +29,7 @@ const Sidebar = ({
   onDeleteChat,
 }) => {
   const { colors } = useTheme();
+<<<<<<< HEAD
   const filteredChats = useMemo(
     () =>
       chats.filter(
@@ -36,6 +38,9 @@ const Sidebar = ({
       ),
     [chats, searchQ]
   );
+=======
+  const { t } = useLangStore();
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
 
   const navigation = useNavigation();
 
@@ -67,11 +72,7 @@ const Sidebar = ({
         style={styles.deleteBtn}
         onPress={() => onDeleteChat(item.id)}
       >
-        <MaterialCommunityIcons
-          name="delete"
-          size={20}
-          color={colors.danger || "#FF3B30"}
-        />
+        <MaterialCommunityIcons name="delete" size={20} color={colors.error} />
       </TouchableOpacity>
     </View>
   );
@@ -102,10 +103,7 @@ const Sidebar = ({
       ]}
     >
       <View
-        style={[
-          styles.sidebarHeader,
-          { borderBottomColor: colors.text + "33" },
-        ]}
+        style={[styles.sidebarHeader, { borderBottomColor: colors.border }]}
       >
         <TextInput
           style={[
@@ -116,7 +114,11 @@ const Sidebar = ({
             },
           ]}
           autoCorrect={false}
+<<<<<<< HEAD
           placeholder="Search chat history"
+=======
+          placeholder={t("searchChats")}
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
           placeholderTextColor={colors.text}
           autoCapitalize="none"
           value={searchQ}
@@ -135,7 +137,7 @@ const Sidebar = ({
         onPress={onNewChat}
       >
         <Text style={[styles.newChatText, { color: colors.text }]}>
-          New Chat
+          {t("newChat")}
         </Text>
       </TouchableOpacity>
       <FlatList
@@ -147,7 +149,7 @@ const Sidebar = ({
       <View
         style={[
           styles.sidebarUser,
-          { borderTopColor: colors.neutral, marginBottom: 15 },
+          { borderTopColor: colors.border, marginBottom: 15 },
         ]}
       >
         <View
@@ -159,7 +161,7 @@ const Sidebar = ({
             alignItems: "center",
             justifyContent: "center",
             borderWidth: 3,
-            borderColor: colors.mostly,
+            borderColor: colors.accent,
           }}
         >
           <Text
@@ -180,7 +182,7 @@ const Sidebar = ({
             fontSize: 18,
           }}
         >
-          {user?.email ?? "Guest"}
+          {user?.email ?? t("guest")}
         </Text>
         <TouchableOpacity style={{ marginLeft: "auto" }} onPress={handleLogout}>
           <Entypo name="log-out" size={24} color={colors.neutral} />

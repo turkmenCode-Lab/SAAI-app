@@ -1,8 +1,4 @@
-import dotenv from "dotenv";
-dotenv.config();
-
-const OPEN_ROUTER_API_KEY = import.meta.env.OPEN_ROUTER_API_KEY;
-const GEMINI_API_KEY = import.meta.env.GEMINI_API_KEY;
+import { OPEN_ROUTER_API_KEY, GEMINI_API_KEY } from "../../config";
 
 const turkmenChars = /[ÄäŇňÖöŞşÜüÝýŽž]/;
 const turkmenWords =

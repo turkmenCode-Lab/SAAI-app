@@ -17,7 +17,7 @@ import { useLangStore } from "../../store/langStore";
 import { useAuthStore } from "../../store/authStore";
 import { useNavigation } from "@react-navigation/native";
 import * as Google from "expo-auth-session/providers/google";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { createAPI } from "../utils/api";
 import { EXPO_OAUTH_CLIENT_ID } from "../../config";
 
@@ -35,6 +35,12 @@ const AuthScreen = () => {
     iosClientId: EXPO_OAUTH_CLIENT_ID,
     androidClientId: EXPO_OAUTH_CLIENT_ID,
   });
+
+  // Memoize the texts array to prevent unnecessary re-renders and resets in TypingErase
+  const texts = useMemo(
+    () => [t("startDeveloping"), t("hiImHere"), t("mayHelpSolve")],
+    [t]
+  );
 
   useEffect(() => {
     if (response?.type === "success") {
@@ -87,7 +93,7 @@ const AuthScreen = () => {
       <Text style={styles.subtitle}>{t("authSubtitle")}</Text>
 
       <TypingErase
-        texts={[t("startDeveloping"), t("hiImHere"), t("mayHelpSolve")]}
+        texts={texts}
         typingSpeed={45}
         erasingSpeed={30}
         pauseBeforeErase={1000}

@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View, Text, Animated, StyleSheet, Dimensions } from "react-native";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useLangStore } from "../../../store/langStore";
-import { memo } from "react";
 
-const TypingEraseComponent = ({
+export default function TypingErase({
   texts = "Hello, world!",
   typingSpeed = 80,
   erasingSpeed = 40,
@@ -13,7 +12,7 @@ const TypingEraseComponent = ({
   loop = true,
   textStyle,
   cursorStyle,
-}) => {
+}) {
   const { t } = useLangStore();
   const [displayed, setDisplayed] = useState("");
   const [fontSize, setFontSize] = useState(28);
@@ -24,11 +23,9 @@ const TypingEraseComponent = ({
   const mountedRef = useRef(true);
   const cursorOpacity = useRef(new Animated.Value(1)).current;
 
-  const resolvedTexts = useMemo(() => {
-    return Array.isArray(texts)
-      ? texts.map((item) => (typeof item === "string" ? t(item) || item : item))
-      : [t(texts) || texts];
-  }, [texts, t]);
+  const resolvedTexts = Array.isArray(texts)
+    ? texts.map((item) => (typeof item === "string" ? t(item) || item : item))
+    : [t(texts) || texts];
 
   useEffect(() => {
     const { width } = Dimensions.get("window");
@@ -159,7 +156,7 @@ const TypingEraseComponent = ({
       </Animated.Text>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -173,5 +170,3 @@ const styles = StyleSheet.create({
     marginLeft: 2,
   },
 });
-
-export default memo(TypingEraseComponent);

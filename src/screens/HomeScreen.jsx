@@ -138,11 +138,15 @@ const HomeScreen = () => {
       return newChatState.id;
     } catch (err) {
       console.error("Error creating chat:", err.response?.data || err.message);
+<<<<<<< HEAD
+      showToast("Failed to create new chat.", "error");
+      return null;
+=======
       showToast(
         t("failedToCreateChat") || "Failed to create new chat.",
         "error"
       );
-      return null;
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
     }
   }, [token, showToast, t]);
 
@@ -240,10 +244,14 @@ const HomeScreen = () => {
       if (isNewChat) {
         chatId = await createNewChat();
         if (!chatId) {
+<<<<<<< HEAD
+          showToast("Failed to create chat.", "error");
+=======
           showToast(
             t("failedToCreateChat") || "Failed to create chat.",
             "error"
           );
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
           setIsLoading(false);
           return;
         }
@@ -268,6 +276,7 @@ const HomeScreen = () => {
       setChats((prev) => {
         const filteredPrev = (prev || []).filter((c) => c && c.id);
         const chatIndex = filteredPrev.findIndex((c) => c.id === chatId);
+<<<<<<< HEAD
         let updatedChat;
         if (chatIndex === -1) {
           updatedChat = {
@@ -281,7 +290,7 @@ const HomeScreen = () => {
             ...filteredPrev[chatIndex],
             messages: [...filteredPrev[chatIndex].messages, userMsg],
             title:
-              isNewChat || filteredPrev[chatIndex].title === t("newChat")
+              isNewChat || filteredPrev[chatIndex].title === "New Chat"
                 ? newTitle
                 : filteredPrev[chatIndex].title,
           };
@@ -291,6 +300,24 @@ const HomeScreen = () => {
             ...filteredPrev.slice(chatIndex + 1),
           ];
         }
+=======
+        if (chatIndex === -1) return filteredPrev;
+
+        const updatedChat = {
+          ...filteredPrev[chatIndex],
+          messages: [...(filteredPrev[chatIndex].messages || []), userMsg],
+          title:
+            isNewChat || filteredPrev[chatIndex].title === t("newChat")
+              ? newTitle
+              : filteredPrev[chatIndex].title,
+        };
+
+        return [
+          ...filteredPrev.slice(0, chatIndex),
+          updatedChat,
+          ...filteredPrev.slice(chatIndex + 1),
+        ];
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
       });
 
       if (
@@ -324,6 +351,27 @@ const HomeScreen = () => {
           messageId,
         });
 
+<<<<<<< HEAD
+        const handleResponse = (data) => {
+          console.log(
+            `📨 Received response for msgId? ${data.messageId || "N/A"}:`,
+            data
+          );
+          if (data.chatId === chatId && data.role !== "user") {
+            setIsLoading(false);
+            socket.current.off("receiveMessage", handleResponse);
+          }
+        };
+
+        const handleError = (data) => {
+          if (data.chatId === chatId) {
+            console.error("Socket error for this msg:", data.message);
+            showToast(`Chat error: ${data.message}`, "error");
+            setIsLoading(false);
+            socket.current.off("chatError", handleError);
+          }
+        };
+=======
         const handleResponse = useCallback(
           (data) => {
             console.log(
@@ -352,6 +400,7 @@ const HomeScreen = () => {
           },
           [chatId, showToast, t]
         );
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
 
         socket.current.on("receiveMessage", handleResponse);
         socket.current.on("chatError", handleError);
@@ -387,8 +436,13 @@ const HomeScreen = () => {
     [currentChatId, token, createNewChat, showToast, chats, navigation, t]
   );
 
+<<<<<<< HEAD
+  const handleNewChat = useCallback(async () => {
+    await createNewChat();
+=======
   const handleNewChat = useCallback(() => {
     createNewChat();
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
     toggleNav();
   }, [createNewChat, toggleNav]);
 

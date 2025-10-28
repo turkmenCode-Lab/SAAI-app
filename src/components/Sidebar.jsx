@@ -15,7 +15,6 @@ import Entypo from "@expo/vector-icons/Entypo";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar, Platform } from "react-native";
 import { useLangStore } from "../../store/langStore";
-import { useNavigation } from "@react-navigation/native";
 
 const Sidebar = ({
   chats,
@@ -30,8 +29,7 @@ const Sidebar = ({
   onDeleteChat,
 }) => {
   const { colors } = useTheme();
-  const { t } = useLangStore();
-
+<<<<<<< HEAD
   const filteredChats = useMemo(
     () =>
       chats.filter(
@@ -40,6 +38,9 @@ const Sidebar = ({
       ),
     [chats, searchQ]
   );
+=======
+  const { t } = useLangStore();
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
 
   const navigation = useNavigation();
 
@@ -113,7 +114,11 @@ const Sidebar = ({
             },
           ]}
           autoCorrect={false}
+<<<<<<< HEAD
+          placeholder="Search chat history"
+=======
           placeholder={t("searchChats")}
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
           placeholderTextColor={colors.text}
           autoCapitalize="none"
           value={searchQ}

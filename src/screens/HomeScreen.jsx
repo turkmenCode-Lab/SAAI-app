@@ -116,7 +116,7 @@ const HomeScreen = () => {
   }, [token, showToast, t]);
 
   const createNewChat = useCallback(async () => {
-    if (!token || !apiRef.current) return;
+    if (!token || !apiRef.current) return null;
     try {
       const response = await apiRef.current.post("/chat", {
         title: t("newChat"),
@@ -125,19 +125,28 @@ const HomeScreen = () => {
       if (!response.data?._id) {
         throw new Error("Invalid response from server");
       }
-      const newChat = {
+      const newChatState = {
         id: response.data._id,
         title: response.data.title,
         messages: [],
       };
-      setChats((prev) => [...(prev.filter((c) => c && c.id) || []), newChat]);
-      setCurrentChatId(newChat.id);
+      setChats((prev) => [
+        ...(prev.filter((c) => c && c.id) || []),
+        newChatState,
+      ]);
+      setCurrentChatId(newChatState.id);
+      return newChatState.id;
     } catch (err) {
       console.error("Error creating chat:", err.response?.data || err.message);
+<<<<<<< HEAD
+      showToast("Failed to create new chat.", "error");
+      return null;
+=======
       showToast(
         t("failedToCreateChat") || "Failed to create new chat.",
         "error"
       );
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
     }
   }, [token, showToast, t]);
 
@@ -168,7 +177,9 @@ const HomeScreen = () => {
       if (socket.current) {
         socket.current.disconnect();
       }
-      socket.current = io(EXPO_API_URI || "http://localhost:5000");
+      socket.current = io(EXPO_API_URI || "http://localhost:5000", {
+        auth: { token },
+      });
       fetchChats();
     }
     return () => {
@@ -231,13 +242,16 @@ const HomeScreen = () => {
       let chatId = currentChatId;
       let isNewChat = !chatId;
       if (isNewChat) {
-        await createNewChat();
-        chatId = currentChatId;
+        chatId = await createNewChat();
         if (!chatId) {
+<<<<<<< HEAD
+          showToast("Failed to create chat.", "error");
+=======
           showToast(
             t("failedToCreateChat") || "Failed to create chat.",
             "error"
           );
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
           setIsLoading(false);
           return;
         }
@@ -260,8 +274,33 @@ const HomeScreen = () => {
       const newTitle = text.length > 35 ? text.substring(0, 35) + "..." : text;
 
       setChats((prev) => {
-        const filteredPrev = prev.filter((c) => c && c.id) || [];
+        const filteredPrev = (prev || []).filter((c) => c && c.id);
         const chatIndex = filteredPrev.findIndex((c) => c.id === chatId);
+<<<<<<< HEAD
+        let updatedChat;
+        if (chatIndex === -1) {
+          updatedChat = {
+            id: chatId,
+            title: newTitle,
+            messages: [userMsg],
+          };
+          return [...filteredPrev, updatedChat];
+        } else {
+          updatedChat = {
+            ...filteredPrev[chatIndex],
+            messages: [...filteredPrev[chatIndex].messages, userMsg],
+            title:
+              isNewChat || filteredPrev[chatIndex].title === "New Chat"
+                ? newTitle
+                : filteredPrev[chatIndex].title,
+          };
+          return [
+            ...filteredPrev.slice(0, chatIndex),
+            updatedChat,
+            ...filteredPrev.slice(chatIndex + 1),
+          ];
+        }
+=======
         if (chatIndex === -1) return filteredPrev;
 
         const updatedChat = {
@@ -278,6 +317,7 @@ const HomeScreen = () => {
           updatedChat,
           ...filteredPrev.slice(chatIndex + 1),
         ];
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
       });
 
       if (
@@ -311,6 +351,27 @@ const HomeScreen = () => {
           messageId,
         });
 
+<<<<<<< HEAD
+        const handleResponse = (data) => {
+          console.log(
+            `📨 Received response for msgId? ${data.messageId || "N/A"}:`,
+            data
+          );
+          if (data.chatId === chatId && data.role !== "user") {
+            setIsLoading(false);
+            socket.current.off("receiveMessage", handleResponse);
+          }
+        };
+
+        const handleError = (data) => {
+          if (data.chatId === chatId) {
+            console.error("Socket error for this msg:", data.message);
+            showToast(`Chat error: ${data.message}`, "error");
+            setIsLoading(false);
+            socket.current.off("chatError", handleError);
+          }
+        };
+=======
         const handleResponse = useCallback(
           (data) => {
             console.log(
@@ -339,6 +400,7 @@ const HomeScreen = () => {
           },
           [chatId, showToast, t]
         );
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
 
         socket.current.on("receiveMessage", handleResponse);
         socket.current.on("chatError", handleError);
@@ -374,8 +436,13 @@ const HomeScreen = () => {
     [currentChatId, token, createNewChat, showToast, chats, navigation, t]
   );
 
+<<<<<<< HEAD
+  const handleNewChat = useCallback(async () => {
+    await createNewChat();
+=======
   const handleNewChat = useCallback(() => {
     createNewChat();
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
     toggleNav();
   }, [createNewChat, toggleNav]);
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   View,
   Text,
@@ -12,7 +12,6 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useTheme } from "@react-navigation/native";
 import { useAuthStore } from "../../store/authStore";
 import Entypo from "@expo/vector-icons/Entypo";
-import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar, Platform } from "react-native";
 import { useLangStore } from "../../store/langStore";
@@ -25,13 +24,23 @@ const Sidebar = ({
   onClose,
   slideValue,
   isOpen,
-  onSubmit,
   searchQ,
   setSearchQ,
   onDeleteChat,
 }) => {
   const { colors } = useTheme();
+<<<<<<< HEAD
+  const filteredChats = useMemo(
+    () =>
+      chats.filter(
+        (chat) =>
+          !searchQ || chat.title.toLowerCase().includes(searchQ.toLowerCase())
+      ),
+    [chats, searchQ]
+  );
+=======
   const { t } = useLangStore();
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
 
   const navigation = useNavigation();
 
@@ -105,12 +114,15 @@ const Sidebar = ({
             },
           ]}
           autoCorrect={false}
+<<<<<<< HEAD
+          placeholder="Search chat history"
+=======
           placeholder={t("searchChats")}
+>>>>>>> f3550827f86a4f81c1e54d8e18ec40999693e41a
           placeholderTextColor={colors.text}
           autoCapitalize="none"
           value={searchQ}
           onChangeText={setSearchQ}
-          onSubmitEditing={() => onSubmit && onSubmit(searchQ)}
         />
         <TouchableOpacity onPress={onClose}>
           <MaterialCommunityIcons
@@ -129,7 +141,7 @@ const Sidebar = ({
         </Text>
       </TouchableOpacity>
       <FlatList
-        data={chats}
+        data={filteredChats}
         renderItem={renderChatItem}
         keyExtractor={(item) => item.id.toString()}
         style={[styles.chatList, { color: colors.text }]}

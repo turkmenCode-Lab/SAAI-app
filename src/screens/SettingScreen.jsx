@@ -20,6 +20,7 @@ import { useAuthStore } from "../../store/authStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeStore } from "../../store/themeStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 export default function SettingsScreen() {
   const theme = useAppTheme();
@@ -153,6 +154,9 @@ export default function SettingsScreen() {
 
   const pickerCommon = {
     color: theme.colors.text,
+    backgroundColor: theme.colors.background,
+    paddingHorizontal: 8,
+    borderRadius: 13,
     height: Platform.OS === "ios" ? 180 : 55,
     width: Platform.OS === "ios" ? 180 : 140,
   };
@@ -167,14 +171,47 @@ export default function SettingsScreen() {
         },
       ]}
     >
-      <Text
-        style={[
-          styles.title,
-          { color: theme.colors.text, fontFamily: theme.fonts.bold },
-        ]}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
+          paddingVertical: 10,
+        }}
       >
-        Settings
-      </Text>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{
+            position: "absolute",
+            left: 16,
+          }}
+        >
+          <Text
+            style={{
+              color: theme.colors.secondary,
+              fontWeight: "500",
+              fontSize: 20,
+            }}
+          >
+            <Ionicons
+              name="arrow-back-outline"
+              size={28}
+              color={theme.colors.secondary}
+            />
+          </Text>
+        </TouchableOpacity>
+
+        <Text
+          style={{
+            color: theme.colors.text,
+            fontFamily: theme.fonts.bold,
+            fontSize: 32,
+          }}
+        >
+          Settings
+        </Text>
+      </View>
 
       <View style={styles.section}>
         {renderCard(

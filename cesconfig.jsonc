@@ -5,8 +5,20 @@
   "projectName": "my-expo-app",
   "packages": [
     {
-      "name": "nativewind",
-      "type": "styling"
+      "name": "nativewindui",
+      "type": "styling",
+      "options": {
+        "selectedComponents": [
+          "text"
+        ]
+      }
+    },
+    {
+      "name": "expo-router",
+      "type": "navigation",
+      "options": {
+        "type": "stack"
+      }
     }
   ],
   "flags": {

@@ -46,10 +46,13 @@ const Sidebar = ({
         ]}
         onPress={() => onLoadChat(item.id)}
       >
-        <Text style={styles.chatTitle} numberOfLines={1}>
+        <Text
+          style={[styles.chatTitle, { color: colors.text }]}
+          numberOfLines={1}
+        >
           {item.title}
         </Text>
-        <Text style={styles.chatSubtitle}>
+        <Text style={[styles.chatSubtitle, { color: colors.text }]}>
           {item.messages.length > 0
             ? new Date(
                 item.messages[item.messages.length - 1].timestamp

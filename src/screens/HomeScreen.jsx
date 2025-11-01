@@ -1,4 +1,3 @@
-// src/screens/HomeScreen.jsx
 import React, {
   useState,
   useRef,
@@ -69,7 +68,6 @@ const HomeScreen = () => {
     }
   }, [toast.visible]);
 
-  // ---- AUTH GUARD ----
   useEffect(() => {
     if (!hasCheckedAuth) {
       if (!token) navigation.replace("Auth");
@@ -81,7 +79,6 @@ const HomeScreen = () => {
     if (hasCheckedAuth && !token) navigation.replace("Auth");
   }, [hasCheckedAuth, token, navigation]);
 
-  // ---- FETCH CHATS ----
   const fetchChats = useCallback(async () => {
     if (!token || !apiRef.current) return;
     try {

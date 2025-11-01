@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
+import { useThemeStore } from "../../../store/themeStore";
 
 const Chat = ({
   chats,
@@ -14,52 +15,15 @@ const Chat = ({
   colors,
   scrollRef,
   isLoading,
-  socket,
 }) => {
+  const { accentColor } = useThemeStore();
   const [isThinking, setIsThinking] = useState(false);
+
   const messages =
     chats.find((chat) => chat.id === currentChatId)?.messages || [];
 
-  useEffect(() => {
-    if (currentChatId && socket) {
-      socket.emit("joinChat", currentChatId);
-    }
-
-    if (socket) {
-      socket.on("receiveMessage", (data) => {
-        if (data.role === "user") return;
-        setChats((prev) =>
-          prev.map((c) =>
-            c.id === data.chatId
-              ? {
-                  ...c,
-                  messages: [
-                    ...c.messages,
-                    {
-                      id: Date.now(),
-                      role: data.role,
-                      text: data.content,
-                      timestamp: new Date().toISOString(),
-                    },
-                  ],
-                }
-              : c
-          )
-        );
-      });
-
-      socket.on("isThinking", ({ chatId, status }) => {
-        if (chatId === currentChatId) setIsThinking(status);
-      });
-    }
-
-    return () => {
-      if (socket) {
-        socket.off("receiveMessage");
-        socket.off("isThinking");
-      }
-    };
-  }, [currentChatId, socket]);
+  // resolve actual color value from theme
+  const accentColorValue = colors[accentColor] || accentColor; // fallback in case accentColor is already a hex
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -90,8 +54,11 @@ const Chat = ({
             style={[
               styles.bubble,
               item.role === "user"
-                ? { alignSelf: "flex-end", backgroundColor: colors.text }
-                : styles.assistantBubble,
+                ? { alignSelf: "flex-end", backgroundColor: colors.neutral }
+                : {
+                    alignSelf: "flex-start",
+                    backgroundColor: accentColorValue,
+                  },
             ]}
           >
             <Text
@@ -108,7 +75,7 @@ const Chat = ({
         ))
       )}
       {(isLoading || isThinking) && (
-        <ActivityIndicator style={{ marginTop: 10 }} color={colors.mostly} />
+        <ActivityIndicator style={{ marginTop: 10 }} color={accentColorValue} />
       )}
     </ScrollView>
   );
@@ -130,7 +97,6 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     maxWidth: "80%",
   },
-  assistantBubble: { alignSelf: "flex-start", backgroundColor: "#f2f2f2" },
   bubbleText: { fontSize: 16, lineHeight: 20 },
 });
 

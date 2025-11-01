@@ -91,6 +91,11 @@ const Sidebar = ({
         },
       ]}
     >
+      <Text
+        style={{ color: colors.text, textAlign: "center", marginVertical: 10 }}
+      >
+        Let's Dive into your history
+      </Text>
       <View
         style={[styles.sidebarHeader, { borderBottomColor: colors.border }]}
       >

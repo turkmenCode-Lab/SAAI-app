@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,14 +7,15 @@ import {
   StyleSheet,
   Animated,
   TextInput,
+  BackHandler,
+  Platform,
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useTheme } from "@react-navigation/native";
 import { useAuthStore } from "../../store/authStore";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useNavigation } from "@react-navigation/native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar, Platform } from "react-native";
+import { PanGestureHandler, State } from "react-native-gesture-handler";
 
 const Sidebar = ({
   chats,
@@ -35,154 +36,196 @@ const Sidebar = ({
 
   const user = useAuthStore((state) => state.user);
 
-  const renderChatItem = ({ item }) => (
-    <View style={styles.chatItemContainer}>
-      <TouchableOpacity
-        style={[
-          styles.chatItem,
-          currentChatId === item.id && {
-            backgroundColor: colors.primary + "0F",
-          },
-        ]}
-        onPress={() => onLoadChat(item.id)}
-      >
-        <Text
-          style={[styles.chatTitle, { color: colors.text }]}
-          numberOfLines={1}
+  const renderChatItem = useCallback(
+    ({ item }) => (
+      <View style={styles.chatItemContainer}>
+        <TouchableOpacity
+          style={[
+            styles.chatItem,
+            currentChatId === item.id && {
+              backgroundColor: colors.primary + "0F",
+            },
+          ]}
+          onPress={() => onLoadChat(item.id)}
         >
-          {item.title}
-        </Text>
-        <Text style={[styles.chatSubtitle, { color: colors.text }]}>
-          {item.messages.length > 0
-            ? new Date(
-                item.messages[item.messages.length - 1].timestamp
-              ).toLocaleDateString()
-            : ""}
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.deleteBtn}
-        onPress={() => onDeleteChat(item.id)}
-      >
-        <MaterialCommunityIcons name="delete" size={20} color={colors.error} />
-      </TouchableOpacity>
-    </View>
+          <Text
+            style={[styles.chatTitle, { color: colors.text }]}
+            numberOfLines={1}
+          >
+            {item.title}
+          </Text>
+          <Text style={[styles.chatSubtitle, { color: colors.text }]}>
+            {item.messages.length > 0
+              ? new Date(
+                  item.messages[item.messages.length - 1].timestamp
+                ).toLocaleDateString()
+              : ""}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.deleteBtn}
+          onPress={() => onDeleteChat(item.id)}
+        >
+          <MaterialCommunityIcons
+            name="delete"
+            size={20}
+            color={colors.error}
+          />
+        </TouchableOpacity>
+      </View>
+    ),
+    [currentChatId, colors, onLoadChat, onDeleteChat]
   );
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     try {
       useAuthStore.getState().logout();
     } catch (e) {
       console.error("Logout error:", e);
     }
-  };
+  }, []);
+
+  const onGestureEvent = useCallback(
+    (event) => {
+      if (event.nativeEvent.state === State.END) {
+        const { translationX } = event.nativeEvent;
+        if (translationX < -100) {
+          onClose();
+        }
+      }
+    },
+    [onClose]
+  );
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        onClose();
+        return true;
+      }
+    );
+
+    return () => backHandler.remove();
+  }, [isOpen, onClose]);
 
   return (
-    <Animated.View
-      style={[
-        {
-          position: "absolute",
-          top: 0,
-          left: 0,
-          bottom: 0,
-          right: 0,
-          backgroundColor: colors.background,
-          transform: [{ translateX: slideValue }],
-          zIndex: 1000,
-          paddingTop: Platform.OS === "android" ? 40 : 60,
-          paddingHorizontal: 15,
-        },
-      ]}
-    >
-      <Text
-        style={{ color: colors.text, textAlign: "center", marginVertical: 10 }}
-      >
-        Let's Dive into your history
-      </Text>
-      <View
-        style={[styles.sidebarHeader, { borderBottomColor: colors.border }]}
-      >
-        <TextInput
-          style={[
-            styles.searchInput,
-            {
-              color: colors.text,
-              borderColor: colors.text,
-            },
-          ]}
-          autoCorrect={false}
-          placeholder="Let's search your chat history!?"
-          placeholderTextColor={colors.text}
-          autoCapitalize="none"
-          value={searchQ}
-          onChangeText={setSearchQ}
-          onSubmitEditing={() => onSubmit && onSubmit(searchQ)}
-        />
-        <TouchableOpacity onPress={onClose}>
-          <MaterialCommunityIcons
-            name="backburger"
-            size={30}
-            color={colors.neutral}
-          />
-        </TouchableOpacity>
-      </View>
-      <TouchableOpacity
-        style={[styles.newChatBtn, { backgroundColor: colors.text + "0A" }]}
-        onPress={onNewChat}
-      >
-        <Text style={[styles.newChatText, { color: colors.text }]}>
-          New Chat
-        </Text>
-      </TouchableOpacity>
-      <FlatList
-        data={chats}
-        renderItem={renderChatItem}
-        keyExtractor={(item) => item.id.toString()}
-        style={[styles.chatList, { color: colors.text }]}
-      />
-      <View
+    <PanGestureHandler onGestureEvent={onGestureEvent}>
+      <Animated.View
         style={[
-          styles.sidebarUser,
-          { borderTopColor: colors.border, marginBottom: 15 },
+          {
+            position: "absolute",
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            backgroundColor: colors.background,
+            transform: [{ translateX: slideValue }],
+            zIndex: 1000,
+            paddingTop: Platform.OS === "android" ? 40 : 60,
+            paddingHorizontal: 15,
+          },
         ]}
       >
-        <View
-          style={{
-            backgroundColor: colors.primary,
-            borderRadius: 100,
-            width: 44,
-            height: 44,
-            alignItems: "center",
-            justifyContent: "center",
-            borderWidth: 3,
-            borderColor: colors.accent,
-          }}
-        >
-          <Text
-            style={{
-              color: colors.text,
-              fontFamily: "InterSemiBold",
-              fontSize: 24,
-            }}
-          >
-            {user?.email ? user.email[0].toUpperCase() : "?"}
-          </Text>
-        </View>
         <Text
           style={{
             color: colors.text,
-            fontFamily: "InterMedium",
-            fontWeight: 500,
-            fontSize: 18,
+            textAlign: "center",
+            marginVertical: 10,
           }}
         >
-          {user?.email ?? "Guest"}
+          Let's Dive into your history
         </Text>
-        <TouchableOpacity style={{ marginLeft: "auto" }} onPress={handleLogout}>
-          <Entypo name="log-out" size={24} color={colors.neutral} />
+        <View
+          style={[styles.sidebarHeader, { borderBottomColor: colors.border }]}
+        >
+          <TextInput
+            style={[
+              styles.searchInput,
+              {
+                color: colors.text,
+                borderColor: colors.text,
+              },
+            ]}
+            autoCorrect={false}
+            placeholder="Let's search your chat history!?"
+            placeholderTextColor={colors.text}
+            autoCapitalize="none"
+            value={searchQ}
+            onChangeText={setSearchQ}
+            onSubmitEditing={() => onSubmit && onSubmit(searchQ)}
+          />
+          <TouchableOpacity onPress={onClose}>
+            <MaterialCommunityIcons
+              name="backburger"
+              size={30}
+              color={colors.neutral}
+            />
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          style={[styles.newChatBtn, { backgroundColor: colors.text + "0A" }]}
+          onPress={onNewChat}
+        >
+          <Text style={[styles.newChatText, { color: colors.text }]}>
+            New Chat
+          </Text>
         </TouchableOpacity>
-      </View>
-    </Animated.View>
+        <FlatList
+          data={chats}
+          renderItem={renderChatItem}
+          keyExtractor={(item) => item.id.toString()}
+          style={[styles.chatList, { color: colors.text }]}
+        />
+        <View
+          style={[
+            styles.sidebarUser,
+            { borderTopColor: colors.border, marginBottom: 15 },
+          ]}
+        >
+          <View
+            style={{
+              backgroundColor: colors.primary,
+              borderRadius: 100,
+              width: 44,
+              height: 44,
+              alignItems: "center",
+              justifyContent: "center",
+              borderWidth: 3,
+              borderColor: colors.accent,
+            }}
+          >
+            <Text
+              style={{
+                color: colors.text,
+                fontFamily: "InterSemiBold",
+                fontSize: 24,
+              }}
+            >
+              {user?.email ? user.email[0].toUpperCase() : "?"}
+            </Text>
+          </View>
+          <Text
+            style={{
+              color: colors.text,
+              fontFamily: "InterMedium",
+              fontWeight: 500,
+              fontSize: 18,
+            }}
+          >
+            {user?.email ?? "Guest"}
+          </Text>
+          <TouchableOpacity
+            style={{ marginLeft: "auto" }}
+            onPress={handleLogout}
+          >
+            <Entypo name="log-out" size={24} color={colors.neutral} />
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
+    </PanGestureHandler>
   );
 };
 

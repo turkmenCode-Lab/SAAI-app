@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Text, ActivityIndicator, View } from "react-native";
@@ -36,6 +36,16 @@ export default function App() {
     initApp();
   }, [getStoredSettings]);
 
+  useEffect(() => {
+    Text.defaultProps = Text.defaultProps || {};
+    Text.defaultProps.style = [
+      { fontFamily: "InterRegular" },
+      ...(Text.defaultProps.style || []),
+    ];
+  }, []);
+
+  const initialRouteName = useMemo(() => (token ? "Home" : "Auth"), [token]);
+
   if (!appReady) {
     return (
       <View
@@ -50,14 +60,6 @@ export default function App() {
       </View>
     );
   }
-
-  Text.defaultProps = Text.defaultProps || {};
-  Text.defaultProps.style = [
-    { fontFamily: "InterRegular" },
-    ...(Text.defaultProps.style || []),
-  ];
-
-  const initialRouteName = token ? "Home" : "Auth";
 
   return (
     <NavigationContainer theme={AppTheme}>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -28,6 +28,8 @@ const EmailAuth = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rePassword, setRePassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRePassword, setShowRePassword] = useState(false);
   const [toast, setToast] = useState({
     visible: false,
     message: "",
@@ -44,25 +46,25 @@ const EmailAuth = ({ navigation }) => {
     ...(Text.defaultProps.style || []),
   ];
 
-  const showToast = (message, status = "success") => {
+  const showToast = useCallback((message, status = "success") => {
     setToast({ visible: true, message, status });
-  };
+  }, []);
 
-  const hideToast = () => {
+  const hideToast = useCallback(() => {
     setToast((prev) => ({ ...prev, visible: false }));
-  };
+  }, []);
 
   useEffect(() => {
     if (authStore.error) {
       showToast(authStore.error, "error");
-      authStore.setError?.("") || useAuthStore.setState({ error: "" });
+      useAuthStore.setState({ error: null });
     }
-  }, [authStore.error]);
+  }, [authStore.error, showToast]);
 
-  const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
-  const validatePassword = (pass) => pass.length >= 6;
+  const validateEmail = useCallback((email) => /\S+@\S+\.\S+/.test(email), []);
+  const validatePassword = useCallback((pass) => pass.length >= 6, []);
 
-  const shake = (animatedValue) => {
+  const shake = useCallback((animatedValue) => {
     animatedValue.setValue(0);
     Animated.sequence([
       Animated.timing(animatedValue, {
@@ -91,9 +93,9 @@ const EmailAuth = ({ navigation }) => {
         useNativeDriver: false,
       }),
     ]).start();
-  };
+  }, []);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!validateEmail(email))
       return shake(shakeEmail) && showToast("Invalid email", "error");
     if (!validatePassword(password))
@@ -127,7 +129,21 @@ const EmailAuth = ({ navigation }) => {
           : err.message || "An unexpected error occurred";
       showToast(errorMessage, "error");
     }
-  };
+  }, [
+    email,
+    password,
+    rePassword,
+    isLogin,
+    authStore,
+    navigation,
+    showToast,
+    shake,
+    shakeEmail,
+    shakePassword,
+    shakeRePassword,
+    validateEmail,
+    validatePassword,
+  ]);
 
   return (
     <SafeAreaView
@@ -182,10 +198,21 @@ const EmailAuth = ({ navigation }) => {
                   styles.input,
                   { backgroundColor: colors.background, color: colors.text },
                 ]}
-                secureTextEntry
+                secureTextEntry={!showPassword}
                 autoCorrect={false}
                 autoCapitalize="none"
               />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.eyeStyle}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={20}
+                  color={colors.neutral}
+                />
+              </TouchableOpacity>
             </View>
           </Animated.View>
 
@@ -206,9 +233,20 @@ const EmailAuth = ({ navigation }) => {
                     styles.input,
                     { backgroundColor: colors.background, color: colors.text },
                   ]}
-                  secureTextEntry
+                  secureTextEntry={!showRePassword}
                   autoCorrect={false}
                 />
+                <TouchableOpacity
+                  onPress={() => setShowRePassword(!showRePassword)}
+                  style={styles.eyeStyle}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Ionicons
+                    name={showRePassword ? "eye-off" : "eye"}
+                    size={20}
+                    color={colors.neutral}
+                  />
+                </TouchableOpacity>
               </View>
             </Animated.View>
           )}
@@ -278,6 +316,7 @@ const EmailAuth = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  eyeStyle: { position: "absolute", right: 21.5 },
   inner: { flex: 1, alignItems: "center", justifyContent: "center", gap: 30 },
   header: { fontSize: 32, fontWeight: "700", textAlign: "center" },
   form: { width: "80%", alignItems: "center", gap: 20 },

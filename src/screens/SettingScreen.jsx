@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   View,
   Text,
@@ -65,28 +71,34 @@ export default function SettingsScreen() {
     }
   }, [isDarkMode, language, accentColor, loading]);
 
-  const accentColorValue = theme.colors.accent;
+  const accentColorValue = useMemo(
+    () => theme.colors.accent,
+    [theme.colors.accent]
+  );
 
-  const animateAccent = () => {
+  const animateAccent = useCallback(() => {
     Animated.sequence([
       Animated.spring(scaleAnim, { toValue: 1.2, useNativeDriver: true }),
       Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true }),
     ]).start();
-  };
+  }, [scaleAnim]);
 
-  const handleAccentChange = (value) => {
-    setAccentColor(value);
-    setStoredAccentColor(value);
-    animateAccent();
-  };
+  const handleAccentChange = useCallback(
+    (value) => {
+      setAccentColor(value);
+      setStoredAccentColor(value);
+      animateAccent();
+    },
+    [setAccentColor, setStoredAccentColor, animateAccent]
+  );
 
-  const handleThemeToggle = () => {
+  const handleThemeToggle = useCallback(() => {
     const newDark = !isDarkMode;
     setIsDarkMode(newDark);
     setDarkMode(newDark);
-  };
+  }, [isDarkMode, setIsDarkMode, setDarkMode]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     Alert.alert("Logout", "Are you sure you want to log out?", [
       { text: "Cancel", style: "cancel" },
       {
@@ -98,15 +110,67 @@ export default function SettingsScreen() {
         },
       },
     ]);
-  };
+  }, [navigation]);
 
-  const openPrivacyPolicy = async () => {
+  const openPrivacyPolicy = useCallback(async () => {
     const url = "https://your-app.com/privacy-policy";
     const supported = await Linking.canOpenURL(url);
     supported
       ? await Linking.openURL(url)
       : Alert.alert("Error", "Can't open URL.");
-  };
+  }, []);
+
+  const renderCard = useCallback(
+    (children) => (
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: theme.colors.surface || theme.colors.card,
+          },
+        ]}
+      >
+        {children}
+      </View>
+    ),
+    [theme.colors]
+  );
+
+  const renderRow = useCallback(
+    (icon, label, rightContent, onPress) => (
+      <TouchableOpacity
+        activeOpacity={onPress ? 0.7 : 1}
+        onPress={onPress}
+        style={styles.row}
+      >
+        <View style={styles.left}>
+          <MaterialIcons name={icon} size={20} color={accentColorValue} />
+          <Text
+            style={[
+              styles.label,
+              { color: theme.colors.text, fontFamily: theme.fonts.medium },
+            ]}
+          >
+            {label}
+          </Text>
+        </View>
+        {rightContent}
+      </TouchableOpacity>
+    ),
+    [accentColorValue, theme.colors, theme.fonts]
+  );
+
+  const pickerCommon = useMemo(
+    () => ({
+      color: theme.colors.text,
+      backgroundColor: theme.colors.background,
+      paddingHorizontal: 8,
+      borderRadius: 13,
+      height: Platform.OS === "ios" ? 180 : 55,
+      width: Platform.OS === "ios" ? 180 : 140,
+    }),
+    [theme.colors, Platform.OS]
+  );
 
   if (loading) {
     return (
@@ -117,49 +181,6 @@ export default function SettingsScreen() {
       </View>
     );
   }
-
-  const renderCard = (children) => (
-    <View
-      style={[
-        styles.card,
-        {
-          backgroundColor: theme.colors.surface || theme.colors.card,
-        },
-      ]}
-    >
-      {children}
-    </View>
-  );
-
-  const renderRow = (icon, label, rightContent, onPress) => (
-    <TouchableOpacity
-      activeOpacity={onPress ? 0.7 : 1}
-      onPress={onPress}
-      style={styles.row}
-    >
-      <View style={styles.left}>
-        <MaterialIcons name={icon} size={20} color={accentColorValue} />
-        <Text
-          style={[
-            styles.label,
-            { color: theme.colors.text, fontFamily: theme.fonts.medium },
-          ]}
-        >
-          {label}
-        </Text>
-      </View>
-      {rightContent}
-    </TouchableOpacity>
-  );
-
-  const pickerCommon = {
-    color: theme.colors.text,
-    backgroundColor: theme.colors.background,
-    paddingHorizontal: 8,
-    borderRadius: 13,
-    height: Platform.OS === "ios" ? 180 : 55,
-    width: Platform.OS === "ios" ? 180 : 140,
-  };
 
   return (
     <View

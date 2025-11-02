@@ -1,6 +1,7 @@
 import { DefaultTheme, DarkTheme } from "@react-navigation/native";
 import { useColorScheme } from "react-native";
-import { useThemeStore } from "../store/themeStore"; // Adjust path as needed
+import { useMemo } from "react";
+import { useThemeStore } from "../store/themeStore";
 
 export const lightTheme = {
   ...DefaultTheme,
@@ -50,16 +51,25 @@ export const useAppTheme = () => {
   const scheme = useColorScheme();
   const { darkMode, accentColor } = useThemeStore();
 
-  const isDark = darkMode !== null ? darkMode : scheme === "dark";
-  const base = isDark ? darkTheme : lightTheme;
-  const selectedAccent = base.colors[accentColor || "mostly"];
+  const isDark = useMemo(
+    () => (darkMode !== null ? darkMode : scheme === "dark"),
+    [darkMode, scheme]
+  );
+  const base = useMemo(() => (isDark ? darkTheme : lightTheme), [isDark]);
+  const selectedAccent = useMemo(
+    () => base.colors[accentColor || "mostly"],
+    [base, accentColor]
+  );
 
-  return {
-    ...base,
-    colors: {
-      ...base.colors,
-      accent: selectedAccent,
-      border: isDark ? "#333333" : "#e5e5e5",
-    },
-  };
+  return useMemo(
+    () => ({
+      ...base,
+      colors: {
+        ...base.colors,
+        accent: selectedAccent,
+        border: isDark ? "#333333" : "#e5e5e5",
+      },
+    }),
+    [base, selectedAccent, isDark]
+  );
 };

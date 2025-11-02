@@ -5,7 +5,7 @@ import { useAuthStore } from "../../store/authStore";
 export const createAPI = () => {
   const api = axios.create({
     baseURL: EXPO_API_URI || "http://localhost:5000/api",
-    timeout: 15000,
+    timeout: 45000,
   });
 
   api.interceptors.request.use(

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "SAAI-app",
-    "slug": "saai",
+    "name": "Sora",
+    "slug": "sora",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -23,7 +23,7 @@
       },
       "jsEngine": "hermes",
       "edgeToEdgeEnabled": true,
-      "package": "com.turkmencodelab.SAAI",
+      "package": "com.turkmencodelab.Sora",
       "softwareKeyboardLayoutMode": "resize"
     },
     "web": {

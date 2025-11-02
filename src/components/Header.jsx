@@ -47,9 +47,7 @@ const Header = ({ isNavOpen, rotateInterpolate, onToggleNav }) => {
             size={20}
             color={colors.principally}
           />
-          <Text style={[styles.getProText, { color: colors.principally }]}>
-            Get Pro
-          </Text>
+          <Text style={[styles.getProText, { color: "#fff" }]}>Get Pro</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleSettingsPress} activeOpacity={0.7}>
           <MaterialCommunityIcons

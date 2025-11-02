@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -26,7 +26,7 @@ const Toast = ({ message, visible: propVisible, status, onHide }) => {
         useNativeDriver: true,
       }).start();
     }
-  }, [propVisible]);
+  }, [propVisible, internalVisible, opacity]);
 
   useEffect(() => {
     let timer;
@@ -44,9 +44,9 @@ const Toast = ({ message, visible: propVisible, status, onHide }) => {
       }, 2500);
     }
     return () => clearTimeout(timer);
-  }, [internalVisible]);
+  }, [internalVisible, opacity, onHide]);
 
-  const hideToast = () => {
+  const hideToast = useCallback(() => {
     if (internalVisible) {
       Animated.timing(opacity, {
         toValue: 0,
@@ -58,7 +58,7 @@ const Toast = ({ message, visible: propVisible, status, onHide }) => {
         if (onHide) onHide();
       });
     }
-  };
+  }, [internalVisible, opacity, onHide]);
 
   if (!internalVisible) return null;
 

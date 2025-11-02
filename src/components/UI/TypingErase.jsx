@@ -144,7 +144,11 @@ export default function TypingErase({
           cursorStyle,
         ]}
       >
-        <Octicons name="sparkle-fill" size={fontSize} color={cursorStyle} />
+        <Octicons
+          name="sparkle-fill"
+          size={fontSize}
+          color={cursorStyle?.color || "inherit"}
+        />
       </Animated.Text>
     </View>
   );

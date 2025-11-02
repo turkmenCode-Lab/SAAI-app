@@ -15,6 +15,7 @@ import {
   Animated,
   Dimensions,
   Easing,
+  LayoutAnimation,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
@@ -57,7 +58,6 @@ const HomeScreen = () => {
     setToast({ visible: true, message: msg, status });
   }, []);
 
-  // Toast auto‑hide
   useEffect(() => {
     if (toast.visible) {
       const t = setTimeout(
@@ -103,7 +103,6 @@ const HomeScreen = () => {
     }
   }, [token, currentChatId, showToast]);
 
-  // ---- CREATE CHAT ----
   const createNewChat = useCallback(async () => {
     if (!token || !apiRef.current) return null;
     try {
@@ -122,7 +121,6 @@ const HomeScreen = () => {
     }
   }, [token, showToast]);
 
-  // ---- DELETE CHAT ----
   const deleteChat = useCallback(
     async (chatId) => {
       if (!token || !apiRef.current || !chatId) return;
@@ -142,7 +140,6 @@ const HomeScreen = () => {
     [token, currentChatId, chats, showToast]
   );
 
-  // ---- INIT API (only when token exists) ----
   useEffect(() => {
     if (token) {
       console.log("Token ready → init API");
@@ -154,7 +151,6 @@ const HomeScreen = () => {
     };
   }, [token, fetchChats]);
 
-  // ---- SIDEBAR ----
   const loadChat = useCallback((id) => {
     setCurrentChatId(id);
     setIsNavOpen(false);
@@ -167,7 +163,7 @@ const HomeScreen = () => {
         toValue: open ? 0 : -SCREEN_WIDTH,
         duration: 525,
         easing: Easing.out(Easing.exp),
-        useNativeDriver: false, // <-- REMOVED
+        useNativeDriver: false,
       }).start();
       return open;
     });
@@ -182,7 +178,6 @@ const HomeScreen = () => {
     []
   );
 
-  // ---- SEND MESSAGE ----
   const handleSubmit = useCallback(
     async (text) => {
       if (!text.trim()) return showToast("Please type a message.", "error");
@@ -197,16 +192,18 @@ const HomeScreen = () => {
         chatId = id;
       }
 
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+
       setIsLoading(true);
       const userMsg = {
         id: Date.now(),
         role: "user",
         text,
         timestamp: new Date().toISOString(),
+        isAnimating: true,
       };
       const title = text.length > 35 ? text.slice(0, 35) + "..." : text;
 
-      // optimistic UI
       setChats((p) => {
         const i = p.findIndex((c) => c.id === chatId);
         if (i === -1) return p;
@@ -229,7 +226,10 @@ const HomeScreen = () => {
           role: ai.role,
           text: ai.content,
           timestamp: ai.timestamp || new Date().toISOString(),
+          isAnimating: true,
         };
+
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
         setChats((p) =>
           p.map((c) =>
@@ -237,16 +237,47 @@ const HomeScreen = () => {
           )
         );
 
-        // update title
         if (isNew || chats.find((c) => c.id === chatId)?.title === "New Chat") {
           await apiRef.current.put(`/chat/${chatId}`, { title });
           setChats((p) =>
             p.map((c) => (c.id === chatId ? { ...c, title } : c))
           );
         }
+
+        setTimeout(() => {
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+          setChats((p) =>
+            p.map((c) =>
+              c.id === chatId
+                ? {
+                    ...c,
+                    messages: c.messages.map((m) => ({
+                      ...m,
+                      isAnimating: false,
+                    })),
+                  }
+                : c
+            )
+          );
+        }, 500);
       } catch (e) {
         console.error("sendMessage error:", e);
         showToast(e.response?.data?.message || "Failed to send.", "error");
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setChats((p) =>
+          p.map((c) =>
+            c.id === chatId
+              ? {
+                  ...c,
+                  messages: c.messages.map((m, idx) =>
+                    idx === c.messages.length - 1
+                      ? { ...m, isAnimating: false }
+                      : m
+                  ),
+                }
+              : c
+          )
+        );
       } finally {
         setIsLoading(false);
       }
@@ -259,13 +290,12 @@ const HomeScreen = () => {
     toggleNav();
   }, [createNewChat, toggleNav]);
 
-  // rotate hamburger
   useEffect(() => {
     Animated.timing(rotation, {
       toValue: isNavOpen ? 1 : 0,
       duration: 525,
       easing: Easing.out(Easing.exp),
-      useNativeDriver: false, // <-- REMOVED
+      useNativeDriver: false,
     }).start();
   }, [isNavOpen]);
 
@@ -280,7 +310,6 @@ const HomeScreen = () => {
         onToggleNav={toggleNav}
       />
 
-      {/* Overlay – pointerEvents moved to style */}
       {isNavOpen && (
         <TouchableOpacity
           style={[styles.overlay, { pointerEvents: "auto" }]}

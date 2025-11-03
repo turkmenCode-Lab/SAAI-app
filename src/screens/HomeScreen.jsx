@@ -31,7 +31,6 @@ import { createAPI } from "../utils/api";
 import Toast from "../components/UI/Toast";
 import { useThemeStore } from "../../store/themeStore";
 
-// Enable LayoutAnimation on Android (call once in app entry if needed)
 if (
   Platform.OS === "android" &&
   UIManager.setLayoutAnimationEnabledExperimental
@@ -43,10 +42,10 @@ const HomeScreen = () => {
   const navigation = useNavigation();
   const { token } = useAuthStore();
   const { accentColor } = useThemeStore();
-  const { colors } = useTheme(); // Moved up to fix ReferenceError
+  const { colors } = useTheme();
 
   const accentColorValue = useMemo(
-    () => colors[accentColor] || colors.primary || "#007AFF", // Better fallback
+    () => colors[accentColor] || colors.primary || "#007AFF",
     [colors, accentColor]
   );
 
@@ -94,7 +93,6 @@ const HomeScreen = () => {
     }
   }, [toast.visible]);
 
-  // API init and fetch chats
   useEffect(() => {
     if (token) {
       apiRef.current = createAPI();
@@ -103,7 +101,7 @@ const HomeScreen = () => {
     return () => {
       apiRef.current = null;
     };
-  }, [token]); // Removed fetchChats from deps since it's stable via useCallback
+  }, [token]);
 
   const fetchChats = useCallback(async () => {
     if (!token || !apiRef.current) return;
@@ -117,7 +115,7 @@ const HomeScreen = () => {
         .map((c) => ({
           id: c._id,
           title: c.title || "New Chat",
-          createdAt: c.createdAt || new Date().toISOString(), // Add createdAt for sorting
+          createdAt: c.createdAt || new Date().toISOString(),
           messages: (c.messages || []).map((m, i) => ({
             id: `${m._id || i}`,
             role: m.role,
@@ -125,10 +123,8 @@ const HomeScreen = () => {
             timestamp: m.timestamp || c.createdAt || new Date().toISOString(),
           })),
         }))
-        // Sort by createdAt descending (latest first)
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setChats(loadedChats);
-      // Always set to the latest chat if available (fixes opening latest on every mount)
       if (loadedChats.length > 0) {
         setCurrentChatId(loadedChats[0].id);
       }
@@ -136,7 +132,7 @@ const HomeScreen = () => {
       console.error("fetchChats error:", error);
       showToast("Failed to load chats.", "error");
     }
-  }, [token, showToast]); // Removed currentChatId from deps
+  }, [token, showToast]);
 
   const createNewChat = useCallback(async () => {
     if (!token || !apiRef.current) return null;
@@ -149,10 +145,10 @@ const HomeScreen = () => {
       const newChat = {
         id: data._id,
         title: data.title,
-        createdAt: data.createdAt || new Date().toISOString(), // Add for consistency
+        createdAt: data.createdAt || new Date().toISOString(),
         messages: [],
       };
-      setChats((prev) => [newChat, ...prev]); // Prepend to keep latest first
+      setChats((prev) => [newChat, ...prev]);
       setCurrentChatId(newChat.id);
       return newChat.id;
     } catch (error) {
@@ -170,7 +166,6 @@ const HomeScreen = () => {
         setChats((prev) => {
           const filtered = prev.filter((c) => c.id !== chatId);
           if (currentChatId === chatId) {
-            // Set to latest remaining or null
             setCurrentChatId(filtered.length > 0 ? filtered[0].id : null);
           }
           return filtered;
@@ -211,7 +206,6 @@ const HomeScreen = () => {
     []
   );
 
-  // Optimized handleSubmit with tighter deps
   const handleSubmit = useCallback(
     async (text) => {
       const trimmed = text.trim();
@@ -235,7 +229,6 @@ const HomeScreen = () => {
         isAnimating: true,
       };
 
-      // Optimistic update for user message
       setChats((prev) => {
         const index = prev.findIndex((c) => c.id === chatId);
         if (index === -1) return prev;
@@ -266,7 +259,6 @@ const HomeScreen = () => {
           isAnimating: true,
         };
 
-        // Add AI response
         setChats((prev) =>
           prev.map((c) =>
             c.id === chatId ? { ...c, messages: [...c.messages, aiMsg] } : c
@@ -275,7 +267,6 @@ const HomeScreen = () => {
 
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
-        // Update title if needed
         if (
           isNewChat ||
           chats.find((c) => c.id === chatId)?.title === "New Chat"
@@ -291,7 +282,6 @@ const HomeScreen = () => {
           error.response?.data?.message || "Failed to send message.",
           "error"
         );
-        // Rollback animation for user message only
         setChats((prev) =>
           prev.map((c) =>
             c.id === chatId
@@ -308,7 +298,6 @@ const HomeScreen = () => {
         );
       } finally {
         setIsLoading(false);
-        // End animations after delay (optimized: use requestAnimationFrame for smoother timing if needed, but setTimeout is fine)
         setTimeout(() => {
           LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
           setChats((prev) =>
@@ -335,13 +324,12 @@ const HomeScreen = () => {
     toggleNav();
   }, [createNewChat, toggleNav]);
 
-  // Nav rotation animation (optimized: useNativeDriver true for transforms)
   useEffect(() => {
     Animated.timing(rotation, {
       toValue: isNavOpen ? 1 : 0,
       duration: 525,
       easing: Easing.out(Easing.exp),
-      useNativeDriver: true, // Optimized: native driver for rotation
+      useNativeDriver: true,
     }).start();
   }, [isNavOpen, rotation]);
 
@@ -361,7 +349,7 @@ const HomeScreen = () => {
           style={[styles.overlay, { pointerEvents: "auto" }]}
           onPress={toggleNav}
           activeOpacity={1}
-          accessible={false} // Overlay shouldn't be focusable
+          accessible={false}
         />
       )}
 
@@ -373,7 +361,6 @@ const HomeScreen = () => {
         onClose={toggleNav}
         slideValue={slideValue}
         isOpen={isNavOpen}
-        // searchQ and setSearchQ removed as unused here; add back if needed
         onDeleteChat={deleteChat}
       />
 

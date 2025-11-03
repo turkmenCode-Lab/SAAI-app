@@ -207,7 +207,6 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
             styles.bubble,
             {
               backgroundColor: isUser ? colors.neutral : accentColorValue,
-              // Add minHeight for Markdown to prevent collapse
               minHeight: 20,
             },
           ]}
@@ -227,7 +226,6 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
             <Markdown
               style={markdownStyles}
               onLinkPress={(url) => {
-                // Handle link press if needed, e.g., open URL
                 console.log("Link pressed:", url);
               }}
             >

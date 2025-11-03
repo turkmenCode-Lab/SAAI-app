@@ -16,6 +16,7 @@ import {
   Dimensions,
   Easing,
   LayoutAnimation,
+  UIManager,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
@@ -28,13 +29,28 @@ import Sidebar from "../components/Sidebar";
 import Chat from "../components/UI/Chat";
 import { createAPI } from "../utils/api";
 import Toast from "../components/UI/Toast";
+import { useThemeStore } from "../../store/themeStore";
+
+// Enable LayoutAnimation on Android (call once in app entry if needed)
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const { token } = useAuthStore();
+  const { accentColor } = useThemeStore();
+  const { colors } = useTheme(); // Moved up to fix ReferenceError
+
+  const accentColorValue = useMemo(
+    () => colors[accentColor] || colors.primary || "#007AFF", // Better fallback
+    [colors, accentColor]
+  );
 
   const [input, setInput] = useState("");
-  const [searchQ, setSearchQ] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [chats, setChats] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
@@ -46,12 +62,10 @@ const HomeScreen = () => {
     status: "success",
   });
 
-  const { colors } = useTheme();
   const scrollRef = useRef(null);
   const rotation = useRef(new Animated.Value(0)).current;
   const SCREEN_WIDTH = Dimensions.get("window").width;
   const slideValue = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
-
   const apiRef = useRef(null);
 
   const showToast = useCallback((msg, status = "success") => {
@@ -59,49 +73,70 @@ const HomeScreen = () => {
   }, []);
 
   useEffect(() => {
+    if (!hasCheckedAuth) {
+      if (!token) {
+        navigation.replace("Auth");
+      }
+      setHasCheckedAuth(true);
+      return;
+    }
+    if (!token) {
+      navigation.replace("Auth");
+    }
+  }, [hasCheckedAuth, token, navigation]);
+
+  useEffect(() => {
     if (toast.visible) {
-      const t = setTimeout(
-        () => setToast((p) => ({ ...p, visible: false })),
-        2300
-      );
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => {
+        setToast((prev) => ({ ...prev, visible: false }));
+      }, 2300);
+      return () => clearTimeout(timer);
     }
   }, [toast.visible]);
 
+  // API init and fetch chats
   useEffect(() => {
-    if (!hasCheckedAuth) {
-      if (!token) navigation.replace("Auth");
-      setHasCheckedAuth(true);
+    if (token) {
+      apiRef.current = createAPI();
+      fetchChats();
     }
-  }, [hasCheckedAuth, token, navigation]);
-
-  useEffect(() => {
-    if (hasCheckedAuth && !token) navigation.replace("Auth");
-  }, [hasCheckedAuth, token, navigation]);
+    return () => {
+      apiRef.current = null;
+    };
+  }, [token]); // Removed fetchChats from deps since it's stable via useCallback
 
   const fetchChats = useCallback(async () => {
     if (!token || !apiRef.current) return;
     try {
       const { data } = await apiRef.current.get("/chat");
-      const loaded = (data || [])
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid response format");
+      }
+      const loadedChats = data
         .filter((c) => c && c._id)
         .map((c) => ({
           id: c._id,
           title: c.title || "New Chat",
+          createdAt: c.createdAt || new Date().toISOString(), // Add createdAt for sorting
           messages: (c.messages || []).map((m, i) => ({
             id: `${m._id || i}`,
             role: m.role,
             text: m.content,
             timestamp: m.timestamp || c.createdAt || new Date().toISOString(),
           })),
-        }));
-      setChats(loaded);
-      if (loaded.length && !currentChatId) setCurrentChatId(loaded[0].id);
-    } catch (e) {
-      console.error("fetchChats error:", e);
+        }))
+        // Sort by createdAt descending (latest first)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setChats(loadedChats);
+      // Always set to the latest chat if available (fixes opening latest on every mount)
+      if (loadedChats.length > 0) {
+        setCurrentChatId(loadedChats[0].id);
+      }
+    } catch (error) {
+      console.error("fetchChats error:", error);
       showToast("Failed to load chats.", "error");
     }
-  }, [token, currentChatId, showToast]);
+  }, [token, showToast]); // Removed currentChatId from deps
 
   const createNewChat = useCallback(async () => {
     if (!token || !apiRef.current) return null;
@@ -110,12 +145,18 @@ const HomeScreen = () => {
         title: "New Chat",
         messages: [],
       });
-      const nc = { id: data._id, title: data.title, messages: [] };
-      setChats((p) => [...p, nc]);
-      setCurrentChatId(nc.id);
-      return nc.id;
-    } catch (e) {
-      console.error("createChat error:", e);
+      if (!data?._id) throw new Error("Invalid response");
+      const newChat = {
+        id: data._id,
+        title: data.title,
+        createdAt: data.createdAt || new Date().toISOString(), // Add for consistency
+        messages: [],
+      };
+      setChats((prev) => [newChat, ...prev]); // Prepend to keep latest first
+      setCurrentChatId(newChat.id);
+      return newChat.id;
+    } catch (error) {
+      console.error("createNewChat error:", error);
       showToast("Failed to create chat.", "error");
       return null;
     }
@@ -126,30 +167,22 @@ const HomeScreen = () => {
       if (!token || !apiRef.current || !chatId) return;
       try {
         await apiRef.current.delete(`/chat/${chatId}`);
-        setChats((p) => p.filter((c) => c.id !== chatId));
-        if (currentChatId === chatId) {
-          const left = chats.filter((c) => c.id !== chatId);
-          setCurrentChatId(left[0]?.id || null);
-        }
+        setChats((prev) => {
+          const filtered = prev.filter((c) => c.id !== chatId);
+          if (currentChatId === chatId) {
+            // Set to latest remaining or null
+            setCurrentChatId(filtered.length > 0 ? filtered[0].id : null);
+          }
+          return filtered;
+        });
         showToast("Chat deleted.", "success");
-      } catch (e) {
-        console.error("deleteChat error:", e);
+      } catch (error) {
+        console.error("deleteChat error:", error);
         showToast("Failed to delete chat.", "error");
       }
     },
-    [token, currentChatId, chats, showToast]
+    [token, currentChatId, showToast]
   );
-
-  useEffect(() => {
-    if (token) {
-      console.log("Token ready → init API");
-      apiRef.current = createAPI();
-      fetchChats();
-    }
-    return () => {
-      apiRef.current = null;
-    };
-  }, [token, fetchChats]);
 
   const loadChat = useCallback((id) => {
     setCurrentChatId(id);
@@ -158,16 +191,16 @@ const HomeScreen = () => {
 
   const toggleNav = useCallback(() => {
     setIsNavOpen((prev) => {
-      const open = !prev;
+      const isOpen = !prev;
       Animated.timing(slideValue, {
-        toValue: open ? 0 : -SCREEN_WIDTH,
+        toValue: isOpen ? 0 : -SCREEN_WIDTH,
         duration: 525,
         easing: Easing.out(Easing.exp),
-        useNativeDriver: false,
+        useNativeDriver: true,
       }).start();
-      return open;
+      return isOpen;
     });
-  }, []);
+  }, [slideValue]);
 
   const rotateInterpolate = useMemo(
     () =>
@@ -178,94 +211,89 @@ const HomeScreen = () => {
     []
   );
 
+  // Optimized handleSubmit with tighter deps
   const handleSubmit = useCallback(
     async (text) => {
-      if (!text.trim()) return showToast("Please type a message.", "error");
+      const trimmed = text.trim();
+      if (!trimmed) return showToast("Please type a message.", "error");
       if (!token) return navigation.replace("Auth");
 
       let chatId = currentChatId;
-      const isNew = !chatId;
-
-      if (isNew) {
-        const id = await createNewChat();
-        if (!id) return;
-        chatId = id;
+      const isNewChat = !chatId;
+      if (isNewChat) {
+        chatId = await createNewChat();
+        if (!chatId) return;
       }
 
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-
-      setIsLoading(true);
+      const title =
+        trimmed.length > 35 ? `${trimmed.slice(0, 35)}...` : trimmed;
       const userMsg = {
-        id: Date.now(),
+        id: Date.now().toString(),
         role: "user",
-        text,
+        text: trimmed,
         timestamp: new Date().toISOString(),
         isAnimating: true,
       };
-      const title = text.length > 35 ? text.slice(0, 35) + "..." : text;
 
-      setChats((p) => {
-        const i = p.findIndex((c) => c.id === chatId);
-        if (i === -1) return p;
-        const c = { ...p[i] };
-        c.messages = [...c.messages, userMsg];
-        if (isNew || c.title === "New Chat") c.title = title;
-        return [...p.slice(0, i), c, ...p.slice(i + 1)];
+      // Optimistic update for user message
+      setChats((prev) => {
+        const index = prev.findIndex((c) => c.id === chatId);
+        if (index === -1) return prev;
+        const updatedChat = {
+          ...prev[index],
+          messages: [...prev[index].messages, userMsg],
+          ...(isNewChat || prev[index].title === "New Chat" ? { title } : {}),
+        };
+        return [...prev.slice(0, index), updatedChat, ...prev.slice(index + 1)];
       });
       setInput("");
+
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setIsLoading(true);
 
       try {
         const { data } = await apiRef.current.post(`/chat/${chatId}/message`, {
           role: "user",
-          content: text,
+          content: trimmed,
         });
+        if (!data?.message) throw new Error("Invalid response");
 
-        const ai = data.message;
         const aiMsg = {
-          id: Date.now() + 1,
-          role: ai.role,
-          text: ai.content,
-          timestamp: ai.timestamp || new Date().toISOString(),
+          id: (Date.now() + 1).toString(),
+          role: data.message.role,
+          text: data.message.content,
+          timestamp: data.message.timestamp || new Date().toISOString(),
           isAnimating: true,
         };
 
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-
-        setChats((p) =>
-          p.map((c) =>
+        // Add AI response
+        setChats((prev) =>
+          prev.map((c) =>
             c.id === chatId ? { ...c, messages: [...c.messages, aiMsg] } : c
           )
         );
 
-        if (isNew || chats.find((c) => c.id === chatId)?.title === "New Chat") {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+
+        // Update title if needed
+        if (
+          isNewChat ||
+          chats.find((c) => c.id === chatId)?.title === "New Chat"
+        ) {
           await apiRef.current.put(`/chat/${chatId}`, { title });
-          setChats((p) =>
-            p.map((c) => (c.id === chatId ? { ...c, title } : c))
+          setChats((prev) =>
+            prev.map((c) => (c.id === chatId ? { ...c, title } : c))
           );
         }
-
-        setTimeout(() => {
-          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-          setChats((p) =>
-            p.map((c) =>
-              c.id === chatId
-                ? {
-                    ...c,
-                    messages: c.messages.map((m) => ({
-                      ...m,
-                      isAnimating: false,
-                    })),
-                  }
-                : c
-            )
-          );
-        }, 500);
-      } catch (e) {
-        console.error("sendMessage error:", e);
-        showToast(e.response?.data?.message || "Failed to send.", "error");
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setChats((p) =>
-          p.map((c) =>
+      } catch (error) {
+        console.error("handleSubmit error:", error);
+        showToast(
+          error.response?.data?.message || "Failed to send message.",
+          "error"
+        );
+        // Rollback animation for user message only
+        setChats((prev) =>
+          prev.map((c) =>
             c.id === chatId
               ? {
                   ...c,
@@ -280,6 +308,23 @@ const HomeScreen = () => {
         );
       } finally {
         setIsLoading(false);
+        // End animations after delay (optimized: use requestAnimationFrame for smoother timing if needed, but setTimeout is fine)
+        setTimeout(() => {
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+          setChats((prev) =>
+            prev.map((c) =>
+              c.id === chatId
+                ? {
+                    ...c,
+                    messages: c.messages.map((m) => ({
+                      ...m,
+                      isAnimating: false,
+                    })),
+                  }
+                : c
+            )
+          );
+        }, 500);
       }
     },
     [currentChatId, token, createNewChat, showToast, chats, navigation]
@@ -290,14 +335,15 @@ const HomeScreen = () => {
     toggleNav();
   }, [createNewChat, toggleNav]);
 
+  // Nav rotation animation (optimized: useNativeDriver true for transforms)
   useEffect(() => {
     Animated.timing(rotation, {
       toValue: isNavOpen ? 1 : 0,
       duration: 525,
       easing: Easing.out(Easing.exp),
-      useNativeDriver: false,
+      useNativeDriver: true, // Optimized: native driver for rotation
     }).start();
-  }, [isNavOpen]);
+  }, [isNavOpen, rotation]);
 
   return (
     <SafeAreaView
@@ -315,6 +361,7 @@ const HomeScreen = () => {
           style={[styles.overlay, { pointerEvents: "auto" }]}
           onPress={toggleNav}
           activeOpacity={1}
+          accessible={false} // Overlay shouldn't be focusable
         />
       )}
 
@@ -326,8 +373,7 @@ const HomeScreen = () => {
         onClose={toggleNav}
         slideValue={slideValue}
         isOpen={isNavOpen}
-        searchQ={searchQ}
-        setSearchQ={setSearchQ}
+        // searchQ and setSearchQ removed as unused here; add back if needed
         onDeleteChat={deleteChat}
       />
 
@@ -343,6 +389,7 @@ const HomeScreen = () => {
           colors={colors}
           scrollRef={scrollRef}
           isLoading={isLoading}
+          showToast={showToast}
         />
 
         <View style={[styles.inputContainer, { paddingHorizontal: 15 }]}>
@@ -350,14 +397,19 @@ const HomeScreen = () => {
             <Prompt onSubmit={handleSubmit} input={input} setInput={setInput} />
             <TouchableOpacity
               activeOpacity={0.7}
-              style={[styles.submit, { backgroundColor: colors.accent }]}
+              style={[styles.submit, { backgroundColor: colors.text }]}
               onPress={() => handleSubmit(input)}
-              disabled={isLoading}
+              disabled={isLoading || !input.trim()}
+              accessibilityRole="button"
+              accessibilityLabel={
+                isLoading ? "Sending message..." : "Send message"
+              }
+              accessibilityState={{ disabled: isLoading || !input.trim() }}
             >
               {isLoading ? (
                 <ActivityIndicator size="small" color={colors.background} />
               ) : (
-                <Feather name="arrow-up" size={28} color={colors.background} />
+                <Feather name="arrow-up" size={28} color={accentColorValue} />
               )}
             </TouchableOpacity>
           </View>

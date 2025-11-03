@@ -35,6 +35,9 @@
       }
     },
     "plugins": ["expo-font"],
-    "owner": "turkmencodelab"
+    "owner": "turkmencodelab",
+    "overrides": {
+      "entities": "1.1.1"
+    }
   }
 }

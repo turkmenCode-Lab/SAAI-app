@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 15,
     fontSize: 16,
-    borderWidth: 2,
+    borderWidth: 1.25,
   },
 });
 

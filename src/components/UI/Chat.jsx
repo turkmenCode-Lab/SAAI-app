@@ -94,7 +94,6 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
           lineHeight: 22,
           color: colors.text,
         },
-        // Code Inline
         code_inline: {
           backgroundColor: isDarkMode ? "#2d2d2d" : "#f0f0f0",
           color: isDarkMode ? "#ffeb3b" : "#d73a49",
@@ -104,7 +103,6 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
           fontFamily: "Courier",
           fontWeight: "600",
         },
-        // Code Block
         code_block: {
           backgroundColor: isDarkMode ? "#1e1e1e" : "#f6f8fa",
           color: isDarkMode ? "#ffffff" : "#24292e",
@@ -118,13 +116,11 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
           borderColor: isDarkMode ? "#404040" : "#e1e4e8",
           overflow: "hidden",
         },
-        // Language tag (optional)
         fence: {
           color: "#858585",
           fontSize: 12,
           marginBottom: 8,
         },
-        // Headings
         heading1: {
           fontSize: 22,
           fontWeight: "bold",
@@ -135,13 +131,11 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
           fontSize: 20,
           fontWeight: "600",
           color: colors.text,
-          marginVertical: 10,
+          marginVertical: 8,
         },
-        // Lists
-        bullet_list: { marginLeft: 20 },
-        ordered_list: { marginLeft: 20 },
+        bullet_list: { marginLeft: 10 },
+        ordered_list: { marginLeft: 10 },
         list_item: { color: colors.text },
-        // Blockquote
         blockquote: {
           borderLeftWidth: 4,
           borderLeftColor: accentColorValue,
@@ -151,12 +145,10 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
             ? "rgba(255,255,255,0.05)"
             : "rgba(0,0,0,0.03)",
         },
-        // Links
         link: {
           color: "#4da6ff",
           textDecorationLine: "underline",
         },
-        // Table
         table: {
           borderWidth: 1,
           borderColor: isDarkMode ? "#444" : "#ddd",
@@ -233,7 +225,11 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
                         showToast("Code copied!", "success");
                       }}
                     >
-                      <Feather name="copy" size={16} color="#fff" />
+                      <Feather
+                        name="copy"
+                        size={16}
+                        color={colors.background}
+                      />
                     </TouchableOpacity>
                     <Text style={styles.code_block}>{node.content}</Text>
                   </View>

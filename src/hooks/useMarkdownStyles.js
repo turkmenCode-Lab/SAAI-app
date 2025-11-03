@@ -4,19 +4,23 @@ import { useAppTheme } from "../theme";
 
 const useMarkdownStyles = () => {
   const theme = useAppTheme();
-  const { colors, isDark } = theme;
+  const { colors } = theme;
+  const isDark = colors.text === "#FFFFFF";
   const accentColorValue = colors.accent;
+
+  const codeBg = isDark ? "#1e1e1e" : "#f6f8fa";
+  const codeColor = isDark ? colors.text : "#24292e";
 
   return useMemo(
     () =>
       StyleSheet.create({
         body: {
           fontSize: 16,
-          lineHeight: 22,
+          lineHeight: 16,
           color: colors.text,
           fontFamily: theme.fonts.regular,
+          color: colors.mostly,
         },
-        // Emphasis
         strong: {
           fontWeight: "bold",
           color: colors.text,
@@ -25,113 +29,103 @@ const useMarkdownStyles = () => {
           fontStyle: "italic",
           color: colors.text,
         },
-        // Code Inline
         code_inline: {
-          backgroundColor: isDark ? colors.primary : colors.primary,
-          color: colors.error, // Use error for consistent red accent in light; adjust if needed
+          backgroundColor: codeBg,
+          color: codeColor,
           paddingHorizontal: 4,
           paddingVertical: 2,
           borderRadius: 4,
-          fontFamily: "monospace", // Use system monospace for better mobile perf
+          fontFamily: "monospace",
           fontWeight: "600",
         },
-        // Code Block
         code_block: {
-          backgroundColor: isDark ? "#1e1e1e" : "#f6f8fa", // Keep GitHub-inspired for readability
-          color: isDark ? colors.text : "#24292e",
-          padding: 12, // Slightly reduced for mobile minimalism
+          backgroundColor: codeBg,
+          color: codeColor,
+          padding: 12,
           borderRadius: 6,
           fontFamily: "monospace",
           fontSize: 14,
           lineHeight: 20,
-          marginVertical: 8, // Reduced margins for tighter mobile layout
+          marginVertical: 8,
           borderWidth: 1,
           borderColor: colors.border,
           overflow: "hidden",
         },
-        // Language tag (optional)
         fence: {
-          color: colors.neutral,
           fontSize: 12,
-          marginBottom: 4, // Reduced for minimalism
+          marginBottom: 4,
           fontFamily: "monospace",
         },
-        // Headings - Enhanced with h3 and h4 for completeness
         heading1: {
-          fontSize: 24, // Slightly larger for mobile hierarchy
+          fontSize: 24,
           fontWeight: "bold",
           color: colors.text,
-          marginVertical: 12,
+          marginVertical: 10,
           fontFamily: theme.fonts.bold,
         },
         heading2: {
           fontSize: 20,
           fontWeight: "600",
           color: colors.text,
-          marginVertical: 10,
+          marginVertical: 8,
           fontFamily: theme.fonts.semibold,
         },
         heading3: {
           fontSize: 18,
           fontWeight: "600",
           color: colors.text,
-          marginVertical: 8,
+          marginVertical: 7,
           fontFamily: theme.fonts.semibold,
         },
         heading4: {
           fontSize: 16,
           fontWeight: "600",
           color: colors.text,
-          marginVertical: 6,
+          marginVertical: 4,
           fontFamily: theme.fonts.medium,
         },
-        // Lists - Minimal padding
-        bullet_list: { marginLeft: 16, marginVertical: 4 },
-        ordered_list: { marginLeft: 16, marginVertical: 4 },
+        bullet_list: { marginLeft: 8, marginVertical: 3 },
+        ordered_list: { marginLeft: 8, marginVertical: 3 },
         list_item: {
           color: colors.text,
           marginVertical: 2,
           fontFamily: theme.fonts.regular,
         },
-        // Blockquote - Use accent for border, subtle bg
         blockquote: {
-          borderLeftWidth: 3, // Slightly thinner for minimalism
+          borderLeftWidth: 3,
           borderLeftColor: accentColorValue,
-          paddingLeft: 12,
-          marginVertical: 8,
+          paddingLeft: 10,
+          marginVertical: 6,
           backgroundColor: isDark
             ? "rgba(255,255,255,0.05)"
             : "rgba(0,0,0,0.03)",
           fontStyle: "italic",
+          color: colors.text,
         },
-        // Links - Use accent color
         link: {
           color: accentColorValue,
           textDecorationLine: "underline",
         },
-        // Table - Simplified borders
         table: {
           borderWidth: 1,
           borderColor: colors.border,
           marginVertical: 8,
-          borderRadius: 4, // Subtle rounding
+          borderRadius: 4,
         },
         table_cell: {
-          padding: 6, // Reduced for mobile
+          padding: 6,
           borderWidth: 1,
           borderColor: colors.border,
           color: colors.text,
         },
-        // Paragraph - Tight spacing
         paragraph: { marginVertical: 4, color: colors.text },
-        // HR - Simple divider
         hr: {
           borderBottomWidth: 1,
           borderBottomColor: colors.border,
           marginVertical: 12,
         },
       }),
-    [colors, isDark, accentColorValue, theme.fonts]
+    [colors, isDark, accentColorValue, theme.fonts, codeBg, codeColor]
   );
 };
 

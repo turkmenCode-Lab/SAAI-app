@@ -379,12 +379,24 @@ const HomeScreen = () => {
           showToast={showToast}
         />
 
-        <View style={[styles.inputContainer, { paddingHorizontal: 15 }]}>
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              paddingHorizontal: 15,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+              elevation: 3,
+            },
+          ]}
+        >
           <View style={styles.content}>
             <Prompt onSubmit={handleSubmit} input={input} setInput={setInput} />
             <TouchableOpacity
               activeOpacity={0.7}
-              style={[styles.submit, { backgroundColor: colors.text }]}
+              style={[styles.submit, { backgroundColor: colors.primary }]}
               onPress={() => handleSubmit(input)}
               disabled={isLoading || !input.trim()}
               accessibilityRole="button"

@@ -14,6 +14,16 @@ import Feather from "@expo/vector-icons/Feather";
 import Markdown from "react-native-markdown-display";
 import useMarkdownStyles from "../../hooks/useMarkdownStyles";
 
+const getContrastColor = (bgColor) => {
+  // Simple luminance-based contrast color selector
+  const hex = bgColor.replace("#", "");
+  const r = parseInt(hex.substring(0, 2), 16) / 255;
+  const g = parseInt(hex.substring(2, 4), 16) / 255;
+  const b = parseInt(hex.substring(4, 6), 16) / 255;
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+  return luminance > 0.5 ? "#000000" : "#FFFFFF";
+};
+
 const TypingIndicator = ({ colors, accentColorValue }) => {
   const [dots, setDots] = useState([0, 0, 0]);
 
@@ -51,8 +61,11 @@ const TypingIndicator = ({ colors, accentColorValue }) => {
 
 const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
   const isUser = item.role === "user";
+  const isDark = colors.text === "#FFFFFF";
   const opacity = useRef(new Animated.Value(0)).current;
   const slideX = useRef(new Animated.Value(isUser ? 50 : -50)).current;
+
+  const userTextColor = getContrastColor(accentColorValue);
 
   const handleCopy = async () => {
     try {
@@ -88,6 +101,12 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
 
   const markdownStyles = useMarkdownStyles();
 
+  const bubbleBgColor = isUser ? accentColorValue : colors.primary;
+  const bubbleTextColor = isUser ? userTextColor : colors.text;
+  const copyButtonBgColor = colors.primary;
+  const copyButtonBorderColor = colors.border;
+  const copyButtonBorderWidth = isDark ? 0 : 1;
+
   return (
     <Animated.View
       style={[
@@ -111,7 +130,7 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
           style={[
             styles.bubble,
             {
-              backgroundColor: isUser ? colors.neutral : accentColorValue,
+              backgroundColor: bubbleBgColor,
               minHeight: 20,
             },
           ]}
@@ -121,7 +140,7 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
               style={[
                 styles.bubbleText,
                 {
-                  color: colors.text,
+                  color: bubbleTextColor,
                 },
               ]}
             >
@@ -148,11 +167,7 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
                         showToast("Code copied!", "success");
                       }}
                     >
-                      <Feather
-                        name="copy"
-                        size={16}
-                        color={colors.background}
-                      />
+                      <Feather name="copy" size={16} color="#FFFFFF" />
                     </TouchableOpacity>
                     <Text style={styles.code_block}>{node.content}</Text>
                   </View>
@@ -167,8 +182,9 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
           style={[
             styles.copyButton,
             {
-              backgroundColor: colors.neutral,
-              borderColor: colors.border,
+              backgroundColor: copyButtonBgColor,
+              borderColor: copyButtonBorderColor,
+              borderWidth: copyButtonBorderWidth,
             },
           ]}
           onPress={handleCopy}
@@ -267,10 +283,7 @@ const styles = StyleSheet.create({
   copyButton: {
     marginTop: 4,
     padding: 4,
-    backgroundColor: "transparent",
     borderRadius: 7,
-    borderWidth: 1,
-    borderColor: "#ddd",
   },
   typingContainer: {
     flexDirection: "row",

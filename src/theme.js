@@ -16,6 +16,9 @@ export const lightTheme = {
     neutral: "#888888",
     success: "#4BB543",
     error: "#FF3333",
+    vs_code: "#569CD6",
+    solarized_light: "#268BD2",
+    solarized_dark: "#859900",
   },
   fonts: {
     regular: "InterRegular",

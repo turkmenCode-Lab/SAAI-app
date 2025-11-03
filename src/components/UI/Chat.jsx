@@ -52,6 +52,7 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
   const isUser = item.role === "user";
   const opacity = useRef(new Animated.Value(0)).current;
   const slideX = useRef(new Animated.Value(isUser ? 50 : -50)).current;
+  const isDarkMode = colors.text === "#FFFFFF";
 
   const handleCopy = async () => {
     try {
@@ -85,103 +86,92 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
     ]).start();
   }, []);
 
-  const markdownStyles = StyleSheet.create({
-    body: {
-      fontSize: 16,
-      lineHeight: 20,
-      color: "#fff",
-    },
-    heading1: {
-      fontSize: 20,
-      fontWeight: "bold",
-      color: "#fff",
-      marginTop: 0,
-      marginBottom: 8,
-    },
-    heading2: {
-      fontSize: 18,
-      fontWeight: "600",
-      color: "#fff",
-      marginTop: 0,
-      marginBottom: 6,
-    },
-    strong: {
-      fontWeight: "bold",
-    },
-    em: {
-      fontStyle: "italic",
-    },
-    code_inline: {
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
-      color: "#ffeb3b",
-      paddingHorizontal: 4,
-      paddingVertical: 2,
-      borderRadius: 4,
-      fontFamily: "monospace",
-    },
-    code_block: {
-      backgroundColor: "rgba(0, 0, 0, 0.2)",
-      color: "#ffeb3b",
-      padding: 12,
-      borderRadius: 8,
-      fontFamily: "monospace",
-      fontSize: 14,
-      lineHeight: 18,
-      marginVertical: 8,
-    },
-    blockquote: {
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
-      borderLeftWidth: 4,
-      borderLeftColor: "#fff",
-      paddingLeft: 12,
-      marginVertical: 8,
-      paddingVertical: 4,
-    },
-    bullet_list: {
-      marginLeft: 16,
-      marginVertical: 4,
-    },
-    bullet_list_icon: {
-      color: "#fff",
-      fontSize: 6,
-    },
-    ordered_list: {
-      marginLeft: 16,
-      marginVertical: 4,
-    },
-    list_item: {
-      marginVertical: 2,
-      color: "#fff",
-    },
-    hr: {
-      borderBottomWidth: 1,
-      borderBottomColor: "rgba(255, 255, 255, 0.3)",
-      marginVertical: 12,
-    },
-    link: {
-      color: "#4da6ff",
-      textDecorationLine: "underline",
-    },
-    table: {
-      borderWidth: 1,
-      borderColor: "rgba(255, 255, 255, 0.2)",
-      marginVertical: 8,
-    },
-    table_row: {
-      flexDirection: "row",
-      backgroundColor: "transparent",
-    },
-    table_cell: {
-      borderWidth: 1,
-      borderColor: "rgba(255, 255, 255, 0.2)",
-      padding: 8,
-      flex: 1,
-      color: "#fff",
-    },
-    paragraph: {
-      marginVertical: 4,
-    },
-  });
+  const markdownStyles = useMemo(
+    () =>
+      StyleSheet.create({
+        body: {
+          fontSize: 16,
+          lineHeight: 22,
+          color: colors.text,
+        },
+        // Code Inline
+        code_inline: {
+          backgroundColor: isDarkMode ? "#2d2d2d" : "#f0f0f0",
+          color: isDarkMode ? "#ffeb3b" : "#d73a49",
+          paddingHorizontal: 6,
+          paddingVertical: 2,
+          borderRadius: 4,
+          fontFamily: "Courier",
+          fontWeight: "600",
+        },
+        // Code Block
+        code_block: {
+          backgroundColor: isDarkMode ? "#1e1e1e" : "#f6f8fa",
+          color: isDarkMode ? "#ffffff" : "#24292e",
+          padding: 16,
+          borderRadius: 8,
+          fontFamily: "Courier",
+          fontSize: 14,
+          lineHeight: 20,
+          marginVertical: 12,
+          borderWidth: 1,
+          borderColor: isDarkMode ? "#404040" : "#e1e4e8",
+          overflow: "hidden",
+        },
+        // Language tag (optional)
+        fence: {
+          color: "#858585",
+          fontSize: 12,
+          marginBottom: 8,
+        },
+        // Headings
+        heading1: {
+          fontSize: 22,
+          fontWeight: "bold",
+          color: colors.text,
+          marginVertical: 12,
+        },
+        heading2: {
+          fontSize: 20,
+          fontWeight: "600",
+          color: colors.text,
+          marginVertical: 10,
+        },
+        // Lists
+        bullet_list: { marginLeft: 20 },
+        ordered_list: { marginLeft: 20 },
+        list_item: { color: colors.text },
+        // Blockquote
+        blockquote: {
+          borderLeftWidth: 4,
+          borderLeftColor: accentColorValue,
+          paddingLeft: 16,
+          marginVertical: 12,
+          backgroundColor: isDarkMode
+            ? "rgba(255,255,255,0.05)"
+            : "rgba(0,0,0,0.03)",
+        },
+        // Links
+        link: {
+          color: "#4da6ff",
+          textDecorationLine: "underline",
+        },
+        // Table
+        table: {
+          borderWidth: 1,
+          borderColor: isDarkMode ? "#444" : "#ddd",
+          marginVertical: 12,
+        },
+        table_cell: {
+          padding: 8,
+          borderWidth: 1,
+          borderColor: isDarkMode ? "#444" : "#ddd",
+          color: colors.text,
+        },
+        paragraph: { marginVertical: 8 },
+      }),
+    [colors.text, isDarkMode, accentColorValue]
+  );
 
   return (
     <Animated.View
@@ -216,7 +206,7 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
               style={[
                 styles.bubbleText,
                 {
-                  color: colors.background,
+                  color: colors.text,
                 },
               ]}
             >
@@ -225,8 +215,29 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
           ) : (
             <Markdown
               style={markdownStyles}
-              onLinkPress={(url) => {
-                console.log("Link pressed:", url);
+              rules={{
+                code_block: (node, children, parent, styles) => (
+                  <View key={node.key} style={{ position: "relative" }}>
+                    <TouchableOpacity
+                      style={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                        padding: 6,
+                        borderRadius: 6,
+                        zIndex: 1,
+                      }}
+                      onPress={() => {
+                        Clipboard.setStringAsync(node.content);
+                        showToast("Code copied!", "success");
+                      }}
+                    >
+                      <Feather name="copy" size={16} color="#fff" />
+                    </TouchableOpacity>
+                    <Text style={styles.code_block}>{node.content}</Text>
+                  </View>
+                ),
               }}
             >
               {item.text}
@@ -234,11 +245,17 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
           )}
         </View>
         <TouchableOpacity
-          style={[styles.copyButton, { backgroundColor: colors.neutral }]}
+          style={[
+            styles.copyButton,
+            {
+              backgroundColor: colors.neutral,
+              borderColor: colors.border,
+            },
+          ]}
           onPress={handleCopy}
           activeOpacity={0.7}
         >
-          <Feather name="copy" size={14} color={colors.background} />
+          <Feather name="copy" size={14} color={colors.text} />
         </TouchableOpacity>
       </View>
     </Animated.View>

@@ -1,10 +1,10 @@
 import { StyleSheet } from "react-native";
 import { useMemo } from "react";
-import { useAppTheme } from "../hooks/useAppTheme"; // Assuming this is the path to your theme hook
+import { useAppTheme } from "../theme";
 
 const useMarkdownStyles = () => {
   const theme = useAppTheme();
-  const { colors, isDark } = theme; // Assuming isDark is exposed or derived as before
+  const { colors, isDark } = theme;
   const accentColorValue = colors.accent;
 
   return useMemo(

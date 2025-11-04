@@ -15,7 +15,6 @@ import Markdown from "react-native-markdown-display";
 import useMarkdownStyles from "../../hooks/useMarkdownStyles";
 
 const getContrastColor = (bgColor) => {
-  // Simple luminance-based contrast color selector
   const hex = bgColor.replace("#", "");
   const r = parseInt(hex.substring(0, 2), 16) / 255;
   const g = parseInt(hex.substring(2, 4), 16) / 255;
@@ -23,6 +22,12 @@ const getContrastColor = (bgColor) => {
   const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
   return luminance > 0.5 ? "#000000" : "#FFFFFF";
 };
+
+const DUMMY_RECOMMENDATIONS = [
+  "Explain me quantum physycs.",
+  "Create simple game on python.",
+  "Write me a quote",
+];
 
 const TypingIndicator = ({ colors, accentColorValue }) => {
   const [dots, setDots] = useState([0, 0, 0]);
@@ -132,6 +137,8 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
             {
               backgroundColor: bubbleBgColor,
               minHeight: 20,
+              borderBottomRightRadius: isUser ? 0 : 15,
+              borderBottomLeftRadius: isUser ? 15 : 0,
             },
           ]}
         >
@@ -155,23 +162,63 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
                     <TouchableOpacity
                       style={{
                         position: "absolute",
-                        top: 8,
-                        right: 8,
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                        padding: 6,
+                        top: 12,
+                        right: 12,
+                        backgroundColor: "rgba(0,0,0,0.7)",
+                        padding: 8,
                         borderRadius: 6,
                         zIndex: 1,
                       }}
-                      onPress={() => {
-                        Clipboard.setStringAsync(node.content);
-                        showToast("Code copied!", "success");
+                      onPress={async () => {
+                        try {
+                          await Clipboard.setStringAsync(node.content);
+                          if (showToast) {
+                            showToast("Code copied!", "success");
+                          }
+                        } catch (error) {
+                          console.error("Failed to copy code:", error);
+                          if (showToast) {
+                            showToast("Failed to copy code", "error");
+                          }
+                        }
                       }}
                     >
                       <Feather name="copy" size={16} color="#FFFFFF" />
                     </TouchableOpacity>
-                    <Text style={styles.code_block}>{node.content}</Text>
+                    <View style={styles.codeBlockWrapper}>
+                      {node.lang && (
+                        <Text
+                          style={[
+                            styles.fence,
+                            {
+                              color: colors.neutral,
+                              backgroundColor: isDark
+                                ? "rgba(255,255,255,0.1)"
+                                : "rgba(0,0,0,0.05)",
+                            },
+                          ]}
+                        >
+                          {node.lang}
+                        </Text>
+                      )}
+                      <Text style={styles.code_block}>{node.content}</Text>
+                    </View>
                   </View>
                 ),
+                table_head: (node, children, parent, styles) => (
+                  <View style={styles.tableHead}>{children}</View>
+                ),
+                table_cell: (node, children, parent, styles) => {
+                  const isHead = parent?.type === "table_head";
+                  return (
+                    <View
+                      key={node.key}
+                      style={[styles.tableCell, isHead && styles.tableHeadCell]}
+                    >
+                      {children}
+                    </View>
+                  );
+                },
               }}
             >
               {item.text}
@@ -205,6 +252,7 @@ const Chat = ({
   scrollRef,
   isLoading,
   showToast,
+  onQuickPromptPress,
 }) => {
   const { accentColor } = useThemeStore();
 
@@ -233,13 +281,33 @@ const Chat = ({
         { justifyContent: messages.length === 0 ? "center" : "flex-end" },
       ]}
       ref={scrollRef}
-      showsVerticalScrollIndicator
+      showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
       {messages.length === 0 ? (
-        <Text style={[styles.greeting, { color: colors.text }]}>
-          How can I help you today?
-        </Text>
+        <View style={styles.emptyContainer}>
+          <Text style={[styles.greeting, { color: colors.text }]}>
+            How can I help you today?
+          </Text>
+          <View style={styles.quickPrompts}>
+            {DUMMY_RECOMMENDATIONS.map((req) => (
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={[
+                  styles.quickPrompt,
+                  {
+                    backgroundColor: colors.primary,
+                    borderColor: accentColorValue,
+                  },
+                ]}
+                key={req}
+                onPress={() => onQuickPromptPress?.(req)}
+              >
+                <Text style={{ color: colors.text }}>{req}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
       ) : (
         messages.map((item, index) => (
           <MessageBubble
@@ -260,44 +328,110 @@ const Chat = ({
 
 const styles = StyleSheet.create({
   chatContainer: { flex: 1 },
-  chatContent: { flexGrow: 1, paddingVertical: 20, paddingHorizontal: 15 },
+  chatContent: {
+    flexGrow: 1,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   greeting: {
     alignSelf: "center",
     textAlign: "center",
     fontSize: 24,
     fontWeight: "600",
+    padding: 20,
+    marginBottom: 32,
+    fontFamily: "InterSemiBold",
   },
   messageContainer: {
-    marginVertical: 4,
-    maxWidth: "80%",
+    marginVertical: 6,
+    maxWidth: "85%",
   },
   bubbleWrapper: {
     flexDirection: "column",
   },
   bubble: {
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 15,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 18,
   },
-  bubbleText: { fontSize: 16, lineHeight: 20 },
+  bubbleText: {
+    fontSize: 16,
+    lineHeight: 22,
+    fontFamily: "InterRegular",
+  },
   copyButton: {
-    marginTop: 4,
-    padding: 4,
-    borderRadius: 7,
+    marginTop: 6,
+    padding: 6,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+    minWidth: 32,
+    alignItems: "center",
   },
   typingContainer: {
     flexDirection: "row",
     alignSelf: "flex-start",
     alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     backgroundColor: "transparent",
+    borderRadius: 18,
+    maxWidth: "85%",
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    marginHorizontal: 4,
+    marginHorizontal: 3,
+  },
+  quickPrompts: {
+    flexDirection: "row",
+    gap: 12,
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 24,
+  },
+  quickPrompt: {
+    borderWidth: 2,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 25,
+    minWidth: 120,
+    alignItems: "center",
+  },
+  codeBlockWrapper: {
+    marginTop: 8,
+  },
+  fence: {
+    fontSize: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    alignSelf: "flex-start",
+    marginBottom: 8,
+    fontFamily: "monospace",
+  },
+  code_block: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontFamily: "monospace",
+  },
+  tableHead: {
+    backgroundColor: "transparent", // Will be overridden by styles.table_head
+  },
+  tableCell: {
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  tableHeadCell: {
+    backgroundColor: "#f0f0f0",
+    fontWeight: "bold",
   },
 });
 

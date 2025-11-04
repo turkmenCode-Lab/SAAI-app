@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   TextInput,
   BackHandler,
   Platform,
+  LayoutAnimation,
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useTheme } from "@react-navigation/native";
@@ -36,46 +37,132 @@ const Sidebar = ({
 
   const user = useAuthStore((state) => state.user);
 
+  const animationRefs = useRef(new Map()).current;
+
+  const filteredChats = useMemo(() => {
+    if (!searchQ?.trim()) return chats;
+    const lowerSearch = searchQ.toLowerCase();
+    return chats.filter((chat) =>
+      chat.title.toLowerCase().includes(lowerSearch)
+    );
+  }, [chats, searchQ]);
+
   const renderChatItem = useCallback(
-    ({ item }) => (
-      <View style={styles.chatItemContainer}>
-        <TouchableOpacity
+    ({ item, index }) => {
+      if (!animationRefs.has(item.id)) {
+        animationRefs.set(item.id, {
+          opacity: new Animated.Value(1),
+          height: new Animated.Value(60), // Initial height
+        });
+      }
+      const animRefs = animationRefs.get(item.id);
+
+      const handleDelete = async () => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        Animated.parallel([
+          Animated.timing(animRefs.opacity, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(animRefs.height, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: false,
+          }),
+        ]).start(() => {
+          onDeleteChat(item.id);
+          animationRefs.delete(item.id);
+        });
+      };
+
+      const handleLoadChat = () => {
+        try {
+          onLoadChat(item.id);
+          setSearchQ("");
+        } catch (error) {
+          console.error("Error loading chat:", error);
+        }
+      };
+
+      const getLastMessageDate = () => {
+        try {
+          if (item.messages?.length > 0) {
+            const timestamp = item.messages[item.messages.length - 1].timestamp;
+            const date = new Date(timestamp);
+            return isNaN(date.getTime()) ? "" : date.toLocaleDateString();
+          }
+          return "";
+        } catch (error) {
+          console.error("Error parsing date:", error);
+          return "";
+        }
+      };
+
+      return (
+        <Animated.View
           style={[
-            styles.chatItem,
-            currentChatId === item.id && {
-              backgroundColor: colors.primary + "0F",
+            styles.chatItemContainer,
+            {
+              opacity: animRefs.opacity,
+              height: animRefs.height,
+              transform: [{ scaleX: animRefs.height }],
             },
           ]}
-          onPress={() => onLoadChat(item.id)}
+          onLayout={(event) => {
+            const { height } = event.nativeEvent.layout;
+            if (height > 0 && height !== 60) {
+              animRefs.height.setValue(height);
+            }
+          }}
         >
-          <Text
-            style={[styles.chatTitle, { color: colors.text }]}
-            numberOfLines={1}
+          <TouchableOpacity
+            style={[
+              styles.chatItem,
+              currentChatId === item.id && {
+                backgroundColor: `${colors.primary}0F`,
+              },
+            ]}
+            onPress={handleLoadChat}
+            activeOpacity={0.7}
           >
-            {item.title}
-          </Text>
-          <Text style={[styles.chatSubtitle, { color: colors.text }]}>
-            {item.messages.length > 0
-              ? new Date(
-                  item.messages[item.messages.length - 1].timestamp
-                ).toLocaleDateString()
-              : ""}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.deleteBtn}
-          onPress={() => onDeleteChat(item.id)}
-        >
-          <MaterialCommunityIcons
-            name="delete"
-            size={20}
-            color={colors.error}
-          />
-        </TouchableOpacity>
-      </View>
-    ),
-    [currentChatId, colors, onLoadChat, onDeleteChat]
+            <View style={styles.chatContent}>
+              <Text
+                style={[styles.chatTitle, { color: colors.text }]}
+                numberOfLines={1}
+              >
+                {item.title || "Untitled Chat"}
+              </Text>
+              <Text style={[styles.chatSubtitle, { color: colors.neutral }]}>
+                {getLastMessageDate()}
+              </Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.deleteBtn]}
+            onPress={handleDelete}
+            activeOpacity={0.7}
+          >
+            <MaterialCommunityIcons
+              name="delete"
+              size={20}
+              color={colors.error}
+            />
+          </TouchableOpacity>
+        </Animated.View>
+      );
+    },
+    [currentChatId, colors, onLoadChat, onDeleteChat, setSearchQ]
   );
+
+  const handleNewChat = useCallback(() => {
+    try {
+      onNewChat();
+      setSearchQ("");
+    } catch (error) {
+      console.error("Error creating new chat:", error);
+    }
+  }, [onNewChat, setSearchQ]);
 
   const handleLogout = useCallback(() => {
     try {
@@ -97,6 +184,12 @@ const Sidebar = ({
     [onClose]
   );
 
+  const handleSearchSubmit = useCallback(() => {
+    if (onSubmit) {
+      onSubmit(searchQ);
+    }
+  }, [onSubmit, searchQ]);
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -111,16 +204,33 @@ const Sidebar = ({
     return () => backHandler.remove();
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    // Clean up animation refs when chats change
+    const currentIds = new Set(chats.map((chat) => chat.id));
+    for (const [id] of animationRefs.entries()) {
+      if (!currentIds.has(id)) {
+        animationRefs.delete(id);
+      }
+    }
+  }, [chats]);
+
+  const keyExtractor = useCallback((item) => item.id.toString(), []);
+
+  const getItemLayout = useCallback(
+    (data, index) => ({
+      length: 60,
+      offset: 60 * index,
+      index,
+    }),
+    []
+  );
+
   return (
     <PanGestureHandler onGestureEvent={onGestureEvent}>
       <Animated.View
         style={[
+          styles.sidebar,
           {
-            position: "absolute",
-            top: 0,
-            left: 0,
-            bottom: 0,
-            right: 0,
             backgroundColor: colors.background,
             transform: [{ translateX: slideValue }],
             zIndex: 1000,
@@ -130,11 +240,10 @@ const Sidebar = ({
         ]}
       >
         <Text
-          style={{
-            color: colors.text,
-            textAlign: "center",
-            marginVertical: 10,
-          }}
+          style={[
+            styles.sidebarTitle,
+            { color: colors.text, textAlign: "center", marginVertical: 10 },
+          ]}
         >
           Let's Dive into your history
         </Text>
@@ -146,18 +255,20 @@ const Sidebar = ({
               styles.searchInput,
               {
                 color: colors.text,
-                borderColor: colors.text,
+                borderColor: colors.border,
+                backgroundColor: colors.primary,
               },
             ]}
             autoCorrect={false}
             placeholder="Let's search your chat history!?"
-            placeholderTextColor={colors.text}
+            placeholderTextColor={colors.neutral}
             autoCapitalize="none"
             value={searchQ}
             onChangeText={setSearchQ}
-            onSubmitEditing={() => onSubmit && onSubmit(searchQ)}
+            onSubmitEditing={handleSearchSubmit}
+            returnKeyType="search"
           />
-          <TouchableOpacity onPress={onClose}>
+          <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
             <MaterialCommunityIcons
               name="backburger"
               size={30}
@@ -166,18 +277,25 @@ const Sidebar = ({
           </TouchableOpacity>
         </View>
         <TouchableOpacity
-          style={[styles.newChatBtn, { backgroundColor: colors.text + "0A" }]}
-          onPress={onNewChat}
+          style={[styles.newChatBtn, { backgroundColor: `${colors.text}0A` }]}
+          onPress={handleNewChat}
+          activeOpacity={0.7}
         >
           <Text style={[styles.newChatText, { color: colors.text }]}>
-            New Chat
+            + New Chat
           </Text>
         </TouchableOpacity>
         <FlatList
-          data={chats}
+          data={filteredChats}
           renderItem={renderChatItem}
-          keyExtractor={(item) => item.id.toString()}
-          style={[styles.chatList, { color: colors.text }]}
+          keyExtractor={keyExtractor}
+          style={styles.chatList}
+          getItemLayout={getItemLayout}
+          removeClippedSubviews={false}
+          initialNumToRender={10}
+          maxToRenderPerBatch={5}
+          windowSize={10}
+          extraData={chats}
         />
         <View
           style={[
@@ -199,7 +317,7 @@ const Sidebar = ({
           >
             <Text
               style={{
-                color: colors.text,
+                color: getContrastColor(colors.primary),
                 fontFamily: "InterSemiBold",
                 fontSize: 24,
               }}
@@ -211,8 +329,9 @@ const Sidebar = ({
             style={{
               color: colors.text,
               fontFamily: "InterMedium",
-              fontWeight: 500,
+              fontWeight: "500",
               fontSize: 18,
+              flex: 1,
             }}
           >
             {user?.email ?? "Guest"}
@@ -220,6 +339,7 @@ const Sidebar = ({
           <TouchableOpacity
             style={{ marginLeft: "auto" }}
             onPress={handleLogout}
+            activeOpacity={0.7}
           >
             <Entypo name="log-out" size={24} color={colors.neutral} />
           </TouchableOpacity>
@@ -240,6 +360,7 @@ const styles = StyleSheet.create({
     height: "100%",
     padding: 15,
     zIndex: 1000,
+    overflow: "hidden",
   },
   sidebarHeader: {
     flexDirection: "row",
@@ -270,11 +391,16 @@ const styles = StyleSheet.create({
   chatItemContainer: {
     position: "relative",
     marginBottom: 4,
+    overflow: "hidden",
   },
   chatItem: {
+    flex: 1,
     paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingHorizontal: 16,
     borderRadius: 8,
+  },
+  chatContent: {
+    flex: 1,
   },
   chatTitle: {
     fontSize: 16,
@@ -290,6 +416,8 @@ const styles = StyleSheet.create({
     right: 8,
     top: 12,
     padding: 4,
+    borderRadius: 4,
+    zIndex: 1,
   },
   searchInput: {
     flex: 1,
@@ -304,5 +432,14 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
 });
+
+const getContrastColor = (bgColor) => {
+  const hex = bgColor.replace("#", "");
+  const r = parseInt(hex.substring(0, 2), 16) / 255;
+  const g = parseInt(hex.substring(2, 4), 16) / 255;
+  const b = parseInt(hex.substring(4, 6), 16) / 255;
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+  return luminance > 0.5 ? "#000000" : "#FFFFFF";
+};
 
 export default Sidebar;

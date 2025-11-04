@@ -60,6 +60,7 @@ const HomeScreen = () => {
     message: "",
     status: "success",
   });
+  const [searchQ, setSearchQ] = useState("");
 
   const scrollRef = useRef(null);
   const rotation = useRef(new Animated.Value(0)).current;
@@ -324,6 +325,14 @@ const HomeScreen = () => {
     toggleNav();
   }, [createNewChat, toggleNav]);
 
+  const handleQuickPromptPress = useCallback(
+    (promptText) => {
+      setInput(promptText);
+      // Optionally auto-submit if desired: handleSubmit(promptText);
+    },
+    [setInput, handleSubmit]
+  );
+
   useEffect(() => {
     Animated.timing(rotation, {
       toValue: isNavOpen ? 1 : 0,
@@ -362,6 +371,9 @@ const HomeScreen = () => {
         slideValue={slideValue}
         isOpen={isNavOpen}
         onDeleteChat={deleteChat}
+        searchQ={searchQ}
+        setSearchQ={setSearchQ}
+        onSubmit={() => {}}
       />
 
       <KeyboardAvoidingView
@@ -377,6 +389,7 @@ const HomeScreen = () => {
           scrollRef={scrollRef}
           isLoading={isLoading}
           showToast={showToast}
+          onQuickPromptPress={handleQuickPromptPress}
         />
 
         <View

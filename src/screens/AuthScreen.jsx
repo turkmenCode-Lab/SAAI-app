@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTheme } from "@react-navigation/native";
 import {
   Text,
@@ -11,11 +12,16 @@ import TypingErase from "../components/UI/TypingErase";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useAppTheme } from "../../src/theme";
+import Toast from "../components/UI/Toast";
 
 const AuthScreen = ({ navigation }) => {
   const { colors } = useTheme();
-
   const theme = useAppTheme();
+  const [toastVisible, setToastVisible] = useState(false);
+
+  const showComingSoon = () => {
+    setToastVisible(true);
+  };
 
   Text.defaultProps = Text.defaultProps || {};
   Text.defaultProps.style = [
@@ -97,6 +103,7 @@ const AuthScreen = ({ navigation }) => {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
+          onPress={showComingSoon}
           activeOpacity={0.75}
           style={[styles.buttons, { backgroundColor: colors.primary }]}
         >
@@ -106,6 +113,7 @@ const AuthScreen = ({ navigation }) => {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
+          onPress={showComingSoon}
           activeOpacity={0.75}
           style={[styles.buttons, { backgroundColor: colors.primary }]}
         >
@@ -138,6 +146,12 @@ const AuthScreen = ({ navigation }) => {
           Privacy Policy
         </Text>
       </Text>
+      <Toast
+        message="Coming soon!"
+        visible={toastVisible}
+        status="error"
+        onHide={() => setToastVisible(false)}
+      />
     </SafeAreaView>
   );
 };

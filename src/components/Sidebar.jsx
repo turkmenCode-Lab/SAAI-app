@@ -9,8 +9,8 @@ import {
   TextInput,
   BackHandler,
   Platform,
-  LayoutAnimation,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useTheme } from "@react-navigation/native";
 import { useAuthStore } from "../../store/authStore";
@@ -37,10 +37,25 @@ const Sidebar = ({
   const navigation = useNavigation();
   const t = useTranslations();
   const { language } = useThemeStore();
+  const insets = useSafeAreaInsets();
 
   const user = useAuthStore((state) => state.user);
 
-  const animationRefs = useRef(new Map()).current;
+  const animationRefs = useRef(new Map());
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  // Fade in animation when sidebar opens
+  useEffect(() => {
+    if (isOpen) {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 250,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      fadeAnim.setValue(0);
+    }
+  }, [isOpen, fadeAnim]);
 
   const filteredChats = useMemo(() => {
     if (!searchQ?.trim()) return chats;
@@ -52,37 +67,63 @@ const Sidebar = ({
 
   const renderChatItem = useCallback(
     ({ item, index }) => {
-      if (!animationRefs.has(item.id)) {
-        animationRefs.set(item.id, {
+      const itemId = item.id;
+      let animRefs = animationRefs.current.get(itemId);
+      if (!animRefs) {
+        animRefs = {
           opacity: new Animated.Value(1),
-          height: new Animated.Value(60), // Initial height
-        });
+          height: new Animated.Value(60),
+          scale: new Animated.Value(1),
+        };
+        animationRefs.current.set(itemId, animRefs);
       }
-      const animRefs = animationRefs.get(item.id);
 
-      const handleDelete = async () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        Animated.parallel([
-          Animated.timing(animRefs.opacity, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          Animated.timing(animRefs.height, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: false,
-          }),
-        ]).start(() => {
-          onDeleteChat(item.id);
-          animationRefs.delete(item.id);
-        });
+      const handleDelete = () => {
+        if (animRefs && animRefs.opacity && animRefs.height) {
+          Animated.parallel([
+            Animated.timing(animRefs.opacity, {
+              toValue: 0,
+              duration: 300,
+              useNativeDriver: false,
+            }),
+            Animated.timing(animRefs.height, {
+              toValue: 0,
+              duration: 300,
+              useNativeDriver: false,
+            }),
+            Animated.timing(animRefs.scale, {
+              toValue: 0.8,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+          ]).start(() => {
+            onDeleteChat(itemId);
+            animationRefs.current.delete(itemId);
+          });
+        } else {
+          onDeleteChat(itemId);
+        }
       };
 
       const handleLoadChat = () => {
         try {
-          onLoadChat(item.id);
+          // Scale animation on press
+          Animated.sequence([
+            Animated.timing(animRefs.scale, {
+              toValue: 0.95,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+            Animated.timing(animRefs.scale, {
+              toValue: 1,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+          ]).start();
+
+          onLoadChat(itemId);
           setSearchQ("");
+          onClose();
         } catch (error) {
           console.error("Error loading chat:", error);
         }
@@ -104,28 +145,32 @@ const Sidebar = ({
         }
       };
 
+      const handleLayout = (event) => {
+        const { height } = event.nativeEvent.layout;
+        if (animRefs && animRefs.height && height > 0 && height !== 60) {
+          animRefs.height.setValue(height);
+        }
+      };
+
       return (
         <Animated.View
           style={[
             styles.chatItemContainer,
             {
-              opacity: animRefs.opacity,
-              height: animRefs.height,
-              transform: [{ scaleX: animRefs.height }],
+              opacity: animRefs?.opacity || 1,
+              height: animRefs?.height || 60,
+              transform: [{ scale: animRefs?.scale || 1 }],
             },
           ]}
-          onLayout={(event) => {
-            const { height } = event.nativeEvent.layout;
-            if (height > 0 && height !== 60) {
-              animRefs.height.setValue(height);
-            }
-          }}
+          onLayout={handleLayout}
         >
           <TouchableOpacity
             style={[
               styles.chatItem,
-              currentChatId === item.id && {
-                backgroundColor: `${colors.primary}0F`,
+              currentChatId === itemId && {
+                backgroundColor: `${colors.primary}15`,
+                borderLeftWidth: 3,
+                borderLeftColor: colors.primary,
               },
             ]}
             onPress={handleLoadChat}
@@ -136,7 +181,7 @@ const Sidebar = ({
                 style={[styles.chatTitle, { color: colors.text }]}
                 numberOfLines={1}
               >
-                {item.title || "Untitled Chat"}
+                {item.title || t("untitledChat")}
               </Text>
               <Text style={[styles.chatSubtitle, { color: colors.neutral }]}>
                 {getLastMessageDate()}
@@ -144,7 +189,7 @@ const Sidebar = ({
             </View>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.deleteBtn]}
+            style={styles.deleteBtn}
             onPress={handleDelete}
             activeOpacity={0.7}
           >
@@ -157,17 +202,27 @@ const Sidebar = ({
         </Animated.View>
       );
     },
-    [currentChatId, colors, onLoadChat, onDeleteChat, setSearchQ, language]
+    [
+      currentChatId,
+      colors,
+      onLoadChat,
+      onDeleteChat,
+      setSearchQ,
+      language,
+      t,
+      onClose,
+    ]
   );
 
   const handleNewChat = useCallback(() => {
     try {
       onNewChat();
       setSearchQ("");
+      onClose();
     } catch (error) {
       console.error("Error creating new chat:", error);
     }
-  }, [onNewChat, setSearchQ]);
+  }, [onNewChat, setSearchQ, onClose]);
 
   const handleLogout = useCallback(() => {
     try {
@@ -210,25 +265,15 @@ const Sidebar = ({
   }, [isOpen, onClose]);
 
   useEffect(() => {
-    // Clean up animation refs when chats change
     const currentIds = new Set(chats.map((chat) => chat.id));
-    for (const [id] of animationRefs.entries()) {
+    for (const [id] of animationRefs.current.entries()) {
       if (!currentIds.has(id)) {
-        animationRefs.delete(id);
+        animationRefs.current.delete(id);
       }
     }
   }, [chats]);
 
   const keyExtractor = useCallback((item) => item.id.toString(), []);
-
-  const getItemLayout = useCallback(
-    (data, index) => ({
-      length: 60,
-      offset: 60 * index,
-      index,
-    }),
-    []
-  );
 
   return (
     <PanGestureHandler onGestureEvent={onGestureEvent}>
@@ -238,18 +283,14 @@ const Sidebar = ({
           {
             backgroundColor: colors.background,
             transform: [{ translateX: slideValue }],
-            zIndex: 1000,
-            paddingTop: Platform.OS === "android" ? 40 : 60,
+            opacity: fadeAnim,
+            paddingTop: insets.top + 15,
+            paddingBottom: insets.bottom,
             paddingHorizontal: 15,
           },
         ]}
       >
-        <Text
-          style={[
-            styles.sidebarTitle,
-            { color: colors.text, textAlign: "center", marginVertical: 10 },
-          ]}
-        >
+        <Text style={[styles.sidebarTitle, { color: colors.text }]}>
           {t("diveHistory")}
         </Text>
         <View
@@ -261,7 +302,7 @@ const Sidebar = ({
               {
                 color: colors.text,
                 borderColor: colors.border,
-                backgroundColor: colors.primary,
+                backgroundColor: `${colors.primary}10`,
               },
             ]}
             autoCorrect={false}
@@ -282,10 +323,19 @@ const Sidebar = ({
           </TouchableOpacity>
         </View>
         <TouchableOpacity
-          style={[styles.newChatBtn, { backgroundColor: `${colors.text}0A` }]}
+          style={[
+            styles.newChatBtn,
+            { backgroundColor: `${colors.primary}15` },
+          ]}
           onPress={handleNewChat}
           activeOpacity={0.7}
         >
+          <MaterialCommunityIcons
+            name="plus"
+            size={20}
+            color={colors.text}
+            style={styles.newChatIcon}
+          />
           <Text style={[styles.newChatText, { color: colors.text }]}>
             {t("newChat")}
           </Text>
@@ -295,54 +345,43 @@ const Sidebar = ({
           renderItem={renderChatItem}
           keyExtractor={keyExtractor}
           style={styles.chatList}
-          getItemLayout={getItemLayout}
+          contentContainerStyle={styles.chatListContent}
           removeClippedSubviews={false}
           initialNumToRender={10}
           maxToRenderPerBatch={5}
           windowSize={10}
-          extraData={chats}
+          extraData={currentChatId}
+          showsVerticalScrollIndicator={false}
         />
-        <View
-          style={[
-            styles.sidebarUser,
-            { borderTopColor: colors.border, marginBottom: 15 },
-          ]}
-        >
+        <View style={[styles.sidebarUser, { borderTopColor: colors.border }]}>
           <View
-            style={{
-              backgroundColor: colors.primary,
-              borderRadius: 100,
-              width: 44,
-              height: 44,
-              alignItems: "center",
-              justifyContent: "center",
-              borderWidth: 3,
-              borderColor: colors.accent,
-            }}
+            style={[
+              styles.userAvatar,
+              {
+                backgroundColor: colors.primary,
+                borderColor: colors.accent,
+              },
+            ]}
           >
             <Text
-              style={{
-                color: getContrastColor(colors.primary),
-                fontFamily: "InterSemiBold",
-                fontSize: 24,
-              }}
+              style={[
+                styles.userAvatarText,
+                {
+                  color: getContrastColor(colors.primary),
+                },
+              ]}
             >
               {user?.email ? user.email[0].toUpperCase() : "?"}
             </Text>
           </View>
           <Text
-            style={{
-              color: colors.text,
-              fontFamily: "InterMedium",
-              fontWeight: "500",
-              fontSize: 18,
-              flex: 1,
-            }}
+            style={[styles.userEmail, { color: colors.text }]}
+            numberOfLines={1}
           >
             {user?.email ?? t("guest")}
           </Text>
           <TouchableOpacity
-            style={{ marginLeft: "auto" }}
+            style={styles.logoutBtn}
             onPress={handleLogout}
             activeOpacity={0.7}
           >
@@ -363,7 +402,6 @@ const styles = StyleSheet.create({
     right: 0,
     width: "100%",
     height: "100%",
-    padding: 15,
     zIndex: 1000,
     overflow: "hidden",
   },
@@ -374,72 +412,116 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     borderBottomWidth: 1,
     marginBottom: 15,
-    gap: 5,
-    outlineWidth: 0,
+    gap: 10,
   },
   sidebarTitle: {
-    fontSize: 20,
-    fontWeight: "600",
+    fontSize: 22,
+    fontWeight: "700",
+    textAlign: "center",
+    marginVertical: 10,
+    marginBottom: 15,
   },
   newChatBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 12,
     paddingHorizontal: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 10,
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  newChatIcon: {
+    marginRight: 8,
   },
   newChatText: {
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: "600",
   },
-  chatList: { flex: 1 },
+  chatList: {
+    flex: 1,
+  },
+  chatListContent: {
+    paddingBottom: 15,
+  },
   chatItemContainer: {
     position: "relative",
-    marginBottom: 4,
+    marginBottom: 6,
     overflow: "hidden",
   },
   chatItem: {
     flex: 1,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingRight: 45,
+    borderRadius: 10,
   },
   chatContent: {
     flex: 1,
   },
   chatTitle: {
     fontSize: 16,
-    fontWeight: "500",
-    marginBottom: 2,
+    fontWeight: "600",
+    marginBottom: 4,
   },
   chatSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     opacity: 0.7,
   },
   deleteBtn: {
     position: "absolute",
-    right: 8,
-    top: 12,
-    padding: 4,
-    borderRadius: 4,
-    zIndex: 1,
+    right: 10,
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
+    padding: 8,
+    borderRadius: 6,
+    zIndex: 2,
   },
   searchInput: {
     flex: 1,
-    borderRadius: 27.5,
-    padding: 10,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
     borderWidth: 1,
+    fontSize: 15,
   },
   sidebarUser: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    paddingVertical: 10,
+    gap: 12,
+    paddingVertical: 15,
+    paddingTop: 15,
+    borderTopWidth: 1,
+  },
+  userAvatar: {
+    borderRadius: 100,
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 3,
+  },
+  userAvatarText: {
+    fontFamily: "InterSemiBold",
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  userEmail: {
+    fontFamily: "InterMedium",
+    fontWeight: "600",
+    fontSize: 16,
+    flex: 1,
+  },
+  logoutBtn: {
+    padding: 4,
   },
 });
 
 const getContrastColor = (bgColor) => {
+  if (!bgColor || typeof bgColor !== "string") return "#FFFFFF";
   const hex = bgColor.replace("#", "");
+  if (hex.length !== 6) return "#FFFFFF";
+
   const r = parseInt(hex.substring(0, 2), 16) / 255;
   const g = parseInt(hex.substring(2, 4), 16) / 255;
   const b = parseInt(hex.substring(4, 6), 16) / 255;

@@ -13,6 +13,7 @@ import * as Clipboard from "expo-clipboard";
 import Feather from "@expo/vector-icons/Feather";
 import Markdown from "react-native-markdown-display";
 import useMarkdownStyles from "../../hooks/useMarkdownStyles";
+import { useTranslations } from "../../utils/translations";
 
 const getContrastColor = (bgColor) => {
   const hex = bgColor.replace("#", "");
@@ -23,11 +24,7 @@ const getContrastColor = (bgColor) => {
   return luminance > 0.5 ? "#000000" : "#FFFFFF";
 };
 
-const DUMMY_RECOMMENDATIONS = [
-  "Explain me quantum physycs.",
-  "Create simple game on python.",
-  "Write me a quote",
-];
+const DUMMY_RECOMMENDATIONS = ["quantum", "gamePython", "quote"];
 
 const TypingIndicator = ({ colors, accentColorValue }) => {
   const [dots, setDots] = useState([0, 0, 0]);
@@ -64,7 +61,7 @@ const TypingIndicator = ({ colors, accentColorValue }) => {
   );
 };
 
-const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
+const MessageBubble = ({ item, colors, accentColorValue, showToast, t }) => {
   const isUser = item.role === "user";
   const isDark = colors.text === "#FFFFFF";
   const opacity = useRef(new Animated.Value(0)).current;
@@ -76,13 +73,13 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
     try {
       await Clipboard.setStringAsync(item.text);
       if (showToast) {
-        showToast("Message copied to clipboard", "success");
+        showToast(t("copiedToClipboard"), "success");
       }
       console.log("Message copied to clipboard");
     } catch (error) {
       console.error("Failed to copy text:", error);
       if (showToast) {
-        showToast("Failed to copy message", "error");
+        showToast(t("failedCopy"), "error");
       }
     }
   };
@@ -173,12 +170,12 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast }) => {
                         try {
                           await Clipboard.setStringAsync(node.content);
                           if (showToast) {
-                            showToast("Code copied!", "success");
+                            showToast(t("codeCopied"), "success");
                           }
                         } catch (error) {
                           console.error("Failed to copy code:", error);
                           if (showToast) {
-                            showToast("Failed to copy code", "error");
+                            showToast(t("failedCopyCode"), "error");
                           }
                         }
                       }}
@@ -255,6 +252,7 @@ const Chat = ({
   onQuickPromptPress,
 }) => {
   const { accentColor } = useThemeStore();
+  const t = useTranslations();
 
   const messages = useMemo(
     () => chats.find((chat) => chat.id === currentChatId)?.messages || [],
@@ -287,10 +285,10 @@ const Chat = ({
       {messages.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={[styles.greeting, { color: colors.text }]}>
-            How can I help you today?
+            {t("howHelp")}
           </Text>
           <View style={styles.quickPrompts}>
-            {DUMMY_RECOMMENDATIONS.map((req) => (
+            {DUMMY_RECOMMENDATIONS.map((key, index) => (
               <TouchableOpacity
                 activeOpacity={0.7}
                 style={[
@@ -300,10 +298,10 @@ const Chat = ({
                     borderColor: accentColorValue,
                   },
                 ]}
-                key={req}
-                onPress={() => onQuickPromptPress?.(req)}
+                key={key}
+                onPress={() => onQuickPromptPress?.(t(key))}
               >
-                <Text style={{ color: colors.text }}>{req}</Text>
+                <Text style={{ color: colors.text }}>{t(key)}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -316,6 +314,7 @@ const Chat = ({
             colors={colors}
             accentColorValue={accentColorValue}
             showToast={showToast}
+            t={t}
           />
         ))
       )}

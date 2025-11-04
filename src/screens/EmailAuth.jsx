@@ -252,6 +252,7 @@ const EmailAuth = ({ navigation }) => {
                   ]}
                   secureTextEntry={!showRePassword}
                   autoCorrect={false}
+                  autoCapitalize="none"
                 />
                 <TouchableOpacity
                   onPress={() => setShowRePassword(!showRePassword)}

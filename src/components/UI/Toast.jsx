@@ -80,7 +80,7 @@ const Toast = ({ message, visible: propVisible, status, onHide }) => {
         },
       ]}
     >
-      <Text style={[styles.message, { color: colors.text }]}>{message}</Text>
+      <Text style={[styles.message, { color: "#f2f2f2" }]}>{message}</Text>
       <TouchableOpacity activeOpacity={0.75} onPress={hideToast}>
         <Ionicons name="close" size={24} color={colors.background} />
       </TouchableOpacity>

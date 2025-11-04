@@ -34,7 +34,10 @@
         "projectId": "83b63db9-3b27-49a4-9085-44ade470cbbf"
       }
     },
-    "plugins": ["expo-font"],
+    "plugins": [
+      "expo-font",
+      "expo-localization"
+    ],
     "owner": "turkmencodelab",
     "overrides": {
       "entities": "1.1.1"

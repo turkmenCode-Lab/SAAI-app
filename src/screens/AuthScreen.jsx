@@ -13,11 +13,13 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useAppTheme } from "../../src/theme";
 import Toast from "../components/UI/Toast";
+import { useTranslations } from "../utils/translations";
 
 const AuthScreen = ({ navigation }) => {
   const { colors } = useTheme();
   const theme = useAppTheme();
   const [toastVisible, setToastVisible] = useState(false);
+  const t = useTranslations();
 
   const showComingSoon = () => {
     setToastVisible(true);
@@ -68,14 +70,10 @@ const AuthScreen = ({ navigation }) => {
           textAlign: "center",
         }}
       >
-        You’ll get smarter responses and can upload files and more.
+        {t("smarterResponses")}
       </Text>
       <TypingErase
-        texts={[
-          "Start developing with AI",
-          "Hi I'm here, how can I help?",
-          "I may help to solve issues.",
-        ]}
+        texts={[t("startDeveloping"), t("hiHelp"), t("solveIssues")]}
         typingSpeed={45}
         erasingSpeed={30}
         pauseBeforeErase={1000}
@@ -99,7 +97,7 @@ const AuthScreen = ({ navigation }) => {
         >
           <MaterialIcons name="alternate-email" size={24} color={colors.text} />
           <Text style={[styles.title, { color: colors.text }]}>
-            Sign In With Email
+            {t("signInEmail")}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -109,7 +107,7 @@ const AuthScreen = ({ navigation }) => {
         >
           <AntDesign name="google" size={24} color={colors.text} />
           <Text style={[styles.title, { color: colors.text }]}>
-            Sign In With Google
+            {t("signInGoogle")}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -119,7 +117,7 @@ const AuthScreen = ({ navigation }) => {
         >
           <AntDesign name="github" size={24} color={colors.text} />
           <Text style={[styles.title, { color: colors.text }]}>
-            Sign In With Github
+            {t("signInGithub")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -136,18 +134,18 @@ const AuthScreen = ({ navigation }) => {
           style={{ fontWeight: "bold", color: colors.text }}
           onPress={() => Linking.openURL("https://example.com/terms")}
         >
-          Terms
+          {t("terms")}
         </Text>{" "}
         and{" "}
         <Text
           style={{ fontWeight: "bold", color: colors.text }}
           onPress={() => Linking.openURL("https://example.com/privacy")}
         >
-          Privacy Policy
+          {t("privacy")}
         </Text>
       </Text>
       <Toast
-        message="Coming soon!"
+        message={t("comingSoon")}
         visible={toastVisible}
         status="error"
         onHide={() => setToastVisible(false)}

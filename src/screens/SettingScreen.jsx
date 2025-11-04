@@ -27,11 +27,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeStore } from "../../store/themeStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useTranslations } from "../utils/translations";
 
 export default function SettingsScreen() {
   const theme = useAppTheme();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+  const t = useTranslations();
 
   const token = useAuthStore((state) => state.token);
   const {
@@ -99,10 +101,10 @@ export default function SettingsScreen() {
   }, [isDarkMode, setIsDarkMode, setDarkMode]);
 
   const handleLogout = useCallback(() => {
-    Alert.alert("Logout", "Are you sure you want to log out?", [
+    Alert.alert(t("logOut"), t("sureLogout"), [
       { text: "Cancel", style: "cancel" },
       {
-        text: "Logout",
+        text: t("logOut"),
         style: "destructive",
         onPress: () => {
           useAuthStore.getState().logout();
@@ -110,7 +112,7 @@ export default function SettingsScreen() {
         },
       },
     ]);
-  }, [navigation]);
+  }, [navigation, t]);
 
   const openPrivacyPolicy = useCallback(async () => {
     const url = "https://your-app.com/privacy-policy";
@@ -230,7 +232,7 @@ export default function SettingsScreen() {
             fontSize: 32,
           }}
         >
-          Settings
+          {t("settings")}
         </Text>
       </View>
 
@@ -238,16 +240,16 @@ export default function SettingsScreen() {
         {renderCard(
           renderRow(
             "language",
-            "Language",
+            t("language"),
             <Picker
               selectedValue={language}
               dropdownIconColor={theme.colors.text}
               style={[styles.picker, pickerCommon]}
               onValueChange={setLanguage}
             >
-              <Picker.Item label="English" value="en" />
-              <Picker.Item label="Русский" value="ru" />
-              <Picker.Item label="Türkmençe" value="tk" />
+              <Picker.Item label={t("english")} value="en" />
+              <Picker.Item label={t("russian")} value="ru" />
+              <Picker.Item label={t("turkmen")} value="tk" />
             </Picker>
           )
         )}
@@ -257,16 +259,16 @@ export default function SettingsScreen() {
         {renderCard(
           renderRow(
             "palette",
-            "Accent Color",
+            t("accentColor"),
             <Picker
               selectedValue={accentColor}
               dropdownIconColor={theme.colors.text}
               style={[styles.picker, pickerCommon]}
               onValueChange={handleAccentChange}
             >
-              <Picker.Item label="Blue" value="mostly" />
-              <Picker.Item label="Purple" value="vitally" />
-              <Picker.Item label="Orange" value="principally" />
+              <Picker.Item label={t("blue")} value="mostly" />
+              <Picker.Item label={t("purple")} value="vitally" />
+              <Picker.Item label={t("orange")} value="principally" />
             </Picker>
           )
         )}
@@ -274,7 +276,7 @@ export default function SettingsScreen() {
         {renderCard(
           renderRow(
             "preview",
-            "Accent Preview",
+            t("accentPreview"),
             <Animated.View
               style={[
                 styles.accentPreview,
@@ -292,7 +294,7 @@ export default function SettingsScreen() {
         {renderCard(
           renderRow(
             "monitor",
-            "Dark Mode",
+            t("darkMode"),
             <View style={styles.switchContainer}>
               <Feather
                 name="sun"
@@ -331,7 +333,7 @@ export default function SettingsScreen() {
               { color: accentColorValue, fontFamily: theme.fonts.semibold },
             ]}
           >
-            Privacy Policy
+            {t("privacyPolicy")}
           </Text>
         </TouchableOpacity>
 
@@ -343,7 +345,7 @@ export default function SettingsScreen() {
               { color: "red", fontFamily: theme.fonts.semibold },
             ]}
           >
-            Log Out
+            {t("logOut")}
           </Text>
         </TouchableOpacity>
       </View>

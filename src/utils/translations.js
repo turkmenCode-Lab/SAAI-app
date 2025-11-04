@@ -1,0 +1,193 @@
+import { useThemeStore } from "../../store/themeStore";
+
+const translations = {
+  en: {
+    // AuthScreen
+    smarterResponses:
+      "You’ll get smarter responses and can upload files and more.",
+    startDeveloping: "Start developing with AI",
+    hiHelp: "Hi I'm here, how can I help?",
+    solveIssues: "I may help to solve issues.",
+    signInEmail: "Sign In With Email",
+    signInGoogle: "Sign In With Google",
+    signInGithub: "Sign In With Github",
+    terms: "Terms",
+    privacy: "Privacy Policy",
+    // EmailAuth
+    loginAccount: "Login to your account",
+    createAccount: "Create a new account",
+    email: "Email",
+    password: "Password",
+    rePassword: "Re-enter Password",
+    login: "Login",
+    signUp: "Sign Up",
+    noAccount: "Haven't got an account? ",
+    haveAccount: "Already have an account? ",
+    goBack: "Go Back",
+    // HomeScreen / Header
+    assistant: "Assistant",
+    getPro: "Get Pro",
+    // Sidebar
+    diveHistory: "Let's Dive into your history",
+    searchHistory: "Let's search your chat history!?",
+    newChat: "+ New Chat",
+    guest: "Guest",
+    // Chat
+    howHelp: "How can I help you today?",
+    quantum: "Explain me quantum physics.",
+    gamePython: "Create simple game on python.",
+    quote: "Write me a quote",
+    // Settings
+    settings: "Settings",
+    language: "Language",
+    english: "English",
+    russian: "Russian",
+    turkmen: "Turkmen",
+    accentColor: "Accent Color",
+    blue: "Blue",
+    purple: "Purple",
+    orange: "Orange",
+    accentPreview: "Accent Preview",
+    darkMode: "Dark Mode",
+    privacyPolicy: "Privacy Policy",
+    logOut: "Log Out",
+    sureLogout: "Are you sure you want to log out?",
+    // Toasts / Common
+    comingSoon: "Coming soon!",
+    emptyMessage: "Please type a message.",
+    loginSuccess: "Login Successful",
+    signupSuccess: "Signup Successful",
+    invalidEmail: "Invalid email",
+    invalidPassword: "Password must be at least 6 characters",
+    passwordsMismatch: "Passwords do not match",
+    userNotFound: "User not found or resource unavailable",
+  },
+  ru: {
+    // AuthScreen
+    smarterResponses:
+      "Вы получите более умные ответы и сможете загружать файлы и многое другое.",
+    startDeveloping: "Начните разработку с ИИ",
+    hiHelp: "Привет, я здесь, чем могу помочь?",
+    solveIssues: "Я могу помочь решить проблемы.",
+    signInEmail: "Войти с помощью email",
+    signInGoogle: "Войти с помощью Google",
+    signInGithub: "Войти с помощью Github",
+    terms: "Условия",
+    privacy: "Политика конфиденциальности",
+    // EmailAuth
+    loginAccount: "Войдите в свою учетную запись",
+    createAccount: "Создайте новый аккаунт",
+    email: "Email",
+    password: "Пароль",
+    rePassword: "Повторите пароль",
+    login: "Войти",
+    signUp: "Зарегистрироваться",
+    noAccount: "Нет аккаунта? ",
+    haveAccount: "Уже есть аккаунт? ",
+    goBack: "Назад",
+    // HomeScreen / Header
+    assistant: "Ассистент",
+    getPro: "Получить Pro",
+    // Sidebar
+    diveHistory: "Давайте нырнем в вашу историю",
+    searchHistory: "Давайте поищем вашу историю чатов!?",
+    newChat: "+ Новый чат",
+    guest: "Гость",
+    // Chat
+    howHelp: "Чем я могу вам помочь сегодня?",
+    quantum: "Объясните мне квантовую физику.",
+    gamePython: "Создайте простую игру на Python.",
+    quote: "Напишите мне цитату",
+    // Settings
+    settings: "Настройки",
+    language: "Язык",
+    english: "Английский",
+    russian: "Русский",
+    turkmen: "Туркменский",
+    accentColor: "Цвет акцента",
+    blue: "Синий",
+    purple: "Фиолетовый",
+    orange: "Оранжевый",
+    accentPreview: "Предпросмотр акцента",
+    darkMode: "Тёмный режим",
+    privacyPolicy: "Политика конфиденциальности",
+    logOut: "Выйти",
+    sureLogout: "Вы уверены, что хотите выйти?",
+    // Toasts / Common
+    comingSoon: "Скоро!",
+    emptyMessage: "Пожалуйста, введите сообщение.",
+    loginSuccess: "Вход выполнен успешно",
+    signupSuccess: "Регистрация прошла успешно",
+    invalidEmail: "Неверный email",
+    invalidPassword: "Пароль должен содержать не менее 6 символов",
+    passwordsMismatch: "Пароли не совпадают",
+    userNotFound: "Пользователь не найден или ресурс недоступен",
+  },
+  tk: {
+    // AuthScreen
+    smarterResponses:
+      "Has akyllı jogaplar alyp, faýllary ýüklemek we başga-da köp z atlaryny alyp bilersiniz.",
+    startDeveloping: "Özbaşdyrýäni AI bilen başlaň",
+    hiHelp: "Salam, nädip kömek edip bilerin?",
+    solveIssues: "Meseläni çözmäge kömek edip bilerin.",
+    signInEmail: "Email bilen giriň",
+    signInGoogle: "Google bilen giriň",
+    signInGithub: "Github bilen giriň",
+    terms: "Şertler",
+    privacy: " Gizlinlik Siyasaty",
+    // EmailAuth
+    loginAccount: "Hasabyňyza giriň",
+    createAccount: "Täze hasap dörediň",
+    email: "Email",
+    password: "Parol",
+    rePassword: "Paroly täzeden giriň",
+    login: "Giriň",
+    signUp: "Hasap döret",
+    noAccount: "Hasabyňyz ýokmu? ",
+    haveAccount: "Hasabyňyz bar? ",
+    goBack: "Yza",
+    // HomeScreen / Header
+    assistant: "Jemgyýetçilik",
+    getPro: "Pro Al",
+    // Sidebar
+    diveHistory: "Siziň taryhyňyza glyň",
+    searchHistory: "Siziň söhbet taryhyňyzy gözläň!?",
+    newChat: "+ Täze Söhbet",
+    guest: "Mynagöç",
+    // Chat
+    howHelp: "Men size nähili kömek edip bilerin?",
+    quantum: "Mäni kwant fizikasyny düşündiriň.",
+    gamePython: "Python-da simple oýun dörediň.",
+    quote: "Mäni bir sitata ýazyň",
+    // Settings
+    settings: "Sazlamalar",
+    language: "Dil",
+    english: "Iňlisçe",
+    russian: "Rusça",
+    turkmen: "Türkmençe",
+    accentColor: "Akzent Reňki",
+    blue: "Gök",
+    purple: "Bineň",
+    orange: "Mämişi",
+    accentPreview: "Akzent Görnüşi",
+    darkMode: "Gara Rejim",
+    privacyPolicy: "Gizlinlik Siyasaty",
+    logOut: "Çykyň",
+    sureLogout: "Çykmagyňyza ynamlymy?",
+    // Toasts / Common
+    comingSoon: "Çalt!",
+    emptyMessage: "Meseläni ýazyň.",
+    loginSuccess: "Giriş Üste Geçdi",
+    signupSuccess: "Hasap Döretildi",
+    invalidEmail: "Nädogry Email",
+    invalidPassword: "Parol 6 belgi azyndan bolmaly",
+    passwordsMismatch: "Parollar deň däl",
+    userNotFound: "Ulanyjy tapylmady ýa-da resurs elýeterli däl",
+  },
+};
+
+export const useTranslations = () => {
+  const { language } = useThemeStore();
+  return (key) =>
+    translations[language]?.[key] || translations.en?.[key] || key;
+};

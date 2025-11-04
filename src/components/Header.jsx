@@ -9,10 +9,12 @@ import {
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useTheme, useNavigation } from "@react-navigation/native";
+import { useTranslations } from "../utils/translations";
 
 const Header = ({ isNavOpen, rotateInterpolate, onToggleNav }) => {
   const { colors } = useTheme();
   const navigation = useNavigation();
+  const t = useTranslations();
 
   const handleToggleNav = useCallback(() => {
     onToggleNav();
@@ -34,7 +36,9 @@ const Header = ({ isNavOpen, rotateInterpolate, onToggleNav }) => {
             <FontAwesome6 name="bars-staggered" size={28} color={colors.text} />
           </Animated.View>
         </TouchableOpacity>
-        <Text style={[styles.heading, { color: colors.text }]}>Assistant</Text>
+        <Text style={[styles.heading, { color: colors.text }]}>
+          {t("assistant")}
+        </Text>
       </View>
 
       <View style={styles.rightSection}>
@@ -47,7 +51,9 @@ const Header = ({ isNavOpen, rotateInterpolate, onToggleNav }) => {
             size={20}
             color={colors.principally}
           />
-          <Text style={[styles.getProText, { color: "#fff" }]}>Get Pro</Text>
+          <Text style={[styles.getProText, { color: "#fff" }]}>
+            {t("getPro")}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleSettingsPress} activeOpacity={0.7}>
           <MaterialCommunityIcons

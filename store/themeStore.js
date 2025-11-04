@@ -1,5 +1,7 @@
+// Updated: store/themeStore.js
 import { create } from "zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Localization from "expo-localization";
 
 const useThemeStore = create((set, get) => ({
   darkMode: false,
@@ -28,6 +30,26 @@ const useThemeStore = create((set, get) => ({
         const settings = JSON.parse(jsonValue);
         set((state) => ({ ...state, ...settings }));
         return settings;
+      } else {
+        // Auto-detect device language
+        const deviceLocale = Localization.locale.toLowerCase();
+        const langCode = deviceLocale.split("-")[0];
+        const supportedLangs = ["en", "ru", "tk"];
+        const detectedLang = supportedLangs.includes(langCode)
+          ? langCode
+          : "en";
+        set({
+          darkMode: false,
+          accentColor: "mostly",
+          language: detectedLang,
+        });
+        // Save the detected settings
+        get().saveSettings();
+        return {
+          darkMode: false,
+          accentColor: "mostly",
+          language: detectedLang,
+        };
       }
     } catch (e) {
       console.warn("Failed to load theme settings:", e);

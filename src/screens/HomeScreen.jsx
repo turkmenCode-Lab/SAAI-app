@@ -30,6 +30,7 @@ import Chat from "../components/UI/Chat";
 import { createAPI } from "../utils/api";
 import Toast from "../components/UI/Toast";
 import { useThemeStore } from "../../store/themeStore";
+import { useTranslations } from "../utils/translations";
 
 if (
   Platform.OS === "android" &&
@@ -43,6 +44,7 @@ const HomeScreen = () => {
   const { token } = useAuthStore();
   const { accentColor } = useThemeStore();
   const { colors } = useTheme();
+  const t = useTranslations();
 
   const accentColorValue = useMemo(
     () => colors[accentColor] || colors.primary || "#007AFF",
@@ -210,7 +212,7 @@ const HomeScreen = () => {
   const handleSubmit = useCallback(
     async (text) => {
       const trimmed = text.trim();
-      if (!trimmed) return showToast("Please type a message.", "error");
+      if (!trimmed) return showToast(t("emptyMessage"), "error");
       if (!token) return navigation.replace("Auth");
 
       let chatId = currentChatId;
@@ -317,7 +319,7 @@ const HomeScreen = () => {
         }, 500);
       }
     },
-    [currentChatId, token, createNewChat, showToast, chats, navigation]
+    [currentChatId, token, createNewChat, showToast, chats, navigation, t]
   );
 
   const handleNewChat = useCallback(() => {

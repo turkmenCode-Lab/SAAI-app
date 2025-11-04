@@ -17,6 +17,8 @@ import { useAuthStore } from "../../store/authStore";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useNavigation } from "@react-navigation/native";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
+import { useThemeStore } from "../../store/themeStore";
+import { useTranslations } from "../utils/translations";
 
 const Sidebar = ({
   chats,
@@ -32,8 +34,9 @@ const Sidebar = ({
   onDeleteChat,
 }) => {
   const { colors } = useTheme();
-
   const navigation = useNavigation();
+  const t = useTranslations();
+  const { language } = useThemeStore();
 
   const user = useAuthStore((state) => state.user);
 
@@ -90,7 +93,9 @@ const Sidebar = ({
           if (item.messages?.length > 0) {
             const timestamp = item.messages[item.messages.length - 1].timestamp;
             const date = new Date(timestamp);
-            return isNaN(date.getTime()) ? "" : date.toLocaleDateString();
+            return isNaN(date.getTime())
+              ? ""
+              : date.toLocaleDateString(language);
           }
           return "";
         } catch (error) {
@@ -152,7 +157,7 @@ const Sidebar = ({
         </Animated.View>
       );
     },
-    [currentChatId, colors, onLoadChat, onDeleteChat, setSearchQ]
+    [currentChatId, colors, onLoadChat, onDeleteChat, setSearchQ, language]
   );
 
   const handleNewChat = useCallback(() => {
@@ -245,7 +250,7 @@ const Sidebar = ({
             { color: colors.text, textAlign: "center", marginVertical: 10 },
           ]}
         >
-          Let's Dive into your history
+          {t("diveHistory")}
         </Text>
         <View
           style={[styles.sidebarHeader, { borderBottomColor: colors.border }]}
@@ -260,7 +265,7 @@ const Sidebar = ({
               },
             ]}
             autoCorrect={false}
-            placeholder="Let's search your chat history!?"
+            placeholder={t("searchHistory")}
             placeholderTextColor={colors.neutral}
             autoCapitalize="none"
             value={searchQ}
@@ -282,7 +287,7 @@ const Sidebar = ({
           activeOpacity={0.7}
         >
           <Text style={[styles.newChatText, { color: colors.text }]}>
-            + New Chat
+            {t("newChat")}
           </Text>
         </TouchableOpacity>
         <FlatList
@@ -334,7 +339,7 @@ const Sidebar = ({
               flex: 1,
             }}
           >
-            {user?.email ?? "Guest"}
+            {user?.email ?? t("guest")}
           </Text>
           <TouchableOpacity
             style={{ marginLeft: "auto" }}

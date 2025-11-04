@@ -1,27 +1,49 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useRef,
+  useMemo,
+  useEffect,
+  useCallback,
+} from "react";
 import {
   StyleSheet,
+  View,
+  TouchableOpacity,
+  Platform,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Animated,
+  Dimensions,
+  Easing,
+  LayoutAnimation,
+  UIManager,
+  Alert,
   Text,
   TextInput,
-  TouchableOpacity,
-  View,
-  KeyboardAvoidingView,
-  Platform,
-  Animated,
-  ActivityIndicator,
 } from "react-native";
-import { useTheme } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Feather from "@expo/vector-icons/Feather";
+import { useTheme } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
+import { useAuthStore } from "../../store/authStore";
+import Toast from "../components/UI/Toast";
+import { useTranslations } from "../utils/translations";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useAppTheme } from "../../src/theme";
-import { useAuthStore } from "../../store/authStore";
-import Toast from "../components/UI/Toast";
+
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const EmailAuth = ({ navigation }) => {
   const { colors } = useTheme();
   const theme = useAppTheme();
+  const t = useTranslations();
   const authStore = useAuthStore();
 
   const [isLogin, setIsLogin] = useState(true);
@@ -97,15 +119,12 @@ const EmailAuth = ({ navigation }) => {
 
   const handleSubmit = useCallback(async () => {
     if (!validateEmail(email))
-      return shake(shakeEmail) && showToast("Invalid email", "error");
+      return shake(shakeEmail) && showToast(t("invalidEmail"), "error");
     if (!validatePassword(password))
-      return (
-        shake(shakePassword) &&
-        showToast("Password must be at least 6 characters", "error")
-      );
+      return shake(shakePassword) && showToast(t("invalidPassword"), "error");
     if (!isLogin && password !== rePassword)
       return (
-        shake(shakeRePassword) && showToast("Passwords do not match", "error")
+        shake(shakeRePassword) && showToast(t("passwordsMismatch"), "error")
       );
 
     try {
@@ -114,10 +133,7 @@ const EmailAuth = ({ navigation }) => {
         : await authStore.register(email, password);
 
       if (result && result.user) {
-        showToast(
-          isLogin ? "Login Successful" : "Signup Successful",
-          "success"
-        );
+        showToast(isLogin ? t("loginSuccess") : t("signupSuccess"), "success");
         setTimeout(() => {
           navigation?.navigate("Home");
         }, 2000);
@@ -125,7 +141,7 @@ const EmailAuth = ({ navigation }) => {
     } catch (err) {
       const errorMessage =
         err.response?.status === 404
-          ? "User not found or resource unavailable"
+          ? t("userNotFound")
           : err.message || "An unexpected error occurred";
       showToast(errorMessage, "error");
     }
@@ -143,6 +159,7 @@ const EmailAuth = ({ navigation }) => {
     shakeRePassword,
     validateEmail,
     validatePassword,
+    t,
   ]);
 
   return (
@@ -155,7 +172,7 @@ const EmailAuth = ({ navigation }) => {
         style={styles.inner}
       >
         <Text style={[styles.header, { color: colors.text }]}>
-          {isLogin ? "Login to your account" : "Create a new account"}
+          {isLogin ? t("loginAccount") : t("createAccount")}
         </Text>
 
         <View style={styles.form}>
@@ -169,7 +186,7 @@ const EmailAuth = ({ navigation }) => {
                 color={colors.neutral}
               />
               <TextInput
-                placeholder="Email"
+                placeholder={t("email")}
                 placeholderTextColor={colors.neutral}
                 value={email}
                 onChangeText={setEmail}
@@ -190,7 +207,7 @@ const EmailAuth = ({ navigation }) => {
             >
               <AntDesign name="lock" size={22} color={colors.neutral} />
               <TextInput
-                placeholder="Password"
+                placeholder={t("password")}
                 placeholderTextColor={colors.neutral}
                 value={password}
                 onChangeText={setPassword}
@@ -225,7 +242,7 @@ const EmailAuth = ({ navigation }) => {
               >
                 <AntDesign name="lock" size={22} color={colors.neutral} />
                 <TextInput
-                  placeholder="Re-enter Password"
+                  placeholder={t("rePassword")}
                   placeholderTextColor={colors.neutral}
                   value={rePassword}
                   onChangeText={setRePassword}
@@ -274,7 +291,7 @@ const EmailAuth = ({ navigation }) => {
               <ActivityIndicator color={colors.text} />
             ) : (
               <Text style={[styles.buttonText, { color: colors.text }]}>
-                {isLogin ? "Login" : "Sign Up"}
+                {isLogin ? t("login") : t("signUp")}
               </Text>
             )}
           </TouchableOpacity>
@@ -288,7 +305,9 @@ const EmailAuth = ({ navigation }) => {
               size={16}
               color={colors.neutral}
             />
-            <Text style={{ color: colors.neutral, fontSize: 16 }}>Go Back</Text>
+            <Text style={{ color: colors.neutral, fontSize: 16 }}>
+              {t("goBack")}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -297,9 +316,9 @@ const EmailAuth = ({ navigation }) => {
           style={{ marginTop: 40 }}
         >
           <Text style={{ color: colors.neutral }}>
-            {isLogin ? "Haven't got an account? " : "Already have an account? "}
+            {isLogin ? `${t("noAccount")}` : `${t("haveAccount")}`}
             <Text style={{ fontWeight: "700", color: colors.text }}>
-              {isLogin ? "Sign Up" : "Login"}
+              {isLogin ? t("signUp") : t("login")}
             </Text>
           </Text>
         </TouchableOpacity>

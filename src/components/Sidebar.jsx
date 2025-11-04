@@ -84,17 +84,17 @@ const Sidebar = ({
             Animated.timing(animRefs.opacity, {
               toValue: 0,
               duration: 300,
-              useNativeDriver: false,
+              useNativeDriver: true,
             }),
             Animated.timing(animRefs.height, {
               toValue: 0,
               duration: 300,
-              useNativeDriver: false,
+              useNativeDriver: true,
             }),
             Animated.timing(animRefs.scale, {
               toValue: 0.8,
               duration: 300,
-              useNativeDriver: true,
+              useNativeDriver: false,
             }),
           ]).start(() => {
             onDeleteChat(itemId);
@@ -107,7 +107,6 @@ const Sidebar = ({
 
       const handleLoadChat = () => {
         try {
-          // Scale animation on press
           Animated.sequence([
             Animated.timing(animRefs.scale, {
               toValue: 0.95,

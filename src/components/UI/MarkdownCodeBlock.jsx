@@ -2,7 +2,6 @@ import React from "react";
 import { useAppTheme } from "../../theme";
 import useMarkdownStyles from "../../hooks/useMarkdownStyles";
 import SyntaxHighlighter from "react-syntax-highlighter";
-
 import {
   atomOneDark,
   atomOneLight,

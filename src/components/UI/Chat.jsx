@@ -15,6 +15,15 @@ import Markdown from "react-native-markdown-display";
 import useMarkdownStyles from "../../hooks/useMarkdownStyles";
 import { useTranslations } from "../../utils/translations";
 
+// --- NEW IMPORTS ---
+// Added the syntax highlighter and the themes we'll use
+import SyntaxHighlighter from "react-native-syntax-highlighter";
+import {
+  atomOneDark,
+  atomOneLight,
+} from "react-native-syntax-highlighter/dist/styles/prism";
+// --------------------
+
 const getContrastColor = (bgColor) => {
   const hex = bgColor.replace("#", "");
   const r = parseInt(hex.substring(0, 2), 16) / 255;
@@ -154,39 +163,63 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast, t }) => {
             <Markdown
               style={markdownStyles}
               rules={{
-                code_block: (node, children, parent, styles) => (
-                  <View key={node.key} style={{ position: "relative" }}>
-                    <TouchableOpacity
-                      style={{
-                        position: "absolute",
-                        top: 12,
-                        right: 12,
-                        backgroundColor: "rgba(0,0,0,0.7)",
-                        padding: 8,
-                        borderRadius: 6,
-                        zIndex: 1,
-                      }}
-                      onPress={async () => {
-                        try {
-                          await Clipboard.setStringAsync(node.content);
-                          if (showToast) {
-                            showToast(t("codeCopied"), "success");
+                // --- THIS IS THE MODIFIED SECTION ---
+                code_block: (node, children, parent, styles) => {
+                  // 1. Select the correct syntax theme
+                  const syntaxTheme = isDark ? atomOneDark : atomOneLight;
+
+                  // 2. Get code string and language
+                  const codeString = String(node.content).replace(/\n$/, "");
+                  const language = node.lang || "plaintext";
+
+                  // 3. This is the style for the <SyntaxHighlighter> component
+                  // It ensures it fits *inside* your container style
+                  const highlighterCustomStyle = {
+                    backgroundColor: "transparent", // Use container's background
+                    padding: 0, // Container already has padding
+                    margin: 0,
+                    fontFamily: "monospace", // Base font
+                    fontSize: 14,
+                  };
+
+                  return (
+                    // 1. Use the code_block style from your hook as the main container
+                    // This gives it the correct padding, background, border, etc.
+                    <View key={node.key} style={markdownStyles.code_block}>
+                      // 2. The themed copy button, positioned absolutely
+                      <TouchableOpacity
+                        style={{
+                          position: "absolute",
+                          top: 8,
+                          right: 8,
+                          backgroundColor: isDark
+                            ? "rgba(255,255,255,0.2)"
+                            : "rgba(0,0,0,0.1)",
+                          padding: 6,
+                          borderRadius: 6,
+                          zIndex: 1,
+                        }}
+                        onPress={async () => {
+                          try {
+                            await Clipboard.setStringAsync(node.content);
+                            if (showToast) {
+                              showToast(t("codeCopied"), "success");
+                            }
+                          } catch (error) {
+                            console.error("Failed to copy code:", error);
+                            if (showToast) {
+                              showToast(t("failedCopyCode"), "error");
+                            }
                           }
-                        } catch (error) {
-                          console.error("Failed to copy code:", error);
-                          if (showToast) {
-                            showToast(t("failedCopyCode"), "error");
-                          }
-                        }
-                      }}
-                    >
-                      <Feather name="copy" size={16} color="#FFFFFF" />
-                    </TouchableOpacity>
-                    <View style={styles.codeBlockWrapper}>
+                        }}
+                      >
+                        <Feather name="copy" size={16} color={colors.text} />
+                      </TouchableOpacity>
+                      // 3. The language "fence" (e.g., "javascript")
                       {node.lang && (
                         <Text
                           style={[
-                            styles.fence,
+                            styles.fence, // Uses the local StyleSheet
                             {
                               color: colors.neutral,
                               backgroundColor: isDark
@@ -198,10 +231,21 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast, t }) => {
                           {node.lang}
                         </Text>
                       )}
-                      <Text style={styles.code_block}>{node.content}</Text>
+                      // 4. The Syntax Highlighter
+                      <SyntaxHighlighter
+                        style={syntaxTheme}
+                        language={language}
+                        customStyle={highlighterCustomStyle}
+                        CodeTag={() => null} // Prevent extra <Code> wrapper
+                        PreTag={() => null} // Prevent extra <Pre> wrapper
+                        highlighter={"prism"}
+                      >
+                        {codeString}
+                      </SyntaxHighlighter>
                     </View>
-                  </View>
-                ),
+                  );
+                },
+                // --- END OF MODIFIED SECTION ---
                 table_head: (node, children, parent, styles) => (
                   <View style={styles.tableHead}>{children}</View>
                 ),
@@ -348,13 +392,13 @@ const styles = StyleSheet.create({
   },
   messageContainer: {
     marginVertical: 6,
-    maxWidth: "85%",
+    maxWidth: "92.5%",
   },
   bubbleWrapper: {
     flexDirection: "column",
   },
   bubble: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 18,
   },
@@ -403,6 +447,8 @@ const styles = StyleSheet.create({
     minWidth: 120,
     alignItems: "center",
   },
+  // This style is not used by the new highlighter,
+  // but I'll leave it in case other code uses it.
   codeBlockWrapper: {
     marginTop: 8,
   },
@@ -415,13 +461,15 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontFamily: "monospace",
   },
+  // This is no longer used for code blocks,
+  // as the highlighter component handles its own text styling.
   code_block: {
-    fontSize: 14,
+    fontSize: 13,
     lineHeight: 20,
     fontFamily: "monospace",
   },
   tableHead: {
-    backgroundColor: "transparent", // Will be overridden by styles.table_head
+    backgroundColor: "transparent",
   },
   tableCell: {
     padding: 12,

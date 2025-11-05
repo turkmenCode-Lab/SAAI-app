@@ -1,10 +1,12 @@
 import React from "react";
 import { useAppTheme } from "../../theme";
 import useMarkdownStyles from "../../hooks/useMarkdownStyles";
-import SyntaxHighlighter from "react-native-syntax-highlighter";
+import SyntaxHighlighter from "react-syntax-highlighter";
 
-import { atomOneDark } from "react-native-syntax-highlighter/dist/styles/prism";
-import { atomOneLight } from "react-native-syntax-highlighter/dist/styles/prism";
+import {
+  atomOneDark,
+  atomOneLight,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
 
 const MarkdownCodeBlock = ({ node, children }) => {
   const { colors } = useAppTheme();

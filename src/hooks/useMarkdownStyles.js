@@ -22,6 +22,8 @@ const useMarkdownStyles = () => {
           lineHeight: 22,
           color: colors.text,
           fontFamily: theme.fonts.regular,
+          paddingHorizontal: 0,
+          marginHorizontal: 0,
         },
 
         paragraph: {
@@ -107,13 +109,15 @@ const useMarkdownStyles = () => {
         },
 
         bullet_list: {
-          marginLeft: 10,
+          marginLeft: 4, // minimal left indent
           marginVertical: 4,
+          paddingLeft: 0,
         },
 
         ordered_list: {
-          marginLeft: 10,
+          marginLeft: 4,
           marginVertical: 4,
+          paddingLeft: 0,
         },
 
         list_item: {
@@ -121,13 +125,14 @@ const useMarkdownStyles = () => {
           marginVertical: 2,
           fontFamily: theme.fonts.regular,
           fontSize: 14,
+          paddingLeft: 2,
         },
 
         blockquote: {
           borderLeftWidth: 3,
           borderLeftColor: accentColorValue,
           backgroundColor: quoteBg,
-          paddingLeft: 12,
+          paddingLeft: 10, // tighter left space
           paddingVertical: 6,
           marginVertical: 8,
           borderRadius: 5,
@@ -145,7 +150,8 @@ const useMarkdownStyles = () => {
         },
 
         table_cell: {
-          padding: 8,
+          paddingVertical: 6,
+          paddingHorizontal: 8,
           borderWidth: 1,
           borderColor: subtleBorder,
           color: colors.text,
@@ -162,7 +168,7 @@ const useMarkdownStyles = () => {
         hr: {
           borderBottomWidth: 1,
           borderBottomColor: subtleBorder,
-          marginVertical: 14,
+          marginVertical: 12,
           opacity: 0.6,
         },
 

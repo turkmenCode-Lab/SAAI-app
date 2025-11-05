@@ -15,14 +15,11 @@ import Markdown from "react-native-markdown-display";
 import useMarkdownStyles from "../../hooks/useMarkdownStyles";
 import { useTranslations } from "../../utils/translations";
 
-// --- NEW IMPORTS ---
-// Added the syntax highlighter and the themes we'll use
-import SyntaxHighlighter from "react-native-syntax-highlighter";
+import SyntaxHighlighter from "react-syntax-highlighter";
 import {
   atomOneDark,
   atomOneLight,
-} from "react-native-syntax-highlighter/dist/styles/prism";
-// --------------------
+} from "react-syntax-highlighter/dist/esm/styles/prism";
 
 const getContrastColor = (bgColor) => {
   const hex = bgColor.replace("#", "");

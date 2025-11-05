@@ -28,6 +28,7 @@ import { useThemeStore } from "../../store/themeStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTranslations } from "../utils/translations";
+import Toast from "../components/UI/Toast";
 
 export default function SettingsScreen() {
   const theme = useAppTheme();
@@ -40,12 +41,16 @@ export default function SettingsScreen() {
     setDarkMode,
     setAccentColor: setStoredAccentColor,
     getStoredSettings,
+    setLanguage: setStoredLanguage, // Assuming this exists in the store; add if not
   } = useThemeStore();
 
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [language, setLanguage] = useState("en");
   const [accentColor, setAccentColor] = useState("mostly");
   const [loading, setLoading] = useState(true);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastStatus, setToastStatus] = useState("success");
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -99,6 +104,21 @@ export default function SettingsScreen() {
     setIsDarkMode(newDark);
     setDarkMode(newDark);
   }, [isDarkMode, setIsDarkMode, setDarkMode]);
+
+  const handleLanguageChange = useCallback(
+    (value) => {
+      const oldLanguage = language;
+      setLanguage(value);
+      if (setStoredLanguage) {
+        setStoredLanguage(value); // Update store if available
+      }
+      // Show toast with recommendation
+      setToastMessage(t("languageChanged"));
+      setToastStatus("success");
+      setToastVisible(true);
+    },
+    [language, setLanguage, setStoredLanguage, t]
+  );
 
   const handleLogout = useCallback(() => {
     Alert.alert(t("logOut"), t("sureLogout"), [
@@ -245,7 +265,7 @@ export default function SettingsScreen() {
               selectedValue={language}
               dropdownIconColor={theme.colors.text}
               style={[styles.picker, pickerCommon]}
-              onValueChange={setLanguage}
+              onValueChange={handleLanguageChange}
             >
               <Picker.Item label={t("english")} value="en" />
               <Picker.Item label={t("russian")} value="ru" />
@@ -349,6 +369,13 @@ export default function SettingsScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <Toast
+        visible={toastVisible}
+        message={toastMessage}
+        status={toastStatus}
+        onHide={() => setToastVisible(false)}
+      />
     </View>
   );
 }

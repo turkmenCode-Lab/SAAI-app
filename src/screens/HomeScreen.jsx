@@ -330,7 +330,6 @@ const HomeScreen = () => {
   const handleQuickPromptPress = useCallback(
     (promptText) => {
       setInput(promptText);
-      // Optionally auto-submit if desired: handleSubmit(promptText);
     },
     [setInput, handleSubmit]
   );
@@ -346,7 +345,7 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView
-      edges={["left", "right", "top"]}
+      edges={["left", "right"]}
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <Header

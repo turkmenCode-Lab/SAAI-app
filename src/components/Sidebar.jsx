@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  FlatList,
   StyleSheet,
   Animated,
   TextInput,
@@ -15,7 +14,11 @@ import { useTheme } from "@react-navigation/native";
 import { useAuthStore } from "../../store/authStore";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useNavigation } from "@react-navigation/native";
-import { PanGestureHandler, State } from "react-native-gesture-handler";
+import {
+  PanGestureHandler,
+  State,
+  FlatList,
+} from "react-native-gesture-handler";
 import { useThemeStore } from "../../store/themeStore";
 import { useTranslations } from "../utils/translations";
 
@@ -131,7 +134,8 @@ const Sidebar = ({
             style={[
               styles.chatItem,
               currentChatId === itemId && {
-                backgroundColor: `${colors.primary}0F`,
+                // FIX 2: Corrected string concatenation for background color
+                backgroundColor: colors.primary + "0F",
               },
             ]}
             onPress={handleLoadChat}
@@ -289,7 +293,7 @@ const Sidebar = ({
           </TouchableOpacity>
         </View>
         <TouchableOpacity
-          style={[styles.newChatBtn, { backgroundColor: `${colors.text}0A` }]}
+          style={[styles.newChatBtn, { backgroundColor: colors.text + "0A" }]}
           onPress={handleNewChat}
           activeOpacity={0.7}
         >
@@ -297,7 +301,7 @@ const Sidebar = ({
             {t("newChat")}
           </Text>
         </TouchableOpacity>
-        <FlatList
+        <FlatList // This is now the FlatList from react-native-gesture-handler
           data={filteredChats}
           renderItem={renderChatItem}
           keyExtractor={keyExtractor}
@@ -395,10 +399,10 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   chatList: {
-    flex: 1,
+    // flex: 1, // <-- I've commented this out to remove the gap!
   },
   chatListContent: {
-    paddingBottom: 15,
+    paddingBottom: 0,
   },
   chatItemContainer: {
     position: "relative",
@@ -442,7 +446,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     paddingVertical: 10,
-    paddingTop: 15,
+    paddingTop: 0,
   },
 });
 

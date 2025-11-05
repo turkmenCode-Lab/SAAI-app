@@ -59,7 +59,7 @@ const AuthScreen = ({ navigation }) => {
             textAlign: "center",
           }}
         >
-          SA-AI
+          Sora
         </Text>
       </View>
       <Text

@@ -52,6 +52,8 @@ const translations = {
     privacyPolicy: "Privacy Policy",
     logOut: "Log Out",
     sureLogout: "Are you sure you want to log out?",
+    languageChanged:
+      "Language changed! We recommend restarting the app to apply changes safely.",
     // Toasts / Common
     comingSoon: "Coming soon!",
     emptyMessage: "Please type a message.",
@@ -113,6 +115,8 @@ const translations = {
     privacyPolicy: "Политика конфиденциальности",
     logOut: "Выйти",
     sureLogout: "Вы уверены, что хотите выйти?",
+    languageChanged:
+      "Язык изменён! Рекомендуем перезапустить приложение для безопасного применения изменений.",
     // Toasts / Common
     comingSoon: "Скоро!",
     emptyMessage: "Пожалуйста, введите сообщение.",
@@ -174,6 +178,8 @@ const translations = {
     privacyPolicy: "Gizlinlik Siyasaty",
     logOut: "Çykyň",
     sureLogout: "Çykmagyňyza ynamlymy?",
+    languageChanged:
+      "Dil üýtgärildi! Üýtgeşlikleri howpsuz ulanmak üçin programmany täzeden işledip bilersiňiz.",
     // Toasts / Common
     comingSoon: "Çalt!",
     emptyMessage: "Meseläni ýazyň.",

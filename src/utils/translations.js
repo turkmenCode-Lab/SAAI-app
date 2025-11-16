@@ -2,7 +2,6 @@ import { useThemeStore } from "../../store/themeStore";
 
 const translations = {
   en: {
-    // AuthScreen
     smarterResponses:
       "You’ll get smarter responses and can upload files and more.",
     startDeveloping: "Start developing with AI",
@@ -13,7 +12,6 @@ const translations = {
     signInGithub: "Sign In With Github",
     terms: "Terms",
     privacy: "Privacy Policy",
-    // EmailAuth
     loginAccount: "Login to your account",
     createAccount: "Create a new account",
     email: "Email",
@@ -24,20 +22,16 @@ const translations = {
     noAccount: "Haven't got an account? ",
     haveAccount: "Already have an account? ",
     goBack: "Go Back",
-    // HomeScreen / Header
     assistant: "Assistant",
     getPro: "Get Pro",
-    // Sidebar
     diveHistory: "Let's Dive into your history",
     searchHistory: "Let's search your chat history!?",
     newChat: "+ New Chat",
     guest: "Guest",
-    // Chat
     howHelp: "How can I help you today?",
-    quantum: "Explain me quantum physics.",
-    gamePython: "Create simple game on python.",
-    quote: "Write me a quote",
-    // Settings
+    quantum: "Explain quantum physics",
+    gamePython: "Create simple game",
+    quote: "Write a quote",
     settings: "Settings",
     language: "Language",
     english: "English",
@@ -54,7 +48,6 @@ const translations = {
     sureLogout: "Are you sure you want to log out?",
     languageChanged:
       "Language changed! We recommend restarting the app to apply changes safely.",
-    // Toasts / Common
     comingSoon: "Coming soon!",
     emptyMessage: "Please type a message.",
     loginSuccess: "Login Successful",
@@ -65,7 +58,6 @@ const translations = {
     userNotFound: "User not found or resource unavailable",
   },
   ru: {
-    // AuthScreen
     smarterResponses:
       "Вы получите более умные ответы и сможете загружать файлы и многое другое.",
     startDeveloping: "Начните разработку с ИИ",
@@ -76,7 +68,6 @@ const translations = {
     signInGithub: "Войти с помощью Github",
     terms: "Условия",
     privacy: "Политика конфиденциальности",
-    // EmailAuth
     loginAccount: "Войдите в свою учетную запись",
     createAccount: "Создайте новый аккаунт",
     email: "Email",
@@ -87,20 +78,16 @@ const translations = {
     noAccount: "Нет аккаунта? ",
     haveAccount: "Уже есть аккаунт? ",
     goBack: "Назад",
-    // HomeScreen / Header
     assistant: "Ассистент",
     getPro: "Получить Pro",
-    // Sidebar
     diveHistory: "Давайте нырнем в вашу историю",
     searchHistory: "Давайте поищем вашу историю чатов!?",
     newChat: "+ Новый чат",
     guest: "Гость",
-    // Chat
     howHelp: "Чем я могу вам помочь сегодня?",
     quantum: "Объясните мне квантовую физику.",
     gamePython: "Создайте простую игру на Python.",
     quote: "Напишите мне цитату",
-    // Settings
     settings: "Настройки",
     language: "Язык",
     english: "Английский",
@@ -117,7 +104,6 @@ const translations = {
     sureLogout: "Вы уверены, что хотите выйти?",
     languageChanged:
       "Язык изменён! Рекомендуем перезапустить приложение для безопасного применения изменений.",
-    // Toasts / Common
     comingSoon: "Скоро!",
     emptyMessage: "Пожалуйста, введите сообщение.",
     loginSuccess: "Вход выполнен успешно",
@@ -128,7 +114,6 @@ const translations = {
     userNotFound: "Пользователь не найден или ресурс недоступен",
   },
   tk: {
-    // AuthScreen
     smarterResponses:
       "Has akyllı jogaplar alyp, faýllary ýüklemek we başga-da köp z atlaryny alyp bilersiniz.",
     startDeveloping: "Özbaşdyrýäni AI bilen başlaň",
@@ -138,8 +123,7 @@ const translations = {
     signInGoogle: "Google bilen giriň",
     signInGithub: "Github bilen giriň",
     terms: "Şertler",
-    privacy: " Gizlinlik Siyasaty",
-    // EmailAuth
+    privacy: "Gizlinlik Siyasaty",
     loginAccount: "Hasabyňyza giriň",
     createAccount: "Täze hasap dörediň",
     email: "Email",
@@ -150,20 +134,16 @@ const translations = {
     noAccount: "Hasabyňyz ýokmu? ",
     haveAccount: "Hasabyňyz bar? ",
     goBack: "Yza",
-    // HomeScreen / Header
     assistant: "Jemgyýetçilik",
     getPro: "Pro Al",
-    // Sidebar
     diveHistory: "Siziň taryhyňyza glyň",
     searchHistory: "Siziň söhbet taryhyňyzy gözläň!?",
     newChat: "+ Täze Söhbet",
     guest: "Mynagöç",
-    // Chat
     howHelp: "Men size nähili kömek edip bilerin?",
     quantum: "Mäni kwant fizikasyny düşündiriň.",
     gamePython: "Python-da simple oýun dörediň.",
     quote: "Mäni bir sitata ýazyň",
-    // Settings
     settings: "Sazlamalar",
     language: "Dil",
     english: "Iňlisçe",
@@ -180,7 +160,6 @@ const translations = {
     sureLogout: "Çykmagyňyza ynamlymy?",
     languageChanged:
       "Dil üýtgärildi! Üýtgeşlikleri howpsuz ulanmak üçin programmany täzeden işledip bilersiňiz.",
-    // Toasts / Common
     comingSoon: "Çalt!",
     emptyMessage: "Meseläni ýazyň.",
     loginSuccess: "Giriş Üste Geçdi",

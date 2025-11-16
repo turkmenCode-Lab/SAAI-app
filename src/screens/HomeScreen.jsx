@@ -17,8 +17,12 @@ import {
   Easing,
   LayoutAnimation,
   UIManager,
+  Keyboard,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 import { useTheme } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
@@ -45,6 +49,7 @@ const HomeScreen = () => {
   const { accentColor } = useThemeStore();
   const { colors } = useTheme();
   const t = useTranslations();
+  const insets = useSafeAreaInsets();
 
   const accentColorValue = useMemo(
     () => colors[accentColor] || colors.primary || "#007AFF",
@@ -343,6 +348,34 @@ const HomeScreen = () => {
     }).start();
   }, [isNavOpen, rotation]);
 
+  const keyboardBehavior = Platform.OS === "ios" ? "padding" : "height";
+  const keyboardOffset = Platform.select({
+    ios: insets.bottom + 20,
+    android: 0,
+  });
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollToEnd({ animated: true });
+        }
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        // Optional: Adjust if needed
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener?.remove();
+      keyboardDidHideListener?.remove();
+    };
+  }, []);
+
   return (
     <SafeAreaView
       edges={["left", "right"]}
@@ -378,26 +411,30 @@ const HomeScreen = () => {
       />
 
       <KeyboardAvoidingView
-        style={{ flex: 1, paddingVertical: 25 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+        style={{ flex: 1 }}
+        behavior={keyboardBehavior}
+        keyboardVerticalOffset={keyboardOffset}
+        enabled
       >
-        <Chat
-          chats={chats}
-          currentChatId={currentChatId}
-          setChats={setChats}
-          colors={colors}
-          scrollRef={scrollRef}
-          isLoading={isLoading}
-          showToast={showToast}
-          onQuickPromptPress={handleQuickPromptPress}
-        />
+        <View style={{ flex: 1, paddingVertical: 10 }}>
+          <Chat
+            chats={chats}
+            currentChatId={currentChatId}
+            setChats={setChats}
+            colors={colors}
+            scrollRef={scrollRef}
+            isLoading={isLoading}
+            showToast={showToast}
+            onQuickPromptPress={handleQuickPromptPress}
+          />
+        </View>
 
         <View
           style={[
             styles.inputContainer,
             {
               paddingHorizontal: 15,
+              paddingBottom: Math.max(insets.bottom, 10),
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.1,

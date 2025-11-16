@@ -68,6 +68,7 @@ const AuthScreen = ({ navigation }) => {
           fontFamily: "InterMedium",
           color: colors.neutral,
           textAlign: "center",
+          padding: 5,
         }}
       >
         {t("smarterResponses")}
@@ -82,6 +83,7 @@ const AuthScreen = ({ navigation }) => {
         textStyle={{
           color: colors.text,
           fontWeight: "700",
+          fontSize: 20,
         }}
         cursorStyle={{
           color: colors.vitally,

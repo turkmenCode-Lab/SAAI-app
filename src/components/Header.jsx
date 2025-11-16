@@ -48,9 +48,7 @@ const Header = ({ isNavOpen, rotateInterpolate, onToggleNav }) => {
           </Animated.View>
         </TouchableOpacity>
 
-        <Text style={[styles.heading, { color: colors.text }]}>
-          {t("assistant")}
-        </Text>
+        <Text style={[styles.heading, { color: colors.text }]}>Sora</Text>
       </View>
 
       <View style={styles.rightSection}>

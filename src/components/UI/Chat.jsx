@@ -32,6 +32,67 @@ const getContrastColor = (bgColor) => {
 
 const DUMMY_RECOMMENDATIONS = ["quantum", "gamePython", "quote"];
 
+const promptIcons = {
+  quantum: "cpu",
+  gamePython: "code",
+  quote: "book",
+};
+
+const QuickPrompt = ({
+  text,
+  onPress,
+  colors,
+  accentColorValue,
+  icon,
+  index,
+}) => {
+  const scaleAnim = useRef(new Animated.Value(0.95)).current;
+
+  useEffect(() => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      tension: 10,
+      friction: 2,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.7}
+      style={[
+        styles.quickPrompt,
+        {
+          borderColor: colors.card,
+          transform: [{ scale: scaleAnim }],
+        },
+      ]}
+      onPress={onPress}
+      onPressIn={() => {
+        Animated.spring(scaleAnim, {
+          toValue: 0.95,
+          tension: 10,
+          friction: 2,
+          useNativeDriver: true,
+        }).start();
+      }}
+      onPressOut={() => {
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 10,
+          friction: 2,
+          useNativeDriver: true,
+        }).start();
+      }}
+    >
+      <Feather name={icon} size={16} color={accentColorValue} />
+      <Text style={[styles.quickPromptText, { color: colors.text }]}>
+        {text}
+      </Text>
+    </TouchableOpacity>
+  );
+};
+
 const TypingIndicator = ({ colors, accentColorValue }) => {
   const [dots, setDots] = useState([0, 0, 0]);
 
@@ -160,30 +221,22 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast, t }) => {
             <Markdown
               style={markdownStyles}
               rules={{
-                // --- THIS IS THE MODIFIED SECTION ---
                 code_block: (node, children, parent, styles) => {
-                  // 1. Select the correct syntax theme
                   const syntaxTheme = isDark ? atomOneDark : atomOneLight;
 
-                  // 2. Get code string and language
                   const codeString = String(node.content).replace(/\n$/, "");
                   const language = node.lang || "plaintext";
 
-                  // 3. This is the style for the <SyntaxHighlighter> component
-                  // It ensures it fits *inside* your container style
                   const highlighterCustomStyle = {
-                    backgroundColor: "transparent", // Use container's background
-                    padding: 0, // Container already has padding
+                    backgroundColor: "transparent",
+                    padding: 0,
                     margin: 0,
-                    fontFamily: "monospace", // Base font
+                    fontFamily: "monospace",
                     fontSize: 14,
                   };
 
                   return (
-                    // 1. Use the code_block style from your hook as the main container
-                    // This gives it the correct padding, background, border, etc.
                     <View key={node.key} style={markdownStyles.code_block}>
-                      // 2. The themed copy button, positioned absolutely
                       <TouchableOpacity
                         style={{
                           position: "absolute",
@@ -212,11 +265,10 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast, t }) => {
                       >
                         <Feather name="copy" size={16} color={colors.text} />
                       </TouchableOpacity>
-                      // 3. The language "fence" (e.g., "javascript")
                       {node.lang && (
                         <Text
                           style={[
-                            styles.fence, // Uses the local StyleSheet
+                            styles.fence,
                             {
                               color: colors.neutral,
                               backgroundColor: isDark
@@ -228,13 +280,12 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast, t }) => {
                           {node.lang}
                         </Text>
                       )}
-                      // 4. The Syntax Highlighter
                       <SyntaxHighlighter
                         style={syntaxTheme}
                         language={language}
                         customStyle={highlighterCustomStyle}
-                        CodeTag={() => null} // Prevent extra <Code> wrapper
-                        PreTag={() => null} // Prevent extra <Pre> wrapper
+                        CodeTag={() => null}
+                        PreTag={() => null}
                         highlighter={"prism"}
                       >
                         {codeString}
@@ -242,7 +293,6 @@ const MessageBubble = ({ item, colors, accentColorValue, showToast, t }) => {
                     </View>
                   );
                 },
-                // --- END OF MODIFIED SECTION ---
                 table_head: (node, children, parent, styles) => (
                   <View style={styles.tableHead}>{children}</View>
                 ),
@@ -330,20 +380,15 @@ const Chat = ({
           </Text>
           <View style={styles.quickPrompts}>
             {DUMMY_RECOMMENDATIONS.map((key, index) => (
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={[
-                  styles.quickPrompt,
-                  {
-                    backgroundColor: colors.primary,
-                    borderColor: accentColorValue,
-                  },
-                ]}
+              <QuickPrompt
                 key={key}
+                text={t(key)}
                 onPress={() => onQuickPromptPress?.(t(key))}
-              >
-                <Text style={{ color: colors.text }}>{t(key)}</Text>
-              </TouchableOpacity>
+                colors={colors}
+                accentColorValue={accentColorValue}
+                icon={promptIcons[key]}
+                index={index}
+              />
             ))}
           </View>
         </View>
@@ -437,15 +482,23 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   quickPrompt: {
-    borderWidth: 2,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    borderTopWidth: 2.15,
+    borderWidth: 1.15,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     borderRadius: 25,
-    minWidth: 120,
+    minWidth: 140,
     alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 8,
   },
-  // This style is not used by the new highlighter,
-  // but I'll leave it in case other code uses it.
+  quickPromptText: {
+    fontSize: 14,
+    fontWeight: "500",
+    fontFamily: "InterSemiBold",
+    textAlign: "center",
+  },
   codeBlockWrapper: {
     marginTop: 8,
   },
@@ -458,8 +511,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontFamily: "monospace",
   },
-  // This is no longer used for code blocks,
-  // as the highlighter component handles its own text styling.
   code_block: {
     fontSize: 13,
     lineHeight: 20,

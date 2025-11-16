@@ -41,7 +41,7 @@ export default function SettingsScreen() {
     setDarkMode,
     setAccentColor: setStoredAccentColor,
     getStoredSettings,
-    setLanguage: setStoredLanguage, // Assuming this exists in the store; add if not
+    setLanguage: setStoredLanguage,
   } = useThemeStore();
 
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -143,18 +143,7 @@ export default function SettingsScreen() {
   }, []);
 
   const renderCard = useCallback(
-    (children) => (
-      <View
-        style={[
-          styles.card,
-          {
-            backgroundColor: theme.colors.surface || theme.colors.card,
-          },
-        ]}
-      >
-        {children}
-      </View>
-    ),
+    (children) => <View style={[styles.card]}>{children}</View>,
     [theme.colors]
   );
 

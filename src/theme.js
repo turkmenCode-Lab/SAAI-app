@@ -19,6 +19,7 @@ export const lightTheme = {
     vs_code: "#569CD6",
     solarized_light: "#268BD2",
     solarized_dark: "#859900",
+    card: "#f8f8f8ff",
   },
   fonts: {
     regular: "InterRegular",
@@ -41,6 +42,10 @@ export const darkTheme = {
     neutral: "#f2f2f2",
     success: "#4BB543",
     error: "#FF3333",
+    vs_code: "#569CD6",
+    solarized_light: "#268BD2",
+    solarized_dark: "#859900",
+    card: "#131313",
   },
   fonts: {
     regular: "InterRegular",

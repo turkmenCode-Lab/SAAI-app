@@ -378,7 +378,7 @@ const HomeScreen = () => {
       />
 
       <KeyboardAvoidingView
-        style={{ flex: 1, paddingVertical: 15 }}
+        style={{ flex: 1, paddingVertical: 25 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
       >
@@ -407,24 +407,13 @@ const HomeScreen = () => {
           ]}
         >
           <View style={styles.content}>
-            <Prompt onSubmit={handleSubmit} input={input} setInput={setInput} />
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={[styles.submit, { backgroundColor: colors.primary }]}
-              onPress={() => handleSubmit(input)}
-              disabled={isLoading || !input.trim()}
-              accessibilityRole="button"
-              accessibilityLabel={
-                isLoading ? "Sending message..." : "Send message"
-              }
-              accessibilityState={{ disabled: isLoading || !input.trim() }}
-            >
-              {isLoading ? (
-                <ActivityIndicator size="small" color={colors.background} />
-              ) : (
-                <Feather name="arrow-up" size={28} color={accentColorValue} />
-              )}
-            </TouchableOpacity>
+            <Prompt
+              onSubmit={handleSubmit}
+              input={input}
+              setInput={setInput}
+              isLoading={isLoading}
+              accentColorValue={accentColorValue}
+            />
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -440,7 +429,7 @@ const HomeScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  inputContainer: { paddingVertical: 10 },
+  inputContainer: {},
   content: {
     flexDirection: "row",
     alignItems: "center",

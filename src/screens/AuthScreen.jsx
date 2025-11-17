@@ -103,7 +103,6 @@ const AuthScreen = ({ navigation }) => {
 
         <View style={styles.spacer} />
 
-        {/* Action Buttons Section */}
         <View style={styles.actionsContainer}>
           <TouchableOpacity
             onPress={() => navigation.navigate("EmailAuth")}

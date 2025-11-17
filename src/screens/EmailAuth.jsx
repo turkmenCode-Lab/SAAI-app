@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useRef,
-  useMemo,
-  useEffect,
-  useCallback,
-} from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   View,
@@ -13,32 +7,17 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Animated,
-  Dimensions,
-  Easing,
-  LayoutAnimation,
-  UIManager,
-  Alert,
   Text,
   TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Feather from "@expo/vector-icons/Feather";
 import { useTheme } from "@react-navigation/native";
-import { useNavigation } from "@react-navigation/native";
 import { useAuthStore } from "../../store/authStore";
 import Toast from "../components/UI/Toast";
 import { useTranslations } from "../utils/translations";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useAppTheme } from "../../src/theme";
-
-if (
-  Platform.OS === "android" &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 const EmailAuth = ({ navigation }) => {
   const { colors } = useTheme();
@@ -58,9 +37,7 @@ const EmailAuth = ({ navigation }) => {
     status: "success",
   });
 
-  const shakeEmail = useRef(new Animated.Value(0)).current;
-  const shakePassword = useRef(new Animated.Value(0)).current;
-  const shakeRePassword = useRef(new Animated.Value(0)).current;
+  const shakeAnim = useRef(new Animated.Value(0)).current;
 
   Text.defaultProps = Text.defaultProps || {};
   Text.defaultProps.style = [
@@ -79,6 +56,7 @@ const EmailAuth = ({ navigation }) => {
   useEffect(() => {
     if (authStore.error) {
       showToast(authStore.error, "error");
+      shake();
       useAuthStore.setState({ error: null });
     }
   }, [authStore.error, showToast]);
@@ -86,46 +64,50 @@ const EmailAuth = ({ navigation }) => {
   const validateEmail = useCallback((email) => /\S+@\S+\.\S+/.test(email), []);
   const validatePassword = useCallback((pass) => pass.length >= 6, []);
 
-  const shake = useCallback((animatedValue) => {
-    animatedValue.setValue(0);
+  const shake = useCallback(() => {
+    shakeAnim.setValue(0);
     Animated.sequence([
-      Animated.timing(animatedValue, {
+      Animated.timing(shakeAnim, {
         toValue: 10,
         duration: 50,
-        useNativeDriver: false,
+        useNativeDriver: true,
       }),
-      Animated.timing(animatedValue, {
+      Animated.timing(shakeAnim, {
         toValue: -10,
         duration: 50,
-        useNativeDriver: false,
+        useNativeDriver: true,
       }),
-      Animated.timing(animatedValue, {
+      Animated.timing(shakeAnim, {
         toValue: 6,
         duration: 50,
-        useNativeDriver: false,
+        useNativeDriver: true,
       }),
-      Animated.timing(animatedValue, {
+      Animated.timing(shakeAnim, {
         toValue: -6,
         duration: 50,
-        useNativeDriver: false,
+        useNativeDriver: true,
       }),
-      Animated.timing(animatedValue, {
+      Animated.timing(shakeAnim, {
         toValue: 0,
         duration: 50,
-        useNativeDriver: false,
+        useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+  }, [shakeAnim]);
 
   const handleSubmit = useCallback(async () => {
-    if (!validateEmail(email))
-      return shake(shakeEmail) && showToast(t("invalidEmail"), "error");
-    if (!validatePassword(password))
-      return shake(shakePassword) && showToast(t("invalidPassword"), "error");
-    if (!isLogin && password !== rePassword)
-      return (
-        shake(shakeRePassword) && showToast(t("passwordsMismatch"), "error")
-      );
+    if (!validateEmail(email)) {
+      shake();
+      return showToast(t("invalidEmail"), "error");
+    }
+    if (!validatePassword(password)) {
+      shake();
+      return showToast(t("invalidPassword"), "error");
+    }
+    if (!isLogin && password !== rePassword) {
+      shake();
+      return showToast(t("passwordsMismatch"), "error");
+    }
 
     try {
       const result = isLogin
@@ -136,7 +118,7 @@ const EmailAuth = ({ navigation }) => {
         showToast(isLogin ? t("loginSuccess") : t("signupSuccess"), "success");
         setTimeout(() => {
           navigation?.navigate("Home");
-        }, 2000);
+        }, 1500);
       }
     } catch (err) {
       const errorMessage =
@@ -144,6 +126,7 @@ const EmailAuth = ({ navigation }) => {
           ? t("userNotFound")
           : err.message || "An unexpected error occurred";
       showToast(errorMessage, "error");
+      shake();
     }
   }, [
     email,
@@ -154,13 +137,12 @@ const EmailAuth = ({ navigation }) => {
     navigation,
     showToast,
     shake,
-    shakeEmail,
-    shakePassword,
-    shakeRePassword,
     validateEmail,
     validatePassword,
     t,
   ]);
+
+  const isFormValid = email && password && (isLogin || password === rePassword);
 
   return (
     <SafeAreaView
@@ -171,159 +153,202 @@ const EmailAuth = ({ navigation }) => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.inner}
       >
-        <Text style={[styles.header, { color: colors.text }]}>
-          {isLogin ? t("loginAccount") : t("createAccount")}
-        </Text>
+        {/* Header */}
+        <View style={styles.headerSection}>
+          <TouchableOpacity
+            onPress={() => navigation?.goBack()}
+            style={styles.backButton}
+            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+          >
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
+          </TouchableOpacity>
 
-        <View style={styles.form}>
-          <Animated.View style={{ transform: [{ translateX: shakeEmail }] }}>
+          <View style={styles.titleContainer}>
+            <Text style={[styles.title, { color: colors.text }]}>
+              {isLogin ? t("login") : t("signUp")}
+            </Text>
+            <Text style={[styles.subtitle, { color: colors.neutral }]}>
+              {isLogin ? "Welcome back" : "Create your account"}
+            </Text>
+          </View>
+        </View>
+
+        {/* Form */}
+        <Animated.View
+          style={[styles.form, { transform: [{ translateX: shakeAnim }] }]}
+        >
+          {/* Email Input */}
+          <View style={styles.inputWrapper}>
+            <Text style={[styles.label, { color: colors.neutral }]}>Email</Text>
             <View
-              style={[styles.inputContainer, { borderColor: colors.primary }]}
+              style={[
+                styles.inputContainer,
+                {
+                  backgroundColor: colors.primary,
+                  borderColor: colors.border || colors.primary,
+                },
+              ]}
             >
               <MaterialIcons
                 name="alternate-email"
-                size={22}
+                size={20}
                 color={colors.neutral}
+                style={styles.icon}
               />
               <TextInput
-                placeholder={t("email")}
-                placeholderTextColor={colors.neutral}
+                placeholder="you@example.com"
+                placeholderTextColor={colors.neutral + "80"}
                 value={email}
                 onChangeText={setEmail}
-                style={[
-                  styles.input,
-                  { backgroundColor: colors.background, color: colors.text },
-                ]}
+                style={[styles.input, { color: colors.text }]}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
               />
             </View>
-          </Animated.View>
+          </View>
 
-          <Animated.View style={{ transform: [{ translateX: shakePassword }] }}>
+          {/* Password Input */}
+          <View style={styles.inputWrapper}>
+            <Text style={[styles.label, { color: colors.neutral }]}>
+              Password
+            </Text>
             <View
-              style={[styles.inputContainer, { borderColor: colors.primary }]}
+              style={[
+                styles.inputContainer,
+                {
+                  backgroundColor: colors.primary,
+                  borderColor: colors.border || colors.primary,
+                },
+              ]}
             >
-              <AntDesign name="lock" size={22} color={colors.neutral} />
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color={colors.neutral}
+                style={styles.icon}
+              />
               <TextInput
-                placeholder={t("password")}
-                placeholderTextColor={colors.neutral}
+                placeholder="••••••••"
+                placeholderTextColor={colors.neutral + "80"}
                 value={password}
                 onChangeText={setPassword}
-                style={[
-                  styles.input,
-                  { backgroundColor: colors.background, color: colors.text },
-                ]}
+                style={[styles.input, { color: colors.text }]}
                 secureTextEntry={!showPassword}
                 autoCorrect={false}
                 autoCapitalize="none"
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
-                style={styles.eyeStyle}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 <Ionicons
-                  name={showPassword ? "eye-off" : "eye"}
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
                   size={20}
                   color={colors.neutral}
                 />
               </TouchableOpacity>
             </View>
-          </Animated.View>
+          </View>
 
+          {/* Confirm Password (Sign Up Only) */}
           {!isLogin && (
-            <Animated.View
-              style={{ transform: [{ translateX: shakeRePassword }] }}
-            >
+            <View style={styles.inputWrapper}>
+              <Text style={[styles.label, { color: colors.neutral }]}>
+                Confirm Password
+              </Text>
               <View
-                style={[styles.inputContainer, { borderColor: colors.primary }]}
+                style={[
+                  styles.inputContainer,
+                  {
+                    backgroundColor: colors.primary,
+                    borderColor: colors.border || colors.primary,
+                  },
+                ]}
               >
-                <AntDesign name="lock" size={22} color={colors.neutral} />
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color={colors.neutral}
+                  style={styles.icon}
+                />
                 <TextInput
-                  placeholder={t("rePassword")}
-                  placeholderTextColor={colors.neutral}
+                  placeholder="••••••••"
+                  placeholderTextColor={colors.neutral + "80"}
                   value={rePassword}
                   onChangeText={setRePassword}
-                  style={[
-                    styles.input,
-                    { backgroundColor: colors.background, color: colors.text },
-                  ]}
+                  style={[styles.input, { color: colors.text }]}
                   secureTextEntry={!showRePassword}
                   autoCorrect={false}
                   autoCapitalize="none"
                 />
                 <TouchableOpacity
                   onPress={() => setShowRePassword(!showRePassword)}
-                  style={styles.eyeStyle}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   <Ionicons
-                    name={showRePassword ? "eye-off" : "eye"}
+                    name={showRePassword ? "eye-off-outline" : "eye-outline"}
                     size={20}
                     color={colors.neutral}
                   />
                 </TouchableOpacity>
               </View>
-            </Animated.View>
+            </View>
           )}
 
+          {/* Submit Button */}
           <TouchableOpacity
-            activeOpacity={0.75}
+            activeOpacity={0.85}
             style={[
-              styles.button,
+              styles.submitButton,
               {
-                backgroundColor:
-                  email && password && (isLogin || password === rePassword)
-                    ? colors.primary
-                    : colors.primary + "80",
+                backgroundColor: isFormValid ? colors.text : colors.primary,
+                opacity: isFormValid ? 1 : 0.5,
               },
             ]}
             onPress={handleSubmit}
-            disabled={
-              authStore.loading ||
-              !email ||
-              !password ||
-              (!isLogin && password !== rePassword)
-            }
+            disabled={authStore.loading || !isFormValid}
           >
             {authStore.loading ? (
-              <ActivityIndicator color={colors.text} />
+              <ActivityIndicator color={colors.background} />
             ) : (
-              <Text style={[styles.buttonText, { color: colors.text }]}>
+              <Text
+                style={[
+                  styles.submitButtonText,
+                  {
+                    color: isFormValid ? colors.background : colors.text,
+                    fontFamily: theme.fonts.semibold,
+                  },
+                ]}
+              >
                 {isLogin ? t("login") : t("signUp")}
               </Text>
             )}
           </TouchableOpacity>
+        </Animated.View>
 
+        {/* Footer */}
+        <View style={styles.footer}>
           <TouchableOpacity
-            style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
-            onPress={() => navigation?.goBack()}
+            onPress={() => setIsLogin(!isLogin)}
+            activeOpacity={0.7}
           >
-            <Ionicons
-              name="arrow-back-outline"
-              size={16}
-              color={colors.neutral}
-            />
-            <Text style={{ color: colors.neutral, fontSize: 16 }}>
-              {t("goBack")}
+            <Text style={[styles.switchText, { color: colors.neutral }]}>
+              {isLogin ? t("noAccount") : t("haveAccount")}{" "}
+              <Text
+                style={{
+                  color: colors.text,
+                  fontFamily: theme.fonts.semibold,
+                  fontWeight: "600",
+                }}
+              >
+                {isLogin ? t("signUp") : t("login")}
+              </Text>
             </Text>
           </TouchableOpacity>
         </View>
-
-        <TouchableOpacity
-          onPress={() => setIsLogin(!isLogin)}
-          style={{ marginTop: 40 }}
-        >
-          <Text style={{ color: colors.neutral }}>
-            {isLogin ? `${t("noAccount")}` : `${t("haveAccount")}`}
-            <Text style={{ fontWeight: "700", color: colors.text }}>
-              {isLogin ? t("signUp") : t("login")}
-            </Text>
-          </Text>
-        </TouchableOpacity>
       </KeyboardAvoidingView>
+
       <Toast
         message={toast.message}
         visible={toast.visible}
@@ -335,31 +360,80 @@ const EmailAuth = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  eyeStyle: { position: "absolute", right: 21.5 },
-  inner: { flex: 1, alignItems: "center", justifyContent: "center", gap: 30 },
-  header: { fontSize: 32, fontWeight: "700", textAlign: "center" },
-  form: { width: "80%", alignItems: "center", gap: 20 },
+  container: {
+    flex: 1,
+  },
+  inner: {
+    flex: 1,
+    paddingHorizontal: 24,
+  },
+  headerSection: {
+    paddingTop: 20,
+    paddingBottom: 40,
+  },
+  backButton: {
+    alignSelf: "flex-start",
+    marginBottom: 24,
+  },
+  titleContainer: {
+    gap: 6,
+  },
+  title: {
+    fontSize: 34,
+    fontWeight: "700",
+    letterSpacing: -0.5,
+  },
+  subtitle: {
+    fontSize: 16,
+    opacity: 0.8,
+  },
+  form: {
+    flex: 1,
+    gap: 24,
+  },
+  inputWrapper: {
+    gap: 8,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginLeft: 4,
+  },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1.2,
-    borderRadius: 100,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    gap: 15,
-    width: "100%",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 12,
+    borderWidth: 1,
   },
-  input: { flex: 1, fontSize: 16, minWidth: 250, outlineWidth: 0 },
-  button: {
-    marginTop: 10,
-    borderRadius: 100,
+  icon: {
+    opacity: 0.6,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    outlineWidth: 0,
+  },
+  submitButton: {
+    marginTop: 8,
+    borderRadius: 12,
     paddingVertical: 16,
     alignItems: "center",
     justifyContent: "center",
-    width: "100%",
   },
-  buttonText: { fontSize: 16, fontWeight: "600" },
+  submitButtonText: {
+    fontSize: 17,
+    fontWeight: "600",
+  },
+  footer: {
+    paddingVertical: 32,
+    alignItems: "center",
+  },
+  switchText: {
+    fontSize: 15,
+  },
 });
 
 export default EmailAuth;

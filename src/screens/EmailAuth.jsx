@@ -153,7 +153,6 @@ const EmailAuth = ({ navigation }) => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.inner}
       >
-        {/* Header */}
         <View style={styles.headerSection}>
           <TouchableOpacity
             onPress={() => navigation?.goBack()}
@@ -173,11 +172,9 @@ const EmailAuth = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Form */}
         <Animated.View
           style={[styles.form, { transform: [{ translateX: shakeAnim }] }]}
         >
-          {/* Email Input */}
           <View style={styles.inputWrapper}>
             <Text style={[styles.label, { color: colors.neutral }]}>Email</Text>
             <View
@@ -208,7 +205,6 @@ const EmailAuth = ({ navigation }) => {
             </View>
           </View>
 
-          {/* Password Input */}
           <View style={styles.inputWrapper}>
             <Text style={[styles.label, { color: colors.neutral }]}>
               Password
@@ -251,7 +247,6 @@ const EmailAuth = ({ navigation }) => {
             </View>
           </View>
 
-          {/* Confirm Password (Sign Up Only) */}
           {!isLogin && (
             <View style={styles.inputWrapper}>
               <Text style={[styles.label, { color: colors.neutral }]}>
@@ -296,7 +291,6 @@ const EmailAuth = ({ navigation }) => {
             </View>
           )}
 
-          {/* Submit Button */}
           <TouchableOpacity
             activeOpacity={0.85}
             style={[

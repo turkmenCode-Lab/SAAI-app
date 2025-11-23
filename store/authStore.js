@@ -2,7 +2,7 @@ import { create } from "zustand";
 import axios from "axios";
 import { EXPO_API_URI } from "../config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 export const useAuthStore = create(
   persist(
@@ -65,8 +65,14 @@ export const useAuthStore = create(
     }),
     {
       name: "auth-storage",
-      getStorage: () => AsyncStorage,
+
+      storage: createJSONStorage(() => AsyncStorage),
+
       partialize: (state) => ({ user: state.user, token: state.token }),
+
+      onStorageError: (error) => {
+        console.error("Zustand persist error:", error);
+      },
     }
   )
 );

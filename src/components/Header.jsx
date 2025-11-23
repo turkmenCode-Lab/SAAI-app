@@ -11,13 +11,12 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useTheme, useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTranslations } from "../utils/translations";
+import { BlurView } from "expo-blur";
 
 const Header = ({ isNavOpen, rotateInterpolate, onToggleNav }) => {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const t = useTranslations();
 
   const handleToggleNav = useCallback(() => {
     onToggleNav();
@@ -27,83 +26,123 @@ const Header = ({ isNavOpen, rotateInterpolate, onToggleNav }) => {
     navigation.navigate("Settings");
   }, [navigation]);
 
+  const HeaderContent = () => (
+    <>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={[styles.iconButton, isNavOpen && styles.bar]}
+        onPress={handleToggleNav}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <Animated.View style={{ transform: [{ rotate: rotateInterpolate }] }}>
+          <FontAwesome6 name="bars-staggered" size={24} color={colors.text} />
+        </Animated.View>
+      </TouchableOpacity>
+
+      <Text style={[styles.heading, { color: colors.text }]}>Sora</Text>
+
+      <TouchableOpacity
+        onPress={handleSettingsPress}
+        activeOpacity={0.7}
+        style={styles.iconButton}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <MaterialCommunityIcons
+          name="cog-outline"
+          size={24}
+          color={colors.text}
+        />
+      </TouchableOpacity>
+    </>
+  );
+
   return (
     <View
       style={[
-        styles.header,
+        styles.headerContainer,
         {
-          backgroundColor: colors.background,
           paddingTop: insets.top + (Platform.OS === "android" ? 5 : 0),
         },
       ]}
     >
-      <View style={styles.leftSection}>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={isNavOpen && styles.bar}
-          onPress={handleToggleNav}
+      {Platform.OS === "ios" ? (
+        <BlurView
+          intensity={80}
+          tint={colors.background === "#000000" ? "dark" : "light"}
+          style={[
+            styles.header,
+            {
+              borderColor: colors.text + "20",
+            },
+          ]}
+          experimentalBlurMethod="dimezisBlurView"
         >
-          <Animated.View style={{ transform: [{ rotate: rotateInterpolate }] }}>
-            <FontAwesome6 name="bars-staggered" size={28} color={colors.text} />
-          </Animated.View>
-        </TouchableOpacity>
-
-        <Text style={[styles.heading, { color: colors.text }]}>Sora</Text>
-      </View>
-
-      <View style={styles.rightSection}>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={[styles.getPro, { backgroundColor: colors.secondary }]}
+          <HeaderContent />
+        </BlurView>
+      ) : (
+        <View
+          style={[
+            styles.header,
+            styles.androidGlass,
+            {
+              backgroundColor: colors.background + "CC",
+              borderColor: colors.text + "20",
+            },
+          ]}
         >
-          <MaterialCommunityIcons
-            name="star-four-points-outline"
-            size={20}
-            color={colors.principally}
-          />
-          <Text style={[styles.getProText, { color: "#fff" }]}>
-            {t("getPro")}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={handleSettingsPress} activeOpacity={0.7}>
-          <MaterialCommunityIcons
-            name="dots-vertical"
-            style={{ marginRight: -15 }}
-            size={28}
-            color={colors.text}
-          />
-        </TouchableOpacity>
-      </View>
+          <HeaderContent />
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  headerContainer: {
+    position: "absolute",
+    top: 0,
+    left: 15,
+    right: 15,
+    zIndex: 1000,
+  },
   header: {
-    marginHorizontal: 15,
     paddingVertical: 10,
+    paddingHorizontal: 15,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    borderRadius: 100,
+    borderWidth: 1,
+    overflow: "hidden",
   },
-  leftSection: { flexDirection: "row", alignItems: "center", gap: 5 },
-  rightSection: { flexDirection: "row", alignItems: "center", gap: 5 },
+  androidGlass: {
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  iconButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 22,
+    zIndex: 10,
+  },
   heading: {
     fontSize: 18,
     fontWeight: "600",
     letterSpacing: 0.5,
-    marginLeft: 8,
+    position: "absolute",
+    left: 0,
+    right: 0,
+    textAlign: "center",
   },
   bar: { opacity: 0.7 },
-  getPro: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-  },
-  getProText: { fontWeight: "600", fontSize: 14, marginLeft: 6 },
 });
 
 export default memo(Header);

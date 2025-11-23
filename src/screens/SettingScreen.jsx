@@ -110,9 +110,8 @@ export default function SettingsScreen() {
       const oldLanguage = language;
       setLanguage(value);
       if (setStoredLanguage) {
-        setStoredLanguage(value); // Update store if available
+        setStoredLanguage(value);
       }
-      // Show toast with recommendation
       setToastMessage(t("languageChanged"));
       setToastStatus("success");
       setToastVisible(true);
@@ -221,7 +220,6 @@ export default function SettingsScreen() {
         >
           <Text
             style={{
-              color: theme.colors.secondary,
               fontWeight: "500",
               fontSize: 20,
             }}
@@ -229,7 +227,7 @@ export default function SettingsScreen() {
             <Ionicons
               name="arrow-back-outline"
               size={28}
-              color={theme.colors.secondary}
+              color={theme.colors.text}
             />
           </Text>
         </TouchableOpacity>

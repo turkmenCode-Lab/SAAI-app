@@ -21,6 +21,7 @@ import {
 } from "react-native-gesture-handler";
 import { useThemeStore } from "../../store/themeStore";
 import { useTranslations } from "../utils/translations";
+import { BlurView } from "expo-blur";
 
 const Sidebar = ({
   chats,
@@ -119,7 +120,7 @@ const Sidebar = ({
         }
       };
 
-      return (
+      const ChatItemContent = () => (
         <Animated.View
           style={[
             styles.chatItemContainer,
@@ -133,10 +134,7 @@ const Sidebar = ({
           <TouchableOpacity
             style={[
               styles.chatItem,
-              currentChatId === itemId && {
-                // FIX 2: Corrected string concatenation for background color
-                backgroundColor: colors.primary + "0F",
-              },
+              currentChatId === itemId && styles.activeChatItem,
             ]}
             onPress={handleLoadChat}
             activeOpacity={0.7}
@@ -152,19 +150,47 @@ const Sidebar = ({
                 {getLastMessageDate()}
               </Text>
             </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.deleteBtn}
-            onPress={handleDelete}
-            activeOpacity={0.7}
-          >
-            <MaterialCommunityIcons
-              name="delete"
-              size={20}
-              color={colors.error}
-            />
+            <TouchableOpacity
+              style={styles.deleteBtn}
+              onPress={handleDelete}
+              activeOpacity={0.7}
+            >
+              <MaterialCommunityIcons
+                name="delete-outline"
+                size={20}
+                color={colors.error}
+              />
+            </TouchableOpacity>
           </TouchableOpacity>
         </Animated.View>
+      );
+
+      return Platform.OS === "ios" && currentChatId === itemId ? (
+        <BlurView
+          intensity={20}
+          tint={colors.background === "#000000" ? "dark" : "light"}
+          style={[
+            styles.glassContainer,
+            {
+              borderColor: colors.primary + "30",
+            },
+          ]}
+        >
+          <ChatItemContent />
+        </BlurView>
+      ) : (
+        <View
+          style={[
+            currentChatId === itemId && styles.glassContainer,
+            currentChatId === itemId &&
+              Platform.OS === "android" && {
+                backgroundColor: colors.primary + "15",
+                borderColor: colors.primary + "30",
+              },
+          ]}
+        >
+          <ChatItemContent />
+        </View>
       );
     },
     [
@@ -249,59 +275,111 @@ const Sidebar = ({
             backgroundColor: colors.background,
             transform: [{ translateX: slideValue }],
             zIndex: 1000,
-            paddingTop: Platform.OS === "android" ? 40 : 60,
+            paddingTop: Platform.OS === "android" ? 50 : 70,
             paddingHorizontal: 15,
             paddingBottom: 15,
           },
         ]}
       >
-        <Text
-          style={[
-            styles.sidebarTitle,
-            { color: colors.text, textAlign: "center", marginVertical: 10 },
-          ]}
-        >
-          {t("diveHistory")}
-        </Text>
-        <View
-          style={[styles.sidebarHeader, { borderBottomColor: colors.border }]}
-        >
-          <TextInput
+        <View style={styles.headerSection}>
+          <View style={styles.titleRow}>
+            <Text style={[styles.sidebarTitle, { color: colors.text }]}>
+              {t("diveHistory")}
+            </Text>
+            <TouchableOpacity
+              onPress={onClose}
+              activeOpacity={0.7}
+              style={styles.closeBtn}
+            >
+              <MaterialCommunityIcons
+                name="close"
+                size={24}
+                color={colors.neutral}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Glass Search Bar */}
+          {Platform.OS === "ios" ? (
+            <BlurView
+              intensity={80}
+              tint={colors.background === "#000000" ? "dark" : "light"}
+              style={[
+                styles.searchContainer,
+                {
+                  borderColor: colors.text + "15",
+                },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="magnify"
+                size={20}
+                color={colors.neutral}
+              />
+              <TextInput
+                style={[styles.searchInput, { color: colors.text }]}
+                autoCorrect={false}
+                placeholder={t("searchHistory")}
+                placeholderTextColor={colors.neutral}
+                autoCapitalize="none"
+                value={searchQ}
+                onChangeText={setSearchQ}
+                onSubmitEditing={handleSearchSubmit}
+                returnKeyType="search"
+              />
+            </BlurView>
+          ) : (
+            <View
+              style={[
+                styles.searchContainer,
+                styles.androidGlass,
+                {
+                  backgroundColor: colors.background + "CC",
+                  borderColor: colors.text + "15",
+                },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="magnify"
+                size={20}
+                color={colors.neutral}
+              />
+              <TextInput
+                style={[styles.searchInput, { color: colors.text }]}
+                autoCorrect={false}
+                placeholder={t("searchHistory")}
+                placeholderTextColor={colors.neutral}
+                autoCapitalize="none"
+                value={searchQ}
+                onChangeText={setSearchQ}
+                onSubmitEditing={handleSearchSubmit}
+                returnKeyType="search"
+              />
+            </View>
+          )}
+
+          {/* New Chat Button */}
+          <TouchableOpacity
             style={[
-              styles.searchInput,
-              {
-                color: colors.text,
-                borderColor: colors.border,
-                backgroundColor: colors.primary,
-              },
+              styles.newChatBtn,
+              { backgroundColor: colors.primary + "20" },
             ]}
-            autoCorrect={false}
-            placeholder={t("searchHistory")}
-            placeholderTextColor={colors.neutral}
-            autoCapitalize="none"
-            value={searchQ}
-            onChangeText={setSearchQ}
-            onSubmitEditing={handleSearchSubmit}
-            returnKeyType="search"
-          />
-          <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
+            onPress={handleNewChat}
+            activeOpacity={0.7}
+          >
             <MaterialCommunityIcons
-              name="backburger"
-              size={30}
-              color={colors.neutral}
+              name="plus-circle-outline"
+              size={20}
+              color={colors.primary}
             />
+            <Text style={[styles.newChatText, { color: colors.text }]}>
+              {t("newChat")}
+            </Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={[styles.newChatBtn, { backgroundColor: colors.text + "0A" }]}
-          onPress={handleNewChat}
-          activeOpacity={0.7}
-        >
-          <Text style={[styles.newChatText, { color: colors.text }]}>
-            {t("newChat")}
-          </Text>
-        </TouchableOpacity>
-        <FlatList // This is now the FlatList from react-native-gesture-handler
+
+        {/* Chat List */}
+        <FlatList
           data={filteredChats}
           renderItem={renderChatItem}
           keyExtractor={keyExtractor}
@@ -312,48 +390,104 @@ const Sidebar = ({
           maxToRenderPerBatch={5}
           windowSize={10}
           extraData={chats}
+          showsVerticalScrollIndicator={false}
         />
-        <View style={[styles.sidebarUser, { borderTopColor: colors.border }]}>
-          <View
-            style={{
-              backgroundColor: colors.primary,
-              borderRadius: 100,
-              width: 44,
-              height: 44,
-              alignItems: "center",
-              justifyContent: "center",
-              borderWidth: 3,
-              borderColor: colors.accent,
-            }}
-          >
-            <Text
-              style={{
-                color: getContrastColor(colors.primary),
-                fontFamily: "InterSemiBold",
-                fontSize: 24,
-              }}
+
+        {/* User Profile Section */}
+        <View style={styles.userSection}>
+          {Platform.OS === "ios" ? (
+            <BlurView
+              intensity={80}
+              tint={colors.background === "#000000" ? "dark" : "light"}
+              style={[
+                styles.userContainer,
+                {
+                  borderColor: colors.text + "15",
+                },
+              ]}
             >
-              {user?.email ? user.email[0].toUpperCase() : "?"}
-            </Text>
-          </View>
-          <Text
-            style={{
-              color: colors.text,
-              fontFamily: "InterMedium",
-              fontWeight: "500",
-              fontSize: 18,
-              flex: 1,
-            }}
-          >
-            {user?.email ?? t("guest")}
-          </Text>
-          <TouchableOpacity
-            style={{ marginLeft: "auto" }}
-            onPress={handleLogout}
-            activeOpacity={0.7}
-          >
-            <Entypo name="log-out" size={24} color={colors.neutral} />
-          </TouchableOpacity>
+              <View style={styles.userContent}>
+                <View
+                  style={[
+                    styles.avatar,
+                    {
+                      backgroundColor: colors.primary + "30",
+                      borderColor: colors.primary + "50",
+                    },
+                  ]}
+                >
+                  <Text style={[styles.avatarText, { color: colors.primary }]}>
+                    {user?.email ? user.email[0].toUpperCase() : "?"}
+                  </Text>
+                </View>
+                <View style={styles.userInfo}>
+                  <Text
+                    style={[styles.userEmail, { color: colors.text }]}
+                    numberOfLines={1}
+                  >
+                    {user?.email ?? t("guest")}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={handleLogout}
+                  activeOpacity={0.7}
+                  style={styles.logoutBtn}
+                >
+                  <MaterialCommunityIcons
+                    name="logout"
+                    size={20}
+                    color={colors.error}
+                  />
+                </TouchableOpacity>
+              </View>
+            </BlurView>
+          ) : (
+            <View
+              style={[
+                styles.userContainer,
+                styles.androidGlass,
+                {
+                  backgroundColor: colors.background + "CC",
+                  borderColor: colors.text + "15",
+                },
+              ]}
+            >
+              <View style={styles.userContent}>
+                <View
+                  style={[
+                    styles.avatar,
+                    {
+                      backgroundColor: colors.primary + "30",
+                      borderColor: colors.primary + "50",
+                    },
+                  ]}
+                >
+                  <Text style={[styles.avatarText, { color: colors.primary }]}>
+                    {user?.email ? user.email[0].toUpperCase() : "?"}
+                  </Text>
+                </View>
+                <View style={styles.userInfo}>
+                  <Text
+                    style={[styles.userEmail, { color: colors.text }]}
+                    numberOfLines={1}
+                  >
+                    {user?.email ?? t("guest")}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={handleLogout}
+                  activeOpacity={0.7}
+                  style={styles.logoutBtn}
+                >
+                  <MaterialCommunityIcons
+                    name="logout"
+                    size={20}
+                    color={colors.error}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
         </View>
       </Animated.View>
     </PanGestureHandler>
@@ -369,94 +503,158 @@ const styles = StyleSheet.create({
     right: 0,
     width: "100%",
     height: "100%",
-    padding: 15,
     zIndex: 1000,
-    overflow: "hidden",
   },
-  sidebarHeader: {
+  headerSection: {
+    marginBottom: 15,
+  },
+  titleRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingBottom: 15,
-    borderBottomWidth: 1,
+    justifyContent: "flex-start",
     marginBottom: 15,
-    gap: 5,
-    outlineWidth: 0,
   },
   sidebarTitle: {
-    fontSize: 20,
-    fontWeight: "600",
+    fontSize: 22,
+    fontWeight: "700",
+    letterSpacing: -0.3,
+    flex: 1,
+    marginRight: 8,
   },
-  newChatBtn: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+  closeBtn: {
+    width: 36,
+    height: 36,
     alignItems: "center",
-    marginBottom: 10,
+    justifyContent: "center",
+    borderRadius: 18,
+    marginLeft: 8,
+    flexShrink: 0,
   },
-  newChatText: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  chatList: {
-    // flex: 1, // <-- I've commented this out to remove the gap!
-  },
-  chatListContent: {
-    paddingBottom: 0,
-  },
-  chatItemContainer: {
-    position: "relative",
-    marginBottom: 4,
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 100,
+    borderWidth: 1,
+    marginBottom: 12,
+    gap: 10,
     overflow: "hidden",
   },
-  chatItem: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-  },
-  chatContent: {
-    flex: 1,
-  },
-  chatTitle: {
-    fontSize: 16,
-    fontWeight: "500",
-    marginBottom: 2,
-  },
-  chatSubtitle: {
-    fontSize: 14,
-    opacity: 0.7,
-  },
-  deleteBtn: {
-    position: "absolute",
-    right: 8,
-    top: 12,
-    padding: 4,
-    borderRadius: 4,
-    zIndex: 1,
+  androidGlass: {
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   searchInput: {
     flex: 1,
-    borderRadius: 27.5,
-    padding: 10,
-    borderWidth: 1,
+    fontSize: 15,
+    outlineWidth: 0,
   },
-  sidebarUser: {
+  newChatBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    paddingVertical: 10,
-    paddingTop: 0,
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 100,
+    gap: 8,
+    marginBottom: 10,
+  },
+  newChatText: {
+    fontSize: 15,
+    fontWeight: "600",
+    letterSpacing: 0.2,
+  },
+  chatList: {
+    flex: 1,
+    marginBottom: 10,
+  },
+  chatListContent: {
+    paddingBottom: 10,
+  },
+  glassContainer: {
+    borderRadius: 16,
+    borderWidth: 1,
+    overflow: "hidden",
+    marginBottom: 6,
+  },
+  chatItemContainer: {
+    overflow: "hidden",
+  },
+  chatItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+  },
+  activeChatItem: {
+    backgroundColor: "transparent",
+  },
+  chatContent: {
+    flex: 1,
+    marginRight: 8,
+  },
+  chatTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    marginBottom: 4,
+    letterSpacing: 0.1,
+  },
+  chatSubtitle: {
+    fontSize: 13,
+    opacity: 0.6,
+  },
+  deleteBtn: {
+    padding: 8,
+    borderRadius: 8,
+  },
+  userSection: {
+    marginTop: 10,
+  },
+  userContainer: {
+    borderRadius: 100,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  userContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+  },
+  avatarText: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  userInfo: {
+    flex: 1,
+  },
+  userEmail: {
+    fontSize: 15,
+    fontWeight: "600",
+    letterSpacing: 0.1,
+  },
+  logoutBtn: {
+    padding: 8,
+    borderRadius: 8,
   },
 });
-
-const getContrastColor = (bgColor) => {
-  const hex = bgColor.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16) / 255;
-  const g = parseInt(hex.substring(2, 4), 16) / 255;
-  const b = parseInt(hex.substring(4, 6), 16) / 255;
-  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-  return luminance > 0.5 ? "#000000" : "#FFFFFF";
-};
 
 export default Sidebar;

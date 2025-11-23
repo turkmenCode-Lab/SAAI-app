@@ -48,7 +48,7 @@ const AuthScreen = ({ navigation }) => {
               },
             ]}
           >
-            Ready to start?
+            {t("welcomeLogin")}
           </Text>
 
           <TypingErase

@@ -8,7 +8,9 @@ import {
   KeyboardAvoidingView,
   Animated,
   Text,
+  ScrollView,
   TextInput,
+  Keyboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "@react-navigation/native";
@@ -31,6 +33,7 @@ const EmailAuth = ({ navigation }) => {
   const [rePassword, setRePassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showRePassword, setShowRePassword] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false); // ← ADD THIS
   const [toast, setToast] = useState({
     visible: false,
     message: "",
@@ -51,6 +54,22 @@ const EmailAuth = ({ navigation }) => {
 
   const hideToast = useCallback(() => {
     setToast((prev) => ({ ...prev, visible: false }));
+  }, []);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => setKeyboardVisible(true)
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => setKeyboardVisible(false)
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
   }, []);
 
   useEffect(() => {
@@ -150,107 +169,72 @@ const EmailAuth = ({ navigation }) => {
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.inner}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
-        <View style={styles.headerSection}>
-          <TouchableOpacity
-            onPress={() => navigation?.goBack()}
-            style={styles.backButton}
-            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-          >
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-
-          <View style={styles.titleContainer}>
-            <Text style={[styles.title, { color: colors.text }]}>
-              {isLogin ? t("login") : t("signUp")}
-            </Text>
-            <Text style={[styles.subtitle, { color: colors.neutral }]}>
-              {isLogin ? "Welcome back" : "Create your account"}
-            </Text>
-          </View>
-        </View>
-
-        <Animated.View
-          style={[styles.form, { transform: [{ translateX: shakeAnim }] }]}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <View style={styles.inputWrapper}>
-            <Text style={[styles.label, { color: colors.neutral }]}>Email</Text>
-            <View
-              style={[
-                styles.inputContainer,
-                {
-                  backgroundColor: colors.primary,
-                  borderColor: colors.border || colors.primary,
-                },
-              ]}
+          <View style={styles.headerSection}>
+            <TouchableOpacity
+              onPress={() => navigation?.goBack()}
+              style={styles.backButton}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
             >
-              <MaterialIcons
-                name="alternate-email"
-                size={20}
-                color={colors.neutral}
-                style={styles.icon}
-              />
-              <TextInput
-                placeholder="you@example.com"
-                placeholderTextColor={colors.neutral + "80"}
-                value={email}
-                onChangeText={setEmail}
-                style={[styles.input, { color: colors.text }]}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </TouchableOpacity>
+
+            <View style={styles.titleContainer}>
+              <Text style={[styles.title, { color: colors.text }]}>
+                {isLogin ? t("login") : t("signUp")}
+              </Text>
+              <Text style={[styles.subtitle, { color: colors.neutral }]}>
+                {isLogin ? "Welcome back" : "Create your account"}
+              </Text>
             </View>
           </View>
 
-          <View style={styles.inputWrapper}>
-            <Text style={[styles.label, { color: colors.neutral }]}>
-              Password
-            </Text>
-            <View
-              style={[
-                styles.inputContainer,
-                {
-                  backgroundColor: colors.primary,
-                  borderColor: colors.border || colors.primary,
-                },
-              ]}
-            >
-              <Ionicons
-                name="lock-closed-outline"
-                size={20}
-                color={colors.neutral}
-                style={styles.icon}
-              />
-              <TextInput
-                placeholder="••••••••"
-                placeholderTextColor={colors.neutral + "80"}
-                value={password}
-                onChangeText={setPassword}
-                style={[styles.input, { color: colors.text }]}
-                secureTextEntry={!showPassword}
-                autoCorrect={false}
-                autoCapitalize="none"
-              />
-              <TouchableOpacity
-                onPress={() => setShowPassword(!showPassword)}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Ionicons
-                  name={showPassword ? "eye-off-outline" : "eye-outline"}
-                  size={20}
-                  color={colors.neutral}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {!isLogin && (
+          <Animated.View
+            style={[styles.form, { transform: [{ translateX: shakeAnim }] }]}
+          >
             <View style={styles.inputWrapper}>
               <Text style={[styles.label, { color: colors.neutral }]}>
-                Confirm Password
+                Email
+              </Text>
+              <View
+                style={[
+                  styles.inputContainer,
+                  {
+                    backgroundColor: colors.primary,
+                    borderColor: colors.border || colors.primary,
+                  },
+                ]}
+              >
+                <MaterialIcons
+                  name="alternate-email"
+                  size={20}
+                  color={colors.neutral}
+                  style={styles.icon}
+                />
+                <TextInput
+                  placeholder="you@example.com"
+                  placeholderTextColor={colors.neutral + "80"}
+                  value={email}
+                  onChangeText={setEmail}
+                  style={[styles.input, { color: colors.text }]}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <Text style={[styles.label, { color: colors.neutral }]}>
+                Password
               </Text>
               <View
                 style={[
@@ -270,77 +254,123 @@ const EmailAuth = ({ navigation }) => {
                 <TextInput
                   placeholder="••••••••"
                   placeholderTextColor={colors.neutral + "80"}
-                  value={rePassword}
-                  onChangeText={setRePassword}
+                  value={password}
+                  onChangeText={setPassword}
                   style={[styles.input, { color: colors.text }]}
-                  secureTextEntry={!showRePassword}
+                  secureTextEntry={!showPassword}
                   autoCorrect={false}
                   autoCapitalize="none"
                 />
                 <TouchableOpacity
-                  onPress={() => setShowRePassword(!showRePassword)}
+                  onPress={() => setShowPassword(!showPassword)}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   <Ionicons
-                    name={showRePassword ? "eye-off-outline" : "eye-outline"}
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
                     size={20}
                     color={colors.neutral}
                   />
                 </TouchableOpacity>
               </View>
             </View>
-          )}
 
-          <TouchableOpacity
-            activeOpacity={0.85}
-            style={[
-              styles.submitButton,
-              {
-                backgroundColor: isFormValid ? colors.text : colors.primary,
-                opacity: isFormValid ? 1 : 0.5,
-              },
-            ]}
-            onPress={handleSubmit}
-            disabled={authStore.loading || !isFormValid}
-          >
-            {authStore.loading ? (
-              <ActivityIndicator color={colors.background} />
-            ) : (
-              <Text
-                style={[
-                  styles.submitButtonText,
-                  {
-                    color: isFormValid ? colors.background : colors.text,
-                    fontFamily: theme.fonts.semibold,
-                  },
-                ]}
-              >
-                {isLogin ? t("login") : t("signUp")}
-              </Text>
+            {!isLogin && (
+              <View style={styles.inputWrapper}>
+                <Text style={[styles.label, { color: colors.neutral }]}>
+                  Confirm Password
+                </Text>
+                <View
+                  style={[
+                    styles.inputContainer,
+                    {
+                      backgroundColor: colors.primary,
+                      borderColor: colors.border || colors.primary,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name="lock-closed-outline"
+                    size={20}
+                    color={colors.neutral}
+                    style={styles.icon}
+                  />
+                  <TextInput
+                    placeholder="••••••••"
+                    placeholderTextColor={colors.neutral + "80"}
+                    value={rePassword}
+                    onChangeText={setRePassword}
+                    style={[styles.input, { color: colors.text }]}
+                    secureTextEntry={!showRePassword}
+                    autoCorrect={false}
+                    autoCapitalize="none"
+                  />
+                  <TouchableOpacity
+                    onPress={() => setShowRePassword(!showRePassword)}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <Ionicons
+                      name={showRePassword ? "eye-off-outline" : "eye-outline"}
+                      size={20}
+                      color={colors.neutral}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
             )}
-          </TouchableOpacity>
-        </Animated.View>
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <TouchableOpacity
-            onPress={() => setIsLogin(!isLogin)}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.switchText, { color: colors.neutral }]}>
-              {isLogin ? t("noAccount") : t("haveAccount")}{" "}
-              <Text
-                style={{
-                  color: colors.text,
-                  fontFamily: theme.fonts.semibold,
-                  fontWeight: "600",
-                }}
+            <TouchableOpacity
+              activeOpacity={0.85}
+              style={[
+                styles.submitButton,
+                {
+                  backgroundColor: isFormValid ? colors.text : colors.primary,
+                  opacity: isFormValid ? 1 : 0.5,
+                },
+              ]}
+              onPress={handleSubmit}
+              disabled={authStore.loading || !isFormValid}
+            >
+              {authStore.loading ? (
+                <ActivityIndicator color={colors.background} />
+              ) : (
+                <Text
+                  style={[
+                    styles.submitButtonText,
+                    {
+                      color: isFormValid ? colors.background : colors.text,
+                      fontFamily: theme.fonts.semibold,
+                    },
+                  ]}
+                >
+                  {isLogin ? t("login") : t("signUp")}
+                </Text>
+              )}
+            </TouchableOpacity>
+          </Animated.View>
+
+          {/* Footer - hidden when keyboard is visible */}
+          {!keyboardVisible && (
+            <View style={styles.footer}>
+              <TouchableOpacity
+                onPress={() => setIsLogin(!isLogin)}
+                activeOpacity={0.7}
               >
-                {isLogin ? t("signUp") : t("login")}
-              </Text>
-            </Text>
-          </TouchableOpacity>
-        </View>
+                <Text style={[styles.switchText, { color: colors.neutral }]}>
+                  {isLogin ? t("noAccount") : t("haveAccount")}{" "}
+                  <Text
+                    style={{
+                      color: colors.text,
+                      fontFamily: theme.fonts.semibold,
+                      fontWeight: "600",
+                    }}
+                  >
+                    {isLogin ? t("signUp") : t("login")}
+                  </Text>
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </ScrollView>
       </KeyboardAvoidingView>
 
       <Toast
@@ -359,6 +389,9 @@ const styles = StyleSheet.create({
   },
   inner: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: 24,
   },
   headerSection: {

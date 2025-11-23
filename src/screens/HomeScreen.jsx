@@ -428,32 +428,17 @@ const HomeScreen = () => {
             onQuickPromptPress={handleQuickPromptPress}
           />
         </View>
-
-        <View
-          style={[
-            styles.inputContainer,
-            {
-              paddingHorizontal: 15,
-              paddingBottom: Math.max(insets.bottom, 10),
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-              elevation: 3,
-            },
-          ]}
-        >
-          <View style={styles.content}>
-            <Prompt
-              onSubmit={handleSubmit}
-              input={input}
-              setInput={setInput}
-              isLoading={isLoading}
-              accentColorValue={accentColorValue}
-            />
-          </View>
-        </View>
       </KeyboardAvoidingView>
+
+      <View style={{ paddingBottom: Math.max(insets.bottom, 10) }}>
+        <Prompt
+          onSubmit={handleSubmit}
+          input={input}
+          setInput={setInput}
+          isLoading={isLoading}
+          accentColorValue={accentColorValue}
+        />
+      </View>
 
       <Toast
         message={toast.message}

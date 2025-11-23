@@ -56,6 +56,7 @@ const translations = {
     invalidPassword: "Password must be at least 6 characters",
     passwordsMismatch: "Passwords do not match",
     userNotFound: "User not found or resource unavailable",
+    welcomeLogin: "Ready to start?",
   },
   ru: {
     smarterResponses:
@@ -112,6 +113,7 @@ const translations = {
     invalidPassword: "Пароль должен содержать не менее 6 символов",
     passwordsMismatch: "Пароли не совпадают",
     userNotFound: "Пользователь не найден или ресурс недоступен",
+    welcomeLogin: "Готовы начать?",
   },
   tk: {
     smarterResponses:
@@ -168,6 +170,7 @@ const translations = {
     invalidPassword: "Parol 6 belgi azyndan bolmaly",
     passwordsMismatch: "Parollar deň däl",
     userNotFound: "Ulanyjy tapylmady ýa-da resurs elýeterli däl",
+    welcomeLogin: "Başlamaga taýynmy?",
   },
 };
 

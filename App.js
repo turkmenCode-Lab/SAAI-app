@@ -19,22 +19,39 @@ export default function App() {
   const getStoredSettings = useThemeStore((state) => state.getStoredSettings);
 
   const [appReady, setAppReady] = useState(false);
+  const [isAuthHydrated, setIsAuthHydrated] = useState(false);
 
   useEffect(() => {
     async function initApp() {
-      await Font.loadAsync({
-        InterRegular: require("./assets/fonts/Inter-Regular.ttf"),
-        InterBold: require("./assets/fonts/Inter-Bold.ttf"),
-        InterSemiBold: require("./assets/fonts/Inter-SemiBold.ttf"),
-        InterMedium: require("./assets/fonts/Inter-Medium.ttf"),
-      });
+      try {
+        await Font.loadAsync({
+          InterRegular: require("./assets/fonts/Inter-Regular.ttf"),
+          InterBold: require("./assets/fonts/Inter-Bold.ttf"),
+          InterSemiBold: require("./assets/fonts/Inter-SemiBold.ttf"),
+          InterMedium: require("./assets/fonts/Inter-Medium.ttf"),
+        });
 
-      await getStoredSettings();
-
-      setAppReady(true);
+        await getStoredSettings();
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setAppReady(true);
+      }
     }
     initApp();
   }, [getStoredSettings]);
+
+  useEffect(() => {
+    if (useAuthStore.persist.hasHydrated()) {
+      setIsAuthHydrated(true);
+    } else {
+      const unsubscribe = useAuthStore.persist.onFinishHydration(() => {
+        setIsAuthHydrated(true);
+      });
+
+      return () => unsubscribe();
+    }
+  }, []);
 
   useEffect(() => {
     Text.defaultProps = Text.defaultProps || {};
@@ -44,9 +61,7 @@ export default function App() {
     ];
   }, []);
 
-  const initialRouteName = useMemo(() => (token ? "Home" : "Auth"), [token]);
-
-  if (!appReady) {
+  if (!appReady || !isAuthHydrated) {
     return (
       <View
         style={{
@@ -64,16 +79,22 @@ export default function App() {
   return (
     <NavigationContainer theme={AppTheme}>
       <Stack.Navigator
-        initialRouteName={initialRouteName}
         screenOptions={{
           headerShown: false,
           animation: "fade",
         }}
       >
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Settings" component={SettingScreen} />
-        <Stack.Screen name="Auth" component={AuthScreen} />
-        <Stack.Screen name="EmailAuth" component={EmailAuth} />
+        {token ? (
+          <>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Settings" component={SettingScreen} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="Auth" component={AuthScreen} />
+            <Stack.Screen name="EmailAuth" component={EmailAuth} />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

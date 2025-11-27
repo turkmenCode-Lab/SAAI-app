@@ -8,32 +8,50 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "jsEngine": "hermes",
+
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.turkmencodelab.sora"
     },
+
     "android": {
+      "package": "com.turkmencodelab.Sora",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.turkmencodelab.Sora",
-      "softwareKeyboardLayoutMode": "resize"
+      "softwareKeyboardLayoutMode": "resize",
+
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE", "VIBRATE"]
     },
+
     "web": {
       "favicon": "./assets/favicon.png"
     },
+
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+
     "extra": {
       "eas": {
         "projectId": "44ec9e71-3605-44ad-81c3-c2221dab7876"
       }
     },
+
     "plugins": ["expo-font", "expo-localization"],
+
     "owner": "turkmencodelab"
   }
 }

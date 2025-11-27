@@ -124,7 +124,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 2,
   },
-  
 });
 
 export default Prompt;

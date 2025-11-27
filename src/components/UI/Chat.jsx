@@ -364,7 +364,7 @@ const Chat = ({
   }, [messages, isLoading]);
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
+    <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
       <ScrollView
         style={styles.chatContainer}
         contentContainerStyle={[
@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
   chatContainer: { flex: 1, paddingTop: 50 },
   chatContent: {
     flexGrow: 1,
-    paddingVertical: 20,
+    paddingVertical: 50,
     paddingHorizontal: 16,
   },
   emptyContainer: {

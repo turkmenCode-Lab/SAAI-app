@@ -57,6 +57,7 @@ const translations = {
     passwordsMismatch: "Passwords do not match",
     userNotFound: "User not found or resource unavailable",
     welcomeLogin: "Ready to start?",
+    copiedToClipboard: "Copied to clipboard",
   },
   ru: {
     smarterResponses:
@@ -114,6 +115,7 @@ const translations = {
     passwordsMismatch: "Пароли не совпадают",
     userNotFound: "Пользователь не найден или ресурс недоступен",
     welcomeLogin: "Готовы начать?",
+    copiedToClipboard: "Скопировано в буфер обмена",
   },
   tk: {
     smarterResponses:
@@ -143,9 +145,9 @@ const translations = {
     newChat: "+ Täze Söhbet",
     guest: "Mynagöç",
     howHelp: "Men size nähili kömek edip bilerin?",
-    quantum: "Mäni kwant fizikasyny düşündiriň.",
-    gamePython: "Python-da simple oýun dörediň.",
-    quote: "Mäni bir sitata ýazyň",
+    quantum: "Maňa kwant fizikasyny düşündir.",
+    gamePython: "Python-da ýeňil oýun döret.",
+    quote: "Maňa bir şygyr ýaz",
     settings: "Sazlamalar",
     language: "Dil",
     english: "Iňlisçe",
@@ -171,6 +173,7 @@ const translations = {
     passwordsMismatch: "Parollar deň däl",
     userNotFound: "Ulanyjy tapylmady ýa-da resurs elýeterli däl",
     welcomeLogin: "Başlamaga taýynmy?",
+    copiedToClipboard: "Kopýalanyldy",
   },
 };
 

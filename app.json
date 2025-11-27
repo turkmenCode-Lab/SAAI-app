@@ -21,7 +21,6 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "jsEngine": "hermes",
       "edgeToEdgeEnabled": true,
       "package": "com.turkmencodelab.Sora",
       "softwareKeyboardLayoutMode": "resize"
@@ -34,13 +33,7 @@
         "projectId": "44ec9e71-3605-44ad-81c3-c2221dab7876"
       }
     },
-    "plugins": [
-      "expo-font",
-      "expo-localization"
-    ],
-    "owner": "turkmencodelab",
-    "overrides": {
-      "entities": "1.1.1"
-    }
+    "plugins": ["expo-font", "expo-localization"],
+    "owner": "turkmencodelab"
   }
 }

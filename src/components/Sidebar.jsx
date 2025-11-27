@@ -623,6 +623,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     borderWidth: 1,
     overflow: "hidden",
+    marginBottom: 15,
   },
   userContent: {
     flexDirection: "row",

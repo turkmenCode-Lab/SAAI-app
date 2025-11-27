@@ -414,7 +414,9 @@ const HomeScreen = () => {
         keyboardVerticalOffset={keyboardOffset}
         enabled
       >
-        <View style={{ flex: 1, paddingBottom: 15 }}>
+        <View
+          style={{ flex: 1, paddingBottom: 55, backgroundColor: "transparent" }}
+        >
           <Chat
             chats={chats}
             currentChatId={currentChatId}

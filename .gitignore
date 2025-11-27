@@ -50,3 +50,4 @@ config.js
 # build configs
 eas.json
 
+.react

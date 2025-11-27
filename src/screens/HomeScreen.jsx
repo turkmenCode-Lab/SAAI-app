@@ -350,7 +350,7 @@ const HomeScreen = () => {
 
   const keyboardBehavior = Platform.OS === "ios" ? "padding" : "height";
   const keyboardOffset = Platform.select({
-    ios: insets.bottom + 20,
+    ios: 0,
     android: 0,
   });
 
@@ -365,9 +365,7 @@ const HomeScreen = () => {
     );
     const keyboardDidHideListener = Keyboard.addListener(
       "keyboardDidHide",
-      () => {
-        // Optional: Adjust if needed
-      }
+      () => {}
     );
 
     return () => {
@@ -416,7 +414,7 @@ const HomeScreen = () => {
         keyboardVerticalOffset={keyboardOffset}
         enabled
       >
-        <View style={{ flex: 1, paddingVertical: 10 }}>
+        <View style={{ flex: 1 }}>
           <Chat
             chats={chats}
             currentChatId={currentChatId}
@@ -431,27 +429,20 @@ const HomeScreen = () => {
 
         <View
           style={[
-            styles.inputContainer,
+            styles.fixedInputContainer,
             {
               paddingHorizontal: 15,
               paddingBottom: Math.max(insets.bottom, 10),
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-              elevation: 3,
             },
           ]}
         >
-          <View style={styles.content}>
-            <Prompt
-              onSubmit={handleSubmit}
-              input={input}
-              setInput={setInput}
-              isLoading={isLoading}
-              accentColorValue={accentColorValue}
-            />
-          </View>
+          <Prompt
+            onSubmit={handleSubmit}
+            input={input}
+            setInput={setInput}
+            isLoading={isLoading}
+            accentColorValue={accentColorValue}
+          />
         </View>
       </KeyboardAvoidingView>
 
@@ -466,12 +457,6 @@ const HomeScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  inputContainer: {},
-  content: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
   submit: {
     borderRadius: 26,
     padding: 12,
@@ -488,6 +473,14 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: "rgba(0,0,0,0.5)",
     zIndex: 5,
+  },
+  fixedInputContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "transparent",
+    zIndex: 10,
   },
 });
 

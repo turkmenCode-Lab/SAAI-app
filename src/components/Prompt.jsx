@@ -20,7 +20,15 @@ const Prompt = ({ onSubmit, input, setInput, isLoading }) => {
       <View
         style={[
           styles.inputWrapper,
-          { backgroundColor: colors.card, borderColor: colors.primary },
+          {
+            borderColor: colors.primary,
+            backgroundColor: colors.background,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 3,
+          },
         ]}
       >
         <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
@@ -80,7 +88,7 @@ const Prompt = ({ onSubmit, input, setInput, isLoading }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor: "transparent" },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "flex-end",
@@ -116,6 +124,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 2,
   },
+  
 });
 
 export default Prompt;

@@ -20,6 +20,7 @@ import {
   atomOneDark,
   atomOneLight,
 } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const getContrastColor = (bgColor) => {
   const hex = bgColor.replace("#", "");
@@ -363,56 +364,61 @@ const Chat = ({
   }, [messages, isLoading]);
 
   return (
-    <ScrollView
-      style={styles.chatContainer}
-      contentContainerStyle={[
-        styles.chatContent,
-        { justifyContent: messages.length === 0 ? "center" : "flex-end" },
-      ]}
-      ref={scrollRef}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-    >
-      {messages.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={[styles.greeting, { color: colors.text }]}>
-            {t("howHelp")}
-          </Text>
-          <View style={styles.quickPrompts}>
-            {DUMMY_RECOMMENDATIONS.map((key, index) => (
-              <QuickPrompt
-                key={key}
-                text={t(key)}
-                onPress={() => onQuickPromptPress?.(t(key))}
-                colors={colors}
-                accentColorValue={accentColorValue}
-                icon={promptIcons[key]}
-                index={index}
-              />
-            ))}
+    <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
+      <ScrollView
+        style={styles.chatContainer}
+        contentContainerStyle={[
+          styles.chatContent,
+          { justifyContent: messages.length === 0 ? "center" : "flex-end" },
+        ]}
+        ref={scrollRef}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {messages.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={[styles.greeting, { color: colors.text }]}>
+              {t("howHelp")}
+            </Text>
+            <View style={styles.quickPrompts}>
+              {DUMMY_RECOMMENDATIONS.map((key, index) => (
+                <QuickPrompt
+                  key={key}
+                  text={t(key)}
+                  onPress={() => onQuickPromptPress?.(t(key))}
+                  colors={colors}
+                  accentColorValue={accentColorValue}
+                  icon={promptIcons[key]}
+                  index={index}
+                />
+              ))}
+            </View>
           </View>
-        </View>
-      ) : (
-        messages.map((item, index) => (
-          <MessageBubble
-            key={item.id || index}
-            item={item}
+        ) : (
+          messages.map((item, index) => (
+            <MessageBubble
+              key={item.id || index}
+              item={item}
+              colors={colors}
+              accentColorValue={accentColorValue}
+              showToast={showToast}
+              t={t}
+            />
+          ))
+        )}
+        {isLoading && (
+          <TypingIndicator
             colors={colors}
             accentColorValue={accentColorValue}
-            showToast={showToast}
-            t={t}
           />
-        ))
-      )}
-      {isLoading && (
-        <TypingIndicator colors={colors} accentColorValue={accentColorValue} />
-      )}
-    </ScrollView>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  chatContainer: { flex: 1 },
+  chatContainer: { flex: 1, paddingTop: 50 },
   chatContent: {
     flexGrow: 1,
     paddingVertical: 20,
